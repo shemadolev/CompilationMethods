@@ -1,0 +1,25 @@
+# This is an example
+
+void foo(){
+	a : int;
+	a = 5;
+	{
+		write(a);
+	}
+}
+
+void main()
+{
+	a : int;
+	B: float;
+    	a = 2;
+	B =(float)a+55;
+	write("This is \"a\":\n");
+	write(a);
+	if full_while  B<>1 do a=3; then {
+        big_var : int;
+	    big_var = (int)a + (int)B;
+        write(big_var);
+    }
+	foo();
+}

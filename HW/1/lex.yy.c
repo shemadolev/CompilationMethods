@@ -1975,5 +1975,6 @@ void showOriginal(){
 }
 void printError(){
     printf("\nLexical error: '%s' in line number %d\n",yytext, yylineno);
+    exit(1);
 }
 
