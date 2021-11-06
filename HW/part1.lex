@@ -1,10 +1,12 @@
 %{
 /*Declaraions section*/
 #include <stdio.h>
+#include <string.h>
 void showToken(char *);
 void showOriginal();
 void printError();
 void showTokenReserved();
+void showTokenString();
 %}
 
 %option yylineno
@@ -27,7 +29,7 @@ int|float|void|write|read|while|do|if|then|else|return|full_while|break   showTo
 {id}                   showToken("id");
 {integernum}            showToken("integernum");
 {realnum}               showToken("realnum");
-{str}                   showToken("str");
+{str}                   showTokenString();
 
 ==|<>|<|<=|>|>=         showToken("relop");
 \+|\-                   showToken("addop");
@@ -46,10 +48,15 @@ int|float|void|write|read|while|do|if|then|else|return|full_while|break   showTo
 %%
 
 void showToken(char* name){
-    printf("<%s,%s>",yytext,name);
+    printf("<%s,%s>",name,yytext);
 }
 void showTokenReserved(){
     printf("<%s>",yytext);
+}
+void showTokenString(){
+    yytext++;
+    yytext[strlen(yytext)-1]='\0';
+    printf("<str,%s>",yytext);
 }
 void showOriginal(){
     printf("%s",yytext);
