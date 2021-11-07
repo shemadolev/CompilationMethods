@@ -48,7 +48,7 @@ int|float|void|write|read|while|do|if|then|else|return|full_while|break   showTo
 
 {symbols}|{whitespace}  showOriginal();
 
-#[^\n\r]*                 ;
+#[^\n\r]*               ;
 
 .                       printError();
 

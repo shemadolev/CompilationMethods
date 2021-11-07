@@ -1,6 +1,5 @@
 #!/bin/bash
-flex part1.lex
-gcc -ll lex.yy.c
+make
 
 dirName=$1
 passCounter=0
@@ -13,7 +12,7 @@ do
 	FileCmm="$File".cmm
 	FileMyO="$File"_my.tokens
 	FileOrO="$File".tokens
-	./a.out <"$FileCmm" >"$FileMyO"
+	./part1 <"$FileCmm" >"$FileMyO"
 	diffRes=$(diff "$FileOrO" "$FileMyO")
 	if [[ -z $diffRes ]]; then #diff is empty == files are eqaul
 		echo "Same: $File"
