@@ -1,11 +1,15 @@
 #!/bin/bash
 make
 
-dirName=$1
 passCounter=0
 totalCounter=0
 
-for File in "$dirName"/*.cmm
+testFolder="my_tests"
+if [[ $# -lt 1 ]]; then
+	testFolder=$1
+fi
+
+for File in "$testFolder"/*.cmm
 do
 	(( totalCounter=$totalCounter+1 ))
 	File=$(echo ${File%.*})
@@ -24,4 +28,3 @@ do
 done
 echo "#######################"
 echo "Summary: Passed $passCounter/$totalCounter"
-
