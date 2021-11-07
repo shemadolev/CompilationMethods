@@ -18,7 +18,7 @@ static bool isEmptyLine = true;
 %option noyywrap
 
 digit       ([0-9])
-letter      ([a-zA-z])
+letter      ([a-zA-Z])
 esacapedChars   (\\["nt])
 symbols         ([\(\)\{\}\.;,:])
 whitespace      ([\t ])
