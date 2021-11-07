@@ -1,0 +1,9 @@
+
+
+<int> <id,main>() {
+	<float> <id,a> <assign,=> <integernum,1>.;
+	<id,a> <relop,<><relop,<> <integernum,3>;
+	<id,a> <relop,>><relop,>> <realnum,45.12>;
+	<int> <id,b>;...
+	<relop,==><relop,==><relop,==> <relop,==><assign,=> <id,asdf> <id,asdf>
+Lexical error: '$' in line number 8

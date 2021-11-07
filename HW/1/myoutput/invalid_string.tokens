@@ -1,0 +1,2 @@
+<str,Follwing is a strin w/ a \n in the middle of the string, which shouldn't be allowed!>
+Lexical error: '"' in line number 2

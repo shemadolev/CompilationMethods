@@ -1,0 +1,16 @@
+
+
+<int> <id,main>() {
+	<float> <id,a> <assign,=> <integernum,1>.;
+	<do>{
+		<id,a> <addop,+><addop,+> , <id,a><addop,+><addop,+>;
+		<id,double> <id,b> <assign,=> <id,a> <addop,+> .<integernum,2>;
+	}<while>(<id,b><relop,<><realnum,08.6>);
+	<if> (<id,today> <assign,=> <id,Sunday>) <then>
+		<break>;;
+	<else>{
+		<id,continue>;
+	}
+	<full_while>(<id,true>);
+	<return> <integernum,1>;
+}
