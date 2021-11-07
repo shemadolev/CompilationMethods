@@ -5,7 +5,7 @@ passCounter=0
 totalCounter=0
 
 testFolder="my_tests"
-if [[ $# -lt 1 ]]; then
+if [[ $# -gt 0 ]]; then
 	testFolder=$1
 fi
 
