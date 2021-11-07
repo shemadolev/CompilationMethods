@@ -1,0 +1,25 @@
+
+
+<void> <id,foo>(){
+	<id,a> : <int>;
+	<id,a> <assign,=> <integernum,5>;
+	{
+		<write>(<id,a>);
+	}
+}
+
+<void> <id,main>()
+{
+	<id,a> : <int>;
+	<id,B>: <float>;
+    	<id,a> <assign,=> <integernum,2>;
+	<id,B> <assign,=>(<float>)<id,a><addop,+><integernum,55>;
+	<write>(<str,This is \"a\":\n>);
+	<write>(<id,a>);
+	<if> <full_while>  <id,B><relop,<>><integernum,1> <do> <id,a><assign,=><integernum,3>; <then> {
+        <id,big_var> : <int>;
+	    <id,big_var> <assign,=> (<int>)<id,a> <addop,+> (<int>)<id,B>;
+        <write>(<id,big_var>);
+    }
+	<id,foo>();
+}

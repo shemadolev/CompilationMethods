@@ -10,13 +10,16 @@ for File in "$dirName"/*.cmm
 do
 	(( totalCounter=$totalCounter+1 ))
 	File=$(echo ${File%.*})
-	./a.out <"$File.cmm" >"$File_my.tokens"
-	diffRes=$(diff "$File.tokens" "$File_my.tokens")
+	FileCmm="$File".cmm
+	FileMyO="$File"_my.tokens
+	FileOrO="$File".tokens
+	./a.out <"$FileCmm" >"$FileMyO"
+	diffRes=$(diff "$FileOrO" "$FileMyO")
 	if [[ -z $diffRes ]]; then #diff is empty == files are eqaul
 		echo "Same: $File"
 		(( passCounter=$passCounter+1 ))
 	else
-		echo "--- Different: $File.tokens != $File_my.tokens"
+		echo "--- Different: $FileOrO != $FileMyO"
 		echo "$diffRes"
 	fi
 done
