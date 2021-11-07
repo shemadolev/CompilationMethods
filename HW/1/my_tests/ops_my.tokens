@@ -5,5 +5,14 @@
 	<id,a> <relop,<><relop,<> <integernum,3>;
 	<id,a> <relop,>><relop,>> <realnum,45.12>;
 	<int> <id,b>;...
-	<relop,==><relop,==><relop,==> <relop,==><assign,=> <id,asdf> <id,asdf>
-Lexical error: '$' in line number 8
+	<relop,==><relop,==><relop,==> <relop,==><assign,=> <id,asdf> <str,asdf$$,,,>
+	<if>(<id,a><relop,<>><id,b>) <then>{
+		<id,a><relop,<>><relop,<>><relop,<>><integernum,4><id,d>;
+		<id,b><relop,>=><id,d>;
+		<id,b><addop,+><addop,+><relop,>=><relop,>><id,c>;
+	}
+	<id,a><mulop,*><id,b><mulop,/><id,A>;
+	<not,!><id,a><not,!><id,bg>;
+	<if>(<id,a><and,&&><id,b>) <then>
+		<or,||>
+Lexical error: '|' in line number 17

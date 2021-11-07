@@ -1,27 +1,21 @@
 # This is a test to check how we analyze special symbols within a string
 
-void f&*&*oo() {
-	a : int;
-	a = 5;
-	{
-		wָ€€rite(a);
-	}
-}
+void f_123o_dd() {}
 
 void ma...in()
 {
 	a : int;
-	B: fl@@oat;
+	B: "fl@@oat";
     	a_ = 2;
 	B =(flo###at)a+55;
-	wr&ite("This is \"a\":\n");
+	"wr&ite"("This is \"a\":\n");
 	write(a);;;
 	;;
-	aa₪₪₪asdf;;;
+	"aa₪₪₪asdf";;;
 	if B<>1 then {
-        _b+-ig_var : int;
 	   : big_var = (int)a + (int)B;
-        writ$e(bi<g_var);
+        write(bi<g_var);
     }
 	fo!o();
+    _b+-ig_var : int;
 }

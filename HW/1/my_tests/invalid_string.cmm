@@ -1,5 +1,5 @@
 "Let's test some legal esacped words: \" - nice... \n - wow! \t - easy. Next:"
 
-"Follwing is a strin w/ a \n in the middle of the string, which shouldn't be allowed!"
+"Following is a string w/ a \n in the middle of the string, which shouldn't be allowed!"
 "An \n shouldn't be allowed in the middle of the string!
 "
