@@ -1,0 +1,4 @@
+<str,Let's test some legal esacped words: \" - nice... \n - wow! \t - easy. Next:>
+
+<str,Following is a string w/ a \n in the middle of the string, which shouldn't be allowed!>
+Lexical error: '"' in line number 4

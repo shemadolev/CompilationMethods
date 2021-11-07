@@ -1,0 +1,5 @@
+"Let's test some legal esacped words: \" - nice... \n - wow! \t - easy. Next:"
+
+"Following is a string w/ a \n in the middle of the string, which shouldn't be allowed!"
+"An \n shouldn't be allowed in the middle of the string!
+"
