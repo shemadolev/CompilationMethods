@@ -1,0 +1,25 @@
+# This is an example 1
+
+void foo(){
+	a : int;
+	a = 5;
+	{
+		write(a);
+	}
+}
+
+void main()
+{
+	a : int;
+	B: float;
+    	a = 2;
+	B =(float)a+55;
+	write("This is \"a\":\n");
+	write(a);
+	if B<>1 then {
+        big_var : int;
+	    big_var = (int)a + (int)B;
+        write(big_var);
+    }
+	foo();
+}
