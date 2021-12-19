@@ -1,3 +1,0 @@
-read(); #Comment[On same line!] This has CR/LF new lines
-#This comment shouldn't be shown, but a new line should
-void bye();

@@ -1,2 +1,0 @@
-<str,This is ok, but next line should have error without another \n>
-Lexical error: '"' in line number 2

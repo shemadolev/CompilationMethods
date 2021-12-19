@@ -1,2 +1,0 @@
-"This is ok, but next line should have error without another \n"
-"error! this has a non-legit escape char: \g "
