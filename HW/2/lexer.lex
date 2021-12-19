@@ -33,61 +33,61 @@ int|float|void|write|read|while|do|if|then|else|return|full_while|break {
 {id} {  
     yylval.type = "id";
     yylval.value = yytext;
-    return ID;
+    return id;
 }
 
 {integernum}  {
     yylval.type = "integernum";
     yylval.value = yytext;
-    return INT;
+    return int;
 }
 
 {realnum} {
     yylval.type = "realnum";
     yylval.value = yytext;
-    return REAL;
+    return real;
 }         
 {str} {  
     yylval.type = "str";
     yylval.value = yytext;
-    return STR;
+    return str;
 }
 
 ==|<>|<|<=|>|>= {
     yylval.type = "relop";
     yylval.value = yytext;
-    return RELOP;
+    return relop;
 }
 
 \+|\- {
     yylval.type = "addop";
     yylval.value = yytext;
-    return ADDOP;
+    return addop;
 }
 \*|\/ {
     yylval.type = "mulop";
     yylval.value = yytext;
-    return MULOP;
+    return mulop;
 }
 \= {
     yylval.type = "assign";
     yylval.value = yytext; //null?
-    return ASSIGN;
+    return assign;
 }
 \&\& {
     yylval.type = "and";
     yylval.value = yytext; //null?
-    return AND;
+    return and;
 }
 \|\| {
     yylval.type = "or";
     yylval.value = yytext;//null?
-    return OR;
+    return or;
 }
 \! {
     yylval.type = "not";
     yylval.value = yytext;//null?
-    return NOT;
+    return not;
 }
 
 {symbols} {
