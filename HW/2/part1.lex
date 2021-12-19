@@ -25,8 +25,8 @@ id              ({letter}+({letter}|{digit}|_)*)
 %%
 
 int|float|void|write|read|while|do|if|then|else|return|full_while|break {  
-    yylval.type = "reserved_word";
-    yylval.value = yytext;
+    yylval.type = yytext;
+    yylval.value = nullptr;
     return yytext;
 }
 
@@ -71,28 +71,28 @@ int|float|void|write|read|while|do|if|then|else|return|full_while|break {
 }
 \= {
     yylval.type = "assign";
-    yylval.value = yytext;
+    yylval.value = yytext; //null?
     return ASSIGN;
 }
 \&\& {
     yylval.type = "and";
-    yylval.value = yytext;
+    yylval.value = yytext; //null?
     return AND;
 }
 \|\| {
     yylval.type = "or";
-    yylval.value = yytext;
+    yylval.value = yytext;//null?
     return OR;
 }
 \! {
     yylval.type = "not";
-    yylval.value = yytext;
+    yylval.value = yytext;//null?
     return NOT;
 }
 
 {symbols} {
-    yylval.type = "symbols";
-    yylval.value = yytext;
+    yylval.type = yytext;
+    yylval.value = nullptr;
     return yytext;
 }
 
