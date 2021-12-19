@@ -1,0 +1,14 @@
+void main() {
+    a: int;
+    b: float;
+
+    read(a);
+    read(b);
+    if  ((int)b < a)   then 
+	    write(a);
+    else {
+	 b = 1234.4321;
+         write(c);
+    }
+
+}
