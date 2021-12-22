@@ -17,7 +17,7 @@ typedef struct node {
     struct node *child;
 } ParserNode;
 
-#define YYSTYPE ParserNode // update yystype to the wanted struct
+#define YYSTYPE ParserNode* // update yystype to the wanted struct
 
 ParserNode *makeNode(const char* type,const char* value, ParserNode *child);
 
