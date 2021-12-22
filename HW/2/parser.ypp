@@ -8,7 +8,20 @@
 %}
 
 // reserved words 
-%token "int" "float" "void" "write" "read" "while" "do" "if" "then" "else" "return" "full_while" "break"
+%token  int "int"
+        float "float"
+        void "void"
+        write "write"
+        read "read"
+        while "while"
+        do "do"
+        if "if"
+        then "then"
+        else "else"
+        return "return"
+        full_while "full_while"
+        break "break"
+
 // other
 %token id integernum realnum str
 // symbols
