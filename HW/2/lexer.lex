@@ -26,63 +26,63 @@ id              ({letter}+({letter}|{digit}|_)*)
 %%
 
 int|float|void|write|read|while|do|if|then|else|return|full_while|break {  
-    yylval = makeNode(yytext, nullptr, nullptr);
+    yylval = makeNode(yytext, NULL, NULL);
     return yytext;
 }
 
 {id} {
-    yylval = makeNode("id", yytext, nullptr);  
+    yylval = makeNode("id", yytext, NULL);  
     return id;
 }
 
 {integernum}  {
-    yylval = makeNode("integernum", yytext, nullptr);
+    yylval = makeNode("integernum", yytext, NULL);
     return int;
 }
 
 {realnum} {
-    yylval = makeNode("realnum", yytext, nullptr);
+    yylval = makeNode("realnum", yytext, NULL);
     return real;
 }         
 {str} {  
-    yylval = makeNode("str", yytext, nullptr);
+    yylval = makeNode("str", yytext, NULL);
     return str;
 }
 
 ==|<>|<|<=|>|>= {
-    yylval = makeNode("relop", yytext, nullptr);
+    yylval = makeNode("relop", yytext, NULL);
     return relop;
 }
 
 \+|\- {
-    yylval = makeNode("addop", yytext, nullptr);
+    yylval = makeNode("addop", yytext, NULL);
     return addop;
 }
 \*|\/ {
-    yylval = makeNode("mulop", yytext, nullptr);
+    yylval = makeNode("mulop", yytext, NULL);
     return mulop;
 }
 \= {
-    yylval = makeNode("assign", nullptr, nullptr);
+    yylval = makeNode("assign", NULL, NULL);
     return assign;
 }
 \&\& {
-    yylval = makeNode("and", nullptr, nullptr);
+    yylval = makeNode("and", NULL, NULL);
     return and;
 }
 
 \|\| {
-    yylval = makeNode("or", nullptr, nullptr);
+    yylval = makeNode("or", NULL, NULL);
     return or;
 }
 
 \! {
-    yylval = makeNode("not", nullptr, nullptr);
+    yylval = makeNode("not", NULL, NULL);
     return not;
 }
 
 {symbols} {
-    yylval = makeNode(yytext, nullptr, nullptr);
+    yylval = makeNode(yytext, NULL, NULL);
     return yytext;
 }
 
