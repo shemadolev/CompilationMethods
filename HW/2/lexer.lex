@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+#include "part2_helpers.h"
 
 void printError();
 %}
