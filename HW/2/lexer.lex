@@ -27,7 +27,7 @@ id              ({letter}+({letter}|{digit}|_)*)
 
 int|float|void|write|read|while|do|if|then|else|return|full_while|break {  
     yylval = makeNode(yytext, NULL, NULL);
-    return yytext;
+    return getTokenFromString(yytext);
 }
 
 {id} {
@@ -92,6 +92,37 @@ int|float|void|write|read|while|do|if|then|else|return|full_while|break {
 .                       printError();
 
 %%
+
+int getTokenFromString(string str){
+    switch (str){
+        case "int":
+            return INT;
+        case "float":
+            return FLOAT;
+        case "void":
+            return VOID;
+        case "write":
+            return WRITE;
+        case "read":
+            return READ;
+        case "while":
+            return WHILE;
+        case "do":
+            return DO;
+        case "if":
+            return IF;
+        case "then":
+            return THEN;
+        case "else":
+            return ELSE;
+        case "return":
+            return RETURN;
+        case "full_while":
+            return FULL_WHILE;
+        case "break":
+            return BREAK;
+    }
+}
 
 void printError(){
     printf("Lexical error: '%s' in line number %d\n",yytext, yylineno);
