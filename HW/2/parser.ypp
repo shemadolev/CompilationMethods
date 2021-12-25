@@ -150,5 +150,5 @@ call_arglist :  call_arglist ',' exp    {$$=makeNode("CALL_ARGLIST", NULL, $1); 
 %%
 
 void yyerror(const char*) {
-    cout << "Syntax error: " << yytext << " in line number " << yylineno << endl;
+    cout << "Syntax error: '" << yytext << "' in line number " << yylineno << endl;
 }
