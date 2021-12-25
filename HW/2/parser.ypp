@@ -7,7 +7,9 @@
     void yyerror(const char*);
 
     extern int yylineno;
-    extern const char* yytext; 
+    extern const char* yytext;
+
+    ParserNode *parseTree; 
 %}
 
 // reserved words 
