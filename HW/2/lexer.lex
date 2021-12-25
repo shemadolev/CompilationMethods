@@ -84,7 +84,7 @@ int|float|void|write|read|while|do|if|then|else|return|full_while|break {
 
 {symbols} {
     yylval = makeNode(yytext, NULL, NULL);
-    return yytext;
+    return yytext[0];
 }
 
 {whitespace}|{newline}  ;
