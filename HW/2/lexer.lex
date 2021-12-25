@@ -32,53 +32,53 @@ int|float|void|write|read|while|do|if|then|else|return|full_while|break {
 
 {id} {
     yylval = makeNode("id", yytext, NULL);  
-    return id;
+    return ID;
 }
 
 {integernum}  {
     yylval = makeNode("integernum", yytext, NULL);
-    return int;
+    return INT;
 }
 
 {realnum} {
     yylval = makeNode("realnum", yytext, NULL);
-    return real;
+    return REAL;
 }         
 {str} {  
     yylval = makeNode("str", yytext, NULL);
-    return str;
+    return STR;
 }
 
 ==|<>|<|<=|>|>= {
     yylval = makeNode("relop", yytext, NULL);
-    return relop;
+    return RELOP;
 }
 
 \+|\- {
     yylval = makeNode("addop", yytext, NULL);
-    return addop;
+    return ADDOP;
 }
 \*|\/ {
     yylval = makeNode("mulop", yytext, NULL);
-    return mulop;
+    return MULOP;
 }
 \= {
     yylval = makeNode("assign", NULL, NULL);
-    return assign;
+    return ASSIGN;
 }
 \&\& {
     yylval = makeNode("and", NULL, NULL);
-    return and;
+    return AND;
 }
 
 \|\| {
     yylval = makeNode("or", NULL, NULL);
-    return or;
+    return OR;
 }
 
 \! {
     yylval = makeNode("not", NULL, NULL);
-    return not;
+    return NOT;
 }
 
 {symbols} {
