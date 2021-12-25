@@ -1,7 +1,7 @@
 all: part2
 
 parser.tab.cpp: parser.ypp part2_helpers.h
-	bison -d parser.ypp
+	bison -vd parser.ypp
 
 lex.yy.c: lexer.lex part2_helpers.h
 	flex lexer.lex 

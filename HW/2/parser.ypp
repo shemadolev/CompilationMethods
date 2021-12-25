@@ -7,7 +7,9 @@
     void yyerror(const char*);
 
     extern int yylineno;
-    extern const char* yytext; 
+    extern const char* yytext;
+
+    ParserNode *parseTree; 
 %}
 
 // reserved words 
@@ -45,14 +47,14 @@ program : fdefs                         {$$=makeNode("PROGRAM", NULL, $1);}
 
 fdefs : fdefs func_api blk              {$$=makeNode("FDEFS", NULL, $1); concatList($1,$2); concatList($1,$3);}
         | fdefs func_api ';'            {$$=makeNode("FDEFS", NULL, $1); concatList($1,$2); concatList($1,$3);}
-        | /* epsilon */                 {$$=makeNode("FDEFS", NULL, ,makeNode("EPSILON", NULL, NULL));}
+        | /* epsilon */                 {$$=makeNode("FDEFS", NULL, makeNode("EPSILON", NULL, NULL));}
 ;
 
 func_api : type ID '(' func_args ')'    {$$=makeNode("FUNC_API", NULL, $1); concatList($1,$2); concatList($1,$3); concatList($1,$4); concatList($1,$5);} 
 ;
 
 func_args : func_arglist                {$$=makeNode("FUNC_ARGS", NULL, $1);}       
-            | /* epsilon */             {$$=makeNode("FUNC_ARGS", NULL, ,makeNode("EPSILON", NULL, NULL));}
+            | /* epsilon */             {$$=makeNode("FUNC_ARGS", NULL, makeNode("EPSILON", NULL, NULL));}
 ;
 
 func_arglist :  func_arglist ',' dcl    {$$=makeNode("FUNC_ARGLIST", NULL, $1); concatList($1,$2); concatList($1,$3);} 
@@ -72,7 +74,7 @@ type :  INT                             {$$=makeNode("TYPE", NULL, $1);}
 ;
 
 stlist : stlist stmt                    {$$=makeNode("STLIST", NULL, $1); concatList($1,$2);}
-         |/* epsilon */                 {$$=makeNode("STLIST", NULL, ,makeNode("EPSILON", NULL, NULL));}
+         |/* epsilon */                 {$$=makeNode("STLIST", NULL, makeNode("EPSILON", NULL, NULL));}
 ;
 
 stmt :  dcl ';'                         {$$=makeNode("STMT", NULL, $1); concatList($1,$2);}
@@ -137,7 +139,7 @@ call : ID '(' call_args ')'             {$$=makeNode("CALL", NULL, $1); concatLi
 ;
 
 call_args : call_arglist                {$$=makeNode("CALL_ARGS", NULL, $1);}
-            |/* epsilon */              {$$=makeNode("CALL_ARGS", NULL, ,makeNode("EPSILON", NULL, NULL));} 
+            |/* epsilon */              {$$=makeNode("CALL_ARGS", NULL, makeNode("EPSILON", NULL, NULL));} 
 ;
 
 call_arglist :  call_arglist ',' exp    {$$=makeNode("CALL_ARGLIST", NULL, $1); concatList($1,$2); concatList($1,$3); }
