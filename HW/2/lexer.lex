@@ -4,9 +4,11 @@
 #include <string.h>
 #include <stdbool.h>
 #include "part2_helpers.h"
+#include "parser.tab.hpp"
 
 void printError();
-int getTokenFromString(string str);
+int getTokenFromString(const char*);
+
 %}
 
 %option yylineno
@@ -38,12 +40,12 @@ int|float|void|write|read|while|do|if|then|else|return|full_while|break {
 
 {integernum}  {
     yylval = makeNode("integernum", yytext, NULL);
-    return INT;
+    return INTEGERNUM;
 }
 
 {realnum} {
     yylval = makeNode("realnum", yytext, NULL);
-    return REAL;
+    return REALNUM;
 }         
 {str} {  
     yylval = makeNode("str", yytext, NULL);
@@ -94,35 +96,8 @@ int|float|void|write|read|while|do|if|then|else|return|full_while|break {
 
 %%
 
-int getTokenFromString(string str){
-    switch (str){
-        case "int":
-            return INT;
-        case "float":
-            return FLOAT;
-        case "void":
-            return VOID;
-        case "write":
-            return WRITE;
-        case "read":
-            return READ;
-        case "while":
-            return WHILE;
-        case "do":
-            return DO;
-        case "if":
-            return IF;
-        case "then":
-            return THEN;
-        case "else":
-            return ELSE;
-        case "return":
-            return RETURN;
-        case "full_while":
-            return FULL_WHILE;
-        case "break":
-            return BREAK;
-    }
+int getTokenFromString(const char* str){
+
 }
 
 void printError(){
