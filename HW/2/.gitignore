@@ -1,3 +1,5 @@
 *.yy.c
 *.tab.cpp
 part2
+parser.output
+parser.tab.hpp
