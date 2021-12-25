@@ -1,0 +1,13 @@
+float ex_func(abc:int);
+
+int l_func() {
+      write("This is a local function\n");
+      return 123;
+}
+
+void main() {
+     somevar: int;
+     somevar = l_func();
+     somevar = somevar + (int)ex_func(1);
+     write(somevar);
+}
