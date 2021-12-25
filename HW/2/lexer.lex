@@ -66,21 +66,21 @@ int|float|void|write|read|while|do|if|then|else|return|full_while|break {
     return MULOP;
 }
 \= {
-    yylval = makeNode("assign", NULL, NULL);
+    yylval = makeNode("assign", yytext, NULL);
     return ASSIGN;
 }
 \&\& {
-    yylval = makeNode("and", NULL, NULL);
+    yylval = makeNode("and", yytext, NULL);
     return AND;
 }
 
 \|\| {
-    yylval = makeNode("or", NULL, NULL);
+    yylval = makeNode("or", yytext, NULL);
     return OR;
 }
 
 \! {
-    yylval = makeNode("not", NULL, NULL);
+    yylval = makeNode("not", yytext, NULL);
     return NOT;
 }
 
