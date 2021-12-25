@@ -124,7 +124,7 @@ int getTokenFromString(const char* str){
     else if(strcmp(str, "break") == 0)
         return BREAK;
     else /* default - shouldn't get here */
-        retun 0;
+        return 0;
 }
 
 void printError(){
