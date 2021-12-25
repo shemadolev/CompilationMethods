@@ -97,7 +97,34 @@ int|float|void|write|read|while|do|if|then|else|return|full_while|break {
 %%
 
 int getTokenFromString(const char* str){
-
+    if(strcmp(str, "int") == 0)
+        return INT;
+    else if(strcmp(str, "float") == 0)
+        return FLOAT;
+    else if(strcmp(str, "void") == 0)
+        return VOID;
+    else if(strcmp(str, "write") == 0)
+        return WRITE;
+    else if(strcmp(str, "read") == 0)
+        return READ;
+    else if(strcmp(str, "while") == 0)
+        return WHILE;
+    else if(strcmp(str, "do") == 0)
+        return DO;
+    else if(strcmp(str, "if") == 0)
+        return IF;
+    else if(strcmp(str, "then") == 0)
+        return THEN;
+    else if(strcmp(str, "else") == 0)
+        return ELSE;
+    else if(strcmp(str, "return") == 0)
+        return RETURN;
+    else if(strcmp(str, "full_while") == 0)
+        return FULL_WHILE;
+    else if(strcmp(str, "break") == 0)
+        return BREAK;
+    else /* default - shouldn't get here */
+        retun 0;
 }
 
 void printError(){
