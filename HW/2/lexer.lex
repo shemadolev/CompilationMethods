@@ -6,6 +6,7 @@
 #include "part2_helpers.h"
 
 void printError();
+int getTokenFromString(string str);
 %}
 
 %option yylineno
