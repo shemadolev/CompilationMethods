@@ -146,7 +146,7 @@ call_args : call_arglist                {$$=makeSymbol("CALL_ARGS",$1);}
 ;
 
 call_arglist :  call_arglist ',' exp    {$$=makeSymbol("CALL_ARGLIST",$1); concatList($1,$2); concatList($1,$3); }
-                | exp                   {$$=makeSymbol("CALL_ARGS",$1);}
+                | exp                   {$$=makeSymbol("CALL_ARGLIST",$1);}
 ;
 
 
