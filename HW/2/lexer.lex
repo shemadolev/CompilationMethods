@@ -47,8 +47,12 @@ int|float|void|write|read|while|do|if|then|else|return|full_while|break {
     yylval = makeNode("realnum", yytext, NULL);
     return REALNUM;
 }         
-{str} {  
-    yylval = makeNode("str", yytext, NULL);
+{str} { 
+    //Remove opening & closing " 
+    char* str_val = yytext + 1;
+    str_val[strlen(yytext)-1]='\0';
+
+    yylval = makeNode("str", str_val, NULL);
     return STR;
 }
 
