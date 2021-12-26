@@ -17,8 +17,9 @@ typedef struct node {
     struct node *child;
 } ParserNode;
 
-#define YYSTYPE ParserNode* // update yystype to the wanted struct
+#define YYSTYPE ParserNode* // Define yystype as the wanted struct
 
+//Macro for a special "epsilon" symbol node
 #define EPSILON makeSymbol("EPSILON",NULL)
 
 ParserNode *makeNode(const char* type,const char* value, ParserNode *child);
