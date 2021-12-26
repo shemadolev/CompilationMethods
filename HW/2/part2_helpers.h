@@ -20,6 +20,8 @@ typedef struct node {
 #define YYSTYPE ParserNode* // update yystype to the wanted struct
 
 ParserNode *makeNode(const char* type,const char* value, ParserNode *child);
+ParserNode *makeSymbol(const char* type, ParserNode *child);
+ParserNode *makeToken(const char* type,const char* value);
 
 ParserNode *concatList(ParserNode *listHead,ParserNode *newItem);
 

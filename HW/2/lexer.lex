@@ -29,22 +29,22 @@ id              ({letter}+({letter}|{digit}|_)*)
 %%
 
 int|float|void|write|read|while|do|if|then|else|return|full_while|break {  
-    yylval = makeNode(yytext, NULL, NULL);
+    yylval = makeToken(yytext, NULL);
     return getTokenFromString(yytext);
 }
 
 {id} {
-    yylval = makeNode("id", yytext, NULL);  
+    yylval = makeToken("id", yytext);  
     return ID;
 }
 
 {integernum}  {
-    yylval = makeNode("integernum", yytext, NULL);
+    yylval = makeToken("integernum", yytext);
     return INTEGERNUM;
 }
 
 {realnum} {
-    yylval = makeNode("realnum", yytext, NULL);
+    yylval = makeToken("realnum", yytext);
     return REALNUM;
 }         
 {str} { 
@@ -52,44 +52,44 @@ int|float|void|write|read|while|do|if|then|else|return|full_while|break {
     char* str_val = yytext + 1;
     str_val[strlen(str_val)-1]='\0';
 
-    yylval = makeNode("str", str_val, NULL);
+    yylval = makeToken("str", str_val);
     return STR;
 }
 
 ==|<>|<|<=|>|>= {
-    yylval = makeNode("relop", yytext, NULL);
+    yylval = makeToken("relop", yytext);
     return RELOP;
 }
 
 \+|\- {
-    yylval = makeNode("addop", yytext, NULL);
+    yylval = makeToken("addop", yytext);
     return ADDOP;
 }
 \*|\/ {
-    yylval = makeNode("mulop", yytext, NULL);
+    yylval = makeToken("mulop", yytext);
     return MULOP;
 }
 \= {
-    yylval = makeNode("assign", yytext, NULL);
+    yylval = makeToken("assign", yytext);
     return ASSIGN;
 }
 \&\& {
-    yylval = makeNode("and", yytext, NULL);
+    yylval = makeToken("and", yytext);
     return AND;
 }
 
 \|\| {
-    yylval = makeNode("or", yytext, NULL);
+    yylval = makeToken("or", yytext);
     return OR;
 }
 
 \! {
-    yylval = makeNode("not", yytext, NULL);
+    yylval = makeToken("not", yytext);
     return NOT;
 }
 
 {symbols} {
-    yylval = makeNode(yytext, NULL, NULL);
+    yylval = makeToken(yytext, NULL);
     return yytext[0];
 }
 

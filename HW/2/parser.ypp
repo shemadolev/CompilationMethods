@@ -45,108 +45,108 @@
 
 %%
 
-program : fdefs                         {parseTree=makeNode("PROGRAM", NULL, $1);}
+program : fdefs                         {parseTree=makeSymbol("PROGRAM",$1);}
 ;
 
 fdefs : /* epsilon */                   {$$=makeNode("FDEFS", NULL, makeNode("EPSILON", NULL, NULL));}
-	| fdefs func_api blk            {$$=makeNode("FDEFS", NULL, $1); concatList($1,$2); concatList($1,$3);}
-        | fdefs func_api ';'            {$$=makeNode("FDEFS", NULL, $1); concatList($1,$2); concatList($1,$3);}
+	| fdefs func_api blk            {$$=makeSymbol("FDEFS",$1); concatList($1,$2); concatList($1,$3);}
+        | fdefs func_api ';'            {$$=makeSymbol("FDEFS",$1); concatList($1,$2); concatList($1,$3);}
 ;
 
-func_api : type ID '(' func_args ')'    {$$=makeNode("FUNC_API", NULL, $1); concatList($1,$2); concatList($1,$3); concatList($1,$4); concatList($1,$5);} 
+func_api : type ID '(' func_args ')'    {$$=makeSymbol("FUNC_API",$1); concatList($1,$2); concatList($1,$3); concatList($1,$4); concatList($1,$5);} 
 ;
 
-func_args : func_arglist                {$$=makeNode("FUNC_ARGS", NULL, $1);}       
+func_args : func_arglist                {$$=makeSymbol("FUNC_ARGS",$1);}       
             | /* epsilon */             {$$=makeNode("FUNC_ARGS", NULL, makeNode("EPSILON", NULL, NULL));}
 ;
 
-func_arglist :  func_arglist ',' dcl    {$$=makeNode("FUNC_ARGLIST", NULL, $1); concatList($1,$2); concatList($1,$3);} 
-                | dcl                   {$$=makeNode("FUNC_ARGLIST", NULL, $1);}
+func_arglist :  func_arglist ',' dcl    {$$=makeSymbol("FUNC_ARGLIST",$1); concatList($1,$2); concatList($1,$3);} 
+                | dcl                   {$$=makeSymbol("FUNC_ARGLIST",$1);}
 ;
 
-blk : '{' stlist '}'                    {$$=makeNode("BLK", NULL, $1); concatList($1,$2); concatList($1,$3);} 
+blk : '{' stlist '}'                    {$$=makeSymbol("BLK",$1); concatList($1,$2); concatList($1,$3);} 
 ;
 
-dcl :   ID ':' type                     {$$=makeNode("DCL", NULL, $1); concatList($1,$2); concatList($1,$3);}
-        | ID ',' dcl                    {$$=makeNode("DCL", NULL, $1); concatList($1,$2); concatList($1,$3);}
+dcl :   ID ':' type                     {$$=makeSymbol("DCL",$1); concatList($1,$2); concatList($1,$3);}
+        | ID ',' dcl                    {$$=makeSymbol("DCL",$1); concatList($1,$2); concatList($1,$3);}
 ;
 
-type :  INT                             {$$=makeNode("TYPE", NULL, $1);}
-        | FLOAT                         {$$=makeNode("TYPE", NULL, $1);}
-        | VOID                          {$$=makeNode("TYPE", NULL, $1);} 
+type :  INT                             {$$=makeSymbol("TYPE",$1);}
+        | FLOAT                         {$$=makeSymbol("TYPE",$1);}
+        | VOID                          {$$=makeSymbol("TYPE",$1);} 
 ;
 
-stlist : stlist stmt                    {$$=makeNode("STLIST", NULL, $1); concatList($1,$2);}
+stlist : stlist stmt                    {$$=makeSymbol("STLIST",$1); concatList($1,$2);}
          |/* epsilon */                 {$$=makeNode("STLIST", NULL, makeNode("EPSILON", NULL, NULL));}
 ;
 
-stmt :  dcl ';'                         {$$=makeNode("STMT", NULL, $1); concatList($1,$2);}
-        | assn                          {$$=makeNode("STMT", NULL, $1);}
-        | exp ';'                       {$$=makeNode("STMT", NULL, $1); concatList($1,$2);}
-        | cntrl                         {$$=makeNode("STMT", NULL, $1);}
-        | read                          {$$=makeNode("STMT", NULL, $1);}
-        | write                         {$$=makeNode("STMT", NULL, $1);}
-        | return                        {$$=makeNode("STMT", NULL, $1);}
-        | blk                           {$$=makeNode("STMT", NULL, $1);}
-        | BREAK ';'                     {$$=makeNode("STMT", NULL, $1); concatList($1,$2);}
+stmt :  dcl ';'                         {$$=makeSymbol("STMT",$1); concatList($1,$2);}
+        | assn                          {$$=makeSymbol("STMT",$1);}
+        | exp ';'                       {$$=makeSymbol("STMT",$1); concatList($1,$2);}
+        | cntrl                         {$$=makeSymbol("STMT",$1);}
+        | read                          {$$=makeSymbol("STMT",$1);}
+        | write                         {$$=makeSymbol("STMT",$1);}
+        | return                        {$$=makeSymbol("STMT",$1);}
+        | blk                           {$$=makeSymbol("STMT",$1);}
+        | BREAK ';'                     {$$=makeSymbol("STMT",$1); concatList($1,$2);}
 ;
 
-return : RETURN exp ';'                 {$$=makeNode("RETURN", NULL, $1); concatList($1,$2); concatList($1,$3); }
-        | RETURN ';'                    {$$=makeNode("RETURN", NULL, $1); concatList($1,$2); }
+return : RETURN exp ';'                 {$$=makeSymbol("RETURN",$1); concatList($1,$2); concatList($1,$3); }
+        | RETURN ';'                    {$$=makeSymbol("RETURN",$1); concatList($1,$2); }
 ;
 
-write : WRITE '(' exp ')' ';'           {$$=makeNode("WRITE", NULL, $1); concatList($1,$2); concatList($1,$3); concatList($1,$4); concatList($1,$5);} 
-        | WRITE '(' STR ')' ';'         {$$=makeNode("WRITE", NULL, $1); concatList($1,$2); concatList($1,$3); concatList($1,$4); concatList($1,$5);} 
+write : WRITE '(' exp ')' ';'           {$$=makeSymbol("WRITE",$1); concatList($1,$2); concatList($1,$3); concatList($1,$4); concatList($1,$5);} 
+        | WRITE '(' STR ')' ';'         {$$=makeSymbol("WRITE",$1); concatList($1,$2); concatList($1,$3); concatList($1,$4); concatList($1,$5);} 
 ;
 
-read : READ '(' lval ')' ';'            {$$=makeNode("READ", NULL, $1); concatList($1,$2); concatList($1,$3); concatList($1,$4); concatList($1,$5);} 
+read : READ '(' lval ')' ';'            {$$=makeSymbol("READ",$1); concatList($1,$2); concatList($1,$3); concatList($1,$4); concatList($1,$5);} 
 ;
 
-assn : lval ASSIGN exp ';'              {$$=makeNode("ASSN", NULL, $1); concatList($1,$2); concatList($1,$3); concatList($1,$4); } 
+assn : lval ASSIGN exp ';'              {$$=makeSymbol("ASSN",$1); concatList($1,$2); concatList($1,$3); concatList($1,$4); } 
 ;
 
-lval : ID                               {$$=makeNode("LVAL", NULL, $1);}
+lval : ID                               {$$=makeSymbol("LVAL",$1);}
 ;
 
-fullwhile : FULL_WHILE bexp DO stmt     {$$=makeNode("FULLWHILE", NULL, $1); concatList($1,$2); concatList($1,$3); concatList($1,$4); } 
+fullwhile : FULL_WHILE bexp DO stmt     {$$=makeSymbol("FULLWHILE",$1); concatList($1,$2); concatList($1,$3); concatList($1,$4); } 
 ;
 
-cntrl : IF bexp THEN stmt ELSE stmt     {$$=makeNode("CNTRL", NULL, $1); concatList($1,$2); concatList($1,$3); concatList($1,$4); concatList($1,$5); concatList($1,$6);} 
-        | IF bexp THEN stmt             {$$=makeNode("CNTRL", NULL, $1); concatList($1,$2); concatList($1,$3); concatList($1,$4); } 
-        | WHILE bexp DO stmt            {$$=makeNode("CNTRL", NULL, $1); concatList($1,$2); concatList($1,$3); concatList($1,$4); } 
-        | fullwhile                     {$$=makeNode("CNTRL", NULL, $1);}
+cntrl : IF bexp THEN stmt ELSE stmt     {$$=makeSymbol("CNTRL",$1); concatList($1,$2); concatList($1,$3); concatList($1,$4); concatList($1,$5); concatList($1,$6);} 
+        | IF bexp THEN stmt             {$$=makeSymbol("CNTRL",$1); concatList($1,$2); concatList($1,$3); concatList($1,$4); } 
+        | WHILE bexp DO stmt            {$$=makeSymbol("CNTRL",$1); concatList($1,$2); concatList($1,$3); concatList($1,$4); } 
+        | fullwhile                     {$$=makeSymbol("CNTRL",$1);}
 ;
 
-bexp :  bexp OR bexp                    {$$=makeNode("BEXP", NULL, $1); concatList($1,$2); concatList($1,$3); }
-        | bexp AND bexp                 {$$=makeNode("BEXP", NULL, $1); concatList($1,$2); concatList($1,$3); }
-        | NOT bexp                      {$$=makeNode("BEXP", NULL, $1); concatList($1,$2); }
-        | exp RELOP exp                 {$$=makeNode("BEXP", NULL, $1); concatList($1,$2); concatList($1,$3); }
-        | '(' bexp ')'                  {$$=makeNode("BEXP", NULL, $1); concatList($1,$2); concatList($1,$3); }
-        | fullwhile                     {$$=makeNode("BEXP", NULL, $1);}
+bexp :  bexp OR bexp                    {$$=makeSymbol("BEXP",$1); concatList($1,$2); concatList($1,$3); }
+        | bexp AND bexp                 {$$=makeSymbol("BEXP",$1); concatList($1,$2); concatList($1,$3); }
+        | NOT bexp                      {$$=makeSymbol("BEXP",$1); concatList($1,$2); }
+        | exp RELOP exp                 {$$=makeSymbol("BEXP",$1); concatList($1,$2); concatList($1,$3); }
+        | '(' bexp ')'                  {$$=makeSymbol("BEXP",$1); concatList($1,$2); concatList($1,$3); }
+        | fullwhile                     {$$=makeSymbol("BEXP",$1);}
 ;
 
-exp :   exp ADDOP exp 	                {$$=makeNode("EXP", NULL, $1); concatList($1,$2); concatList($1,$3); }
-        | exp MULOP exp                 {$$=makeNode("EXP", NULL, $1); concatList($1,$2); concatList($1,$3); }
-        | '(' exp ')'                   {$$=makeNode("EXP", NULL, $1); concatList($1,$2); concatList($1,$3); }
-        | '(' type ')' exp              {$$=makeNode("EXP", NULL, $1); concatList($1,$2); concatList($1,$3); concatList($1,$4);}
-        | ID                            {$$=makeNode("EXP", NULL, $1);}
-        | num                           {$$=makeNode("EXP", NULL, $1);}
-        | call                          {$$=makeNode("EXP", NULL, $1);}
+exp :   exp ADDOP exp 	                {$$=makeSymbol("EXP",$1); concatList($1,$2); concatList($1,$3); }
+        | exp MULOP exp                 {$$=makeSymbol("EXP",$1); concatList($1,$2); concatList($1,$3); }
+        | '(' exp ')'                   {$$=makeSymbol("EXP",$1); concatList($1,$2); concatList($1,$3); }
+        | '(' type ')' exp              {$$=makeSymbol("EXP",$1); concatList($1,$2); concatList($1,$3); concatList($1,$4);}
+        | ID                            {$$=makeSymbol("EXP",$1);}
+        | num                           {$$=makeSymbol("EXP",$1);}
+        | call                          {$$=makeSymbol("EXP",$1);}
 ;
 
-num :   INTEGERNUM                      {$$=makeNode("NUM", NULL, $1);}
-        | REALNUM                       {$$=makeNode("NUM", NULL, $1);}
+num :   INTEGERNUM                      {$$=makeSymbol("NUM",$1);}
+        | REALNUM                       {$$=makeSymbol("NUM",$1);}
 ;
 
-call : ID '(' call_args ')'             {$$=makeNode("CALL", NULL, $1); concatList($1,$2); concatList($1,$3); concatList($1,$4);}
+call : ID '(' call_args ')'             {$$=makeSymbol("CALL",$1); concatList($1,$2); concatList($1,$3); concatList($1,$4);}
 ;
 
-call_args : call_arglist                {$$=makeNode("CALL_ARGS", NULL, $1);}
+call_args : call_arglist                {$$=makeSymbol("CALL_ARGS",$1);}
             |/* epsilon */              {$$=makeNode("CALL_ARGS", NULL, makeNode("EPSILON", NULL, NULL));} 
 ;
 
-call_arglist :  call_arglist ',' exp    {$$=makeNode("CALL_ARGLIST", NULL, $1); concatList($1,$2); concatList($1,$3); }
-                | exp                   {$$=makeNode("CALL_ARGLIST", NULL, $1);}
+call_arglist :  call_arglist ',' exp    {$$=makeSymbol("CALL_ARGLIST",$1); concatList($1,$2); concatList($1,$3); }
+                | exp                   {$$=makeSymbol("CALL_ARGS",$1);}
 ;
 
 
@@ -154,5 +154,4 @@ call_arglist :  call_arglist ',' exp    {$$=makeNode("CALL_ARGLIST", NULL, $1); 
 
 void yyerror(const char*) {
     cout << "Syntax error: '" << yytext << "' in line number " << yylineno << endl;
-    exit(2);
 }
