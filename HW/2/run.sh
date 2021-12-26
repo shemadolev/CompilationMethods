@@ -28,4 +28,5 @@ do
 done
 echo "#######################"
 echo "Summary: Passed $passCounter/$totalCounter"
-make clean
+
+#make clean
