@@ -48,7 +48,7 @@
 program : fdefs                         {parseTree=makeSymbol("PROGRAM",$1);}
 ;
 
-fdefs : /* epsilon */                   {$$=makeNode("FDEFS", NULL, makeNode("EPSILON", NULL, NULL));}
+fdefs : /* epsilon */                   {$$=makeSymbol("FDEFS", makeSymbol("EPSILON", NULL));}
 	| fdefs func_api blk            {$$=makeSymbol("FDEFS",$1); concatList($1,$2); concatList($1,$3);}
         | fdefs func_api ';'            {$$=makeSymbol("FDEFS",$1); concatList($1,$2); concatList($1,$3);}
 ;
@@ -57,7 +57,7 @@ func_api : type ID '(' func_args ')'    {$$=makeSymbol("FUNC_API",$1); concatLis
 ;
 
 func_args : func_arglist                {$$=makeSymbol("FUNC_ARGS",$1);}       
-            | /* epsilon */             {$$=makeNode("FUNC_ARGS", NULL, makeNode("EPSILON", NULL, NULL));}
+            | /* epsilon */             {$$=makeSymbol("FUNC_ARGS", makeSymbol("EPSILON", NULL));}
 ;
 
 func_arglist :  func_arglist ',' dcl    {$$=makeSymbol("FUNC_ARGLIST",$1); concatList($1,$2); concatList($1,$3);} 
@@ -77,7 +77,7 @@ type :  INT                             {$$=makeSymbol("TYPE",$1);}
 ;
 
 stlist : stlist stmt                    {$$=makeSymbol("STLIST",$1); concatList($1,$2);}
-         |/* epsilon */                 {$$=makeNode("STLIST", NULL, makeNode("EPSILON", NULL, NULL));}
+         |/* epsilon */                 {$$=makeSymbol("STLIST", makeSymbol("EPSILON", NULL));}
 ;
 
 stmt :  dcl ';'                         {$$=makeSymbol("STMT",$1); concatList($1,$2);}
@@ -142,7 +142,7 @@ call : ID '(' call_args ')'             {$$=makeSymbol("CALL",$1); concatList($1
 ;
 
 call_args : call_arglist                {$$=makeSymbol("CALL_ARGS",$1);}
-            |/* epsilon */              {$$=makeNode("CALL_ARGS", NULL, makeNode("EPSILON", NULL, NULL));} 
+            |/* epsilon */              {$$=makeSymbol("CALL_ARGS", makeSymbol("EPSILON", NULL));} 
 ;
 
 call_arglist :  call_arglist ',' exp    {$$=makeSymbol("CALL_ARGLIST",$1); concatList($1,$2); concatList($1,$3); }
