@@ -22,14 +22,15 @@
         DO
         IF
         THEN
-        ELSE
         RETURN
         FULL_WHILE
         BREAK
 
+// solve dangling else (select shift over reduce)  
+%precedence ELSE
+
 // other
 %token ID INTEGERNUM REALNUM STR
-// symbols
 
 %right ASSIGN
 %left OR
@@ -39,6 +40,7 @@
 %left MULOP
 %right NOT
 
+// symbols
 %precedence '(' ')' '{' '}' '.' ';' ',' ':'
 
 %%
