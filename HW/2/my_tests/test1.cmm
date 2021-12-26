@@ -1,0 +1,21 @@
+void secondary();
+
+int main(argv: int, argc: void) {
+	secondary();
+}
+
+void secondary() {
+    a , b : int;
+    b = 2;
+    read(a);
+    if (full_while(a>0) do {
+        a = a - 0 - b;
+        if(a<0) then
+            return false;
+    }) then
+        if 1>0 then
+            write("HELLO\n");
+        else
+            write("WORLD\n"); #Dangling else
+}
+

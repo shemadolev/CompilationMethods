@@ -1,0 +1,3 @@
+void main(){
+	a = (int)a + b * (float)c / d;
+}
