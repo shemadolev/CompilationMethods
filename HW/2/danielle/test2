@@ -1,0 +1,8 @@
+void main(){
+break;
+	while(i>0)do{
+	i=0;
+	break;
+	}
+return;
+}

@@ -1,0 +1,7 @@
+void main(){
+	i : int;
+	i = 5;
+	while (i>0) do break;
+	break;
+	return;
+}

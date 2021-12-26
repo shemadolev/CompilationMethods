@@ -1,0 +1,16 @@
+#void main(argv: void, argc: void) {
+void main() {
+    #if num1 > num3 then if num1 > num2 then num1 = num2; else num1 = num3;
+    if !5 > 3 then return;
+    if !(5 > 3) then return;
+    if !5 > 3 || 2 == 2 then return;
+    if id >= num || id2 >= num2 || id3 >= num3 then return 5;
+    if id >= num || id2 >= num2 && id3 >= num3 then return 5;
+    if num1 <= num2 then return;
+    if num1 <> num2 then return;
+    while (!2*2 > 2+2) do {
+        return 1;
+        return 1;
+        return 1;
+    }
+}
