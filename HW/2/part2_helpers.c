@@ -11,6 +11,7 @@ extern int yyparse (void);
 /*                             MAKE a node                                */
 /**************************************************************************/
 
+
 ParserNode *makeNode(const char* type,const char* value, ParserNode *child)
 {
   ParserNode *p;

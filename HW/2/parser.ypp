@@ -48,27 +48,27 @@
 program : fdefs                         {parseTree=makeSymbol("PROGRAM",$1);}
 ;
 
-fdefs : /* epsilon */                   {$$=makeSymbol("FDEFS", makeSymbol("EPSILON", NULL));}
-	| fdefs func_api blk            {$$=makeSymbol("FDEFS",$1); concatList($1,$2); concatList($1,$3);}
-        | fdefs func_api ';'            {$$=makeSymbol("FDEFS",$1); concatList($1,$2); concatList($1,$3);}
+fdefs : /* epsilon */                   {$$=makeSymbol("FDEFS", EPSILON);}
+	| fdefs func_api blk            {$$=makeSymbol("FDEFS",$1); concatList(concatList($1,$2),$3);}
+        | fdefs func_api ';'            {$$=makeSymbol("FDEFS",$1); concatList(concatList($1,$2),$3);}
 ;
 
-func_api : type ID '(' func_args ')'    {$$=makeSymbol("FUNC_API",$1); concatList($1,$2); concatList($1,$3); concatList($1,$4); concatList($1,$5);} 
+func_api : type ID '(' func_args ')'    {$$=makeSymbol("FUNC_API",$1); concatList(concatList(concatList(concatList($1,$2),$3),$4),$5);} 
 ;
 
 func_args : func_arglist                {$$=makeSymbol("FUNC_ARGS",$1);}       
-            | /* epsilon */             {$$=makeSymbol("FUNC_ARGS", makeSymbol("EPSILON", NULL));}
+            | /* epsilon */             {$$=makeSymbol("FUNC_ARGS", EPSILON);}
 ;
 
-func_arglist :  func_arglist ',' dcl    {$$=makeSymbol("FUNC_ARGLIST",$1); concatList($1,$2); concatList($1,$3);} 
+func_arglist :  func_arglist ',' dcl    {$$=makeSymbol("FUNC_ARGLIST",$1); concatList(concatList($1,$2),$3);} 
                 | dcl                   {$$=makeSymbol("FUNC_ARGLIST",$1);}
 ;
 
-blk : '{' stlist '}'                    {$$=makeSymbol("BLK",$1); concatList($1,$2); concatList($1,$3);} 
+blk : '{' stlist '}'                    {$$=makeSymbol("BLK",$1); concatList(concatList($1,$2),$3);} 
 ;
 
-dcl :   ID ':' type                     {$$=makeSymbol("DCL",$1); concatList($1,$2); concatList($1,$3);}
-        | ID ',' dcl                    {$$=makeSymbol("DCL",$1); concatList($1,$2); concatList($1,$3);}
+dcl :   ID ':' type                     {$$=makeSymbol("DCL",$1); concatList(concatList($1,$2),$3);}
+        | ID ',' dcl                    {$$=makeSymbol("DCL",$1); concatList(concatList($1,$2),$3);}
 ;
 
 type :  INT                             {$$=makeSymbol("TYPE",$1);}
@@ -77,7 +77,7 @@ type :  INT                             {$$=makeSymbol("TYPE",$1);}
 ;
 
 stlist : stlist stmt                    {$$=makeSymbol("STLIST",$1); concatList($1,$2);}
-         |/* epsilon */                 {$$=makeSymbol("STLIST", makeSymbol("EPSILON", NULL));}
+         |/* epsilon */                 {$$=makeSymbol("STLIST", EPSILON);}
 ;
 
 stmt :  dcl ';'                         {$$=makeSymbol("STMT",$1); concatList($1,$2);}
@@ -91,44 +91,44 @@ stmt :  dcl ';'                         {$$=makeSymbol("STMT",$1); concatList($1
         | BREAK ';'                     {$$=makeSymbol("STMT",$1); concatList($1,$2);}
 ;
 
-return : RETURN exp ';'                 {$$=makeSymbol("RETURN",$1); concatList($1,$2); concatList($1,$3); }
+return : RETURN exp ';'                 {$$=makeSymbol("RETURN",$1); concatList(concatList($1,$2),$3); }
         | RETURN ';'                    {$$=makeSymbol("RETURN",$1); concatList($1,$2); }
 ;
 
-write : WRITE '(' exp ')' ';'           {$$=makeSymbol("WRITE",$1); concatList($1,$2); concatList($1,$3); concatList($1,$4); concatList($1,$5);} 
-        | WRITE '(' STR ')' ';'         {$$=makeSymbol("WRITE",$1); concatList($1,$2); concatList($1,$3); concatList($1,$4); concatList($1,$5);} 
+write : WRITE '(' exp ')' ';'           {$$=makeSymbol("WRITE",$1); concatList(concatList(concatList(concatList($1,$2),$3),$4),$5);} 
+        | WRITE '(' STR ')' ';'         {$$=makeSymbol("WRITE",$1); concatList(concatList(concatList(concatList($1,$2),$3),$4),$5);} 
 ;
 
-read : READ '(' lval ')' ';'            {$$=makeSymbol("READ",$1); concatList($1,$2); concatList($1,$3); concatList($1,$4); concatList($1,$5);} 
+read : READ '(' lval ')' ';'            {$$=makeSymbol("READ",$1); concatList(concatList(concatList(concatList($1,$2),$3),$4),$5);} 
 ;
 
-assn : lval ASSIGN exp ';'              {$$=makeSymbol("ASSN",$1); concatList($1,$2); concatList($1,$3); concatList($1,$4); } 
+assn : lval ASSIGN exp ';'              {$$=makeSymbol("ASSN",$1); concatList(concatList(concatList($1,$2),$3),$4); } 
 ;
 
 lval : ID                               {$$=makeSymbol("LVAL",$1);}
 ;
 
-fullwhile : FULL_WHILE bexp DO stmt     {$$=makeSymbol("FULLWHILE",$1); concatList($1,$2); concatList($1,$3); concatList($1,$4); } 
+fullwhile : FULL_WHILE bexp DO stmt     {$$=makeSymbol("FULLWHILE",$1); concatList(concatList(concatList($1,$2),$3),$4); } 
 ;
 
-cntrl : IF bexp THEN stmt ELSE stmt     {$$=makeSymbol("CNTRL",$1); concatList($1,$2); concatList($1,$3); concatList($1,$4); concatList($1,$5); concatList($1,$6);} 
-        | IF bexp THEN stmt             {$$=makeSymbol("CNTRL",$1); concatList($1,$2); concatList($1,$3); concatList($1,$4); } 
-        | WHILE bexp DO stmt            {$$=makeSymbol("CNTRL",$1); concatList($1,$2); concatList($1,$3); concatList($1,$4); } 
+cntrl : IF bexp THEN stmt ELSE stmt     {$$=makeSymbol("CNTRL",$1); concatList(concatList(concatList(concatList(concatList($1,$2),$3),$4),$5),$6);} 
+        | IF bexp THEN stmt             {$$=makeSymbol("CNTRL",$1); concatList(concatList(concatList($1,$2),$3),$4); } 
+        | WHILE bexp DO stmt            {$$=makeSymbol("CNTRL",$1); concatList(concatList(concatList($1,$2),$3),$4); } 
         | fullwhile                     {$$=makeSymbol("CNTRL",$1);}
 ;
 
-bexp :  bexp OR bexp                    {$$=makeSymbol("BEXP",$1); concatList($1,$2); concatList($1,$3); }
-        | bexp AND bexp                 {$$=makeSymbol("BEXP",$1); concatList($1,$2); concatList($1,$3); }
+bexp :  bexp OR bexp                    {$$=makeSymbol("BEXP",$1); concatList(concatList($1,$2),$3); }
+        | bexp AND bexp                 {$$=makeSymbol("BEXP",$1); concatList(concatList($1,$2),$3); }
         | NOT bexp                      {$$=makeSymbol("BEXP",$1); concatList($1,$2); }
-        | exp RELOP exp                 {$$=makeSymbol("BEXP",$1); concatList($1,$2); concatList($1,$3); }
-        | '(' bexp ')'                  {$$=makeSymbol("BEXP",$1); concatList($1,$2); concatList($1,$3); }
+        | exp RELOP exp                 {$$=makeSymbol("BEXP",$1); concatList(concatList($1,$2),$3); }
+        | '(' bexp ')'                  {$$=makeSymbol("BEXP",$1); concatList(concatList($1,$2),$3); }
         | fullwhile                     {$$=makeSymbol("BEXP",$1);}
 ;
 
-exp :   exp ADDOP exp 	                {$$=makeSymbol("EXP",$1); concatList($1,$2); concatList($1,$3); }
-        | exp MULOP exp                 {$$=makeSymbol("EXP",$1); concatList($1,$2); concatList($1,$3); }
-        | '(' exp ')'                   {$$=makeSymbol("EXP",$1); concatList($1,$2); concatList($1,$3); }
-        | '(' type ')' exp              {$$=makeSymbol("EXP",$1); concatList($1,$2); concatList($1,$3); concatList($1,$4);}
+exp :   exp ADDOP exp 	                {$$=makeSymbol("EXP",$1); concatList(concatList($1,$2),$3); }
+        | exp MULOP exp                 {$$=makeSymbol("EXP",$1); concatList(concatList($1,$2),$3); }
+        | '(' exp ')'                   {$$=makeSymbol("EXP",$1); concatList(concatList($1,$2),$3); }
+        | '(' type ')' exp              {$$=makeSymbol("EXP",$1); concatList(concatList(concatList($1,$2),$3),$4);}
         | ID                            {$$=makeSymbol("EXP",$1);}
         | num                           {$$=makeSymbol("EXP",$1);}
         | call                          {$$=makeSymbol("EXP",$1);}
@@ -138,14 +138,14 @@ num :   INTEGERNUM                      {$$=makeSymbol("NUM",$1);}
         | REALNUM                       {$$=makeSymbol("NUM",$1);}
 ;
 
-call : ID '(' call_args ')'             {$$=makeSymbol("CALL",$1); concatList($1,$2); concatList($1,$3); concatList($1,$4);}
+call : ID '(' call_args ')'             {$$=makeSymbol("CALL",$1); concatList(concatList(concatList($1,$2),$3),$4);}
 ;
 
 call_args : call_arglist                {$$=makeSymbol("CALL_ARGS",$1);}
-            |/* epsilon */              {$$=makeSymbol("CALL_ARGS", makeSymbol("EPSILON", NULL));} 
+            |/* epsilon */              {$$=makeSymbol("CALL_ARGS", EPSILON);} 
 ;
 
-call_arglist :  call_arglist ',' exp    {$$=makeSymbol("CALL_ARGLIST",$1); concatList($1,$2); concatList($1,$3); }
+call_arglist :  call_arglist ',' exp    {$$=makeSymbol("CALL_ARGLIST",$1); concatList(concatList($1,$2),$3); }
                 | exp                   {$$=makeSymbol("CALL_ARGLIST",$1);}
 ;
 
