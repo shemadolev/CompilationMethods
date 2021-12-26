@@ -30,7 +30,6 @@
 // other
 %token ID INTEGERNUM REALNUM STR
 // symbols
-%token '(' ')' '{' '}' '.' ';' ',' ':'
 
 %right ASSIGN
 %left OR
@@ -39,6 +38,8 @@
 %left ADDOP
 %left MULOP
 %right NOT
+
+%precedence '(' ')' '{' '}' '.' ';' ',' ':'
 
 %%
 
