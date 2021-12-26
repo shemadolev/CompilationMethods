@@ -21,12 +21,12 @@
         WHILE
         DO
         IF
-        THEN
         RETURN
         FULL_WHILE
         BREAK
 
 // solve dangling else (select shift over reduce)  
+%precedence THEN
 %precedence ELSE
 
 // other
