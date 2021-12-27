@@ -90,7 +90,7 @@ int|float|void|write|read|while|do|if|then|else|return|full_while|break {
 
 {symbols} {
     yylval = makeToken(yytext, NULL);
-    return yytext[0];
+    return yytext[0]; //Use the char itself as the token
 }
 
 {whitespace}|{newline}  ;
@@ -100,6 +100,7 @@ int|float|void|write|read|while|do|if|then|else|return|full_while|break {
 
 %%
 
+//"Switch-case" of identifier from the given yytext
 int getTokenFromString(const char* str){
     if(strcmp(str, "int") == 0)
         return INT;

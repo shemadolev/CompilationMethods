@@ -30,12 +30,10 @@ ParserNode *makeNode(const char* type,const char* value, ParserNode *child)
   return(p);
 }
 
-//Make a node for a symbol (no type)
 ParserNode *makeSymbol(const char* type, ParserNode *child){
   return makeNode(type, NULL, child);
 }
 
-//Make a node for a token (no children)
 ParserNode *makeToken(const char* type,const char* value){
   return makeNode(type, value, NULL);
 }

@@ -12,7 +12,7 @@
     ParserNode *parseTree; 
 %}
 
-// reserved words 
+// Reserved words 
 %token  INT
         FLOAT
         VOID
@@ -25,13 +25,14 @@
         FULL_WHILE
         BREAK
 
-// solve dangling else (select shift over reduce)  
+// Solve dangling else (select shift over reduce)  
 %precedence THEN
 %precedence ELSE
 
-// other
+// Other tokens (no special precedence)
 %token ID INTEGERNUM REALNUM STR
 
+//Associativity & precedence matched to C++ syntax
 %right ASSIGN
 %left OR
 %left AND
@@ -40,7 +41,7 @@
 %left MULOP
 %right NOT
 
-// symbols
+// Symbols (Highest priority)
 %precedence '(' ')' '{' '}' '.' ';' ',' ':'
 
 %%
