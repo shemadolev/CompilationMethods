@@ -3,3 +3,4 @@
 part2
 parser.output
 parser.tab.hpp
+*.exe
