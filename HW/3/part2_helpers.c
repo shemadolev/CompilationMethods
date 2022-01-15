@@ -30,6 +30,13 @@ ParserNode *makeNode(const char* type,const char* value, ParserNode *child)
   return(p);
 }
 
+ParserNode *makeSymbol(const char* type, ParserNode *child){
+  return makeNode(type, NULL, child);
+}
+
+ParserNode *makeToken(const char* type,const char* value){
+  return makeNode(type, value, NULL);
+}
 
 /**************************************************************************/
 /*                           Concate item to list                         */

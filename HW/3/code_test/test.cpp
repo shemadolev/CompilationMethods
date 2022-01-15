@@ -6,7 +6,7 @@ using namespace std;
 
 int main(){
 
-    code myCode;
+    codeClass myCode;
     myCode.emit("JLINK 0");
     myCode.emit("HALT");
 
