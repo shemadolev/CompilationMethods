@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
-#include "part2_helpers.h"
+#include "part2_helpers.hpp"
 #include "parser.tab.hpp"
 
 void printError();
@@ -29,22 +29,22 @@ id              ({letter}+({letter}|{digit}|_)*)
 %%
 
 int|float|void|write|read|while|do|if|then|else|return|full_while|break {  
-    yylval = makeNode(yytext, NULL, NULL);
+    yylval = new NodeToken(yytext);
     return getTokenFromString(yytext);
 }
 
 {id} {
-    yylval = makeNode("id", yytext, NULL);  
+    yylval = new NodeToken("id",yytext);  
     return ID;
 }
 
 {integernum}  {
-    yylval = makeNode("integernum", yytext, NULL);
+    yylval = new NodeToken("integernum",yytext);
     return INTEGERNUM;
 }
 
 {realnum} {
-    yylval = makeNode("realnum", yytext, NULL);
+    yylval = new NodeToken("realnum",yytext);
     return REALNUM;
 }         
 {str} { 
@@ -52,45 +52,45 @@ int|float|void|write|read|while|do|if|then|else|return|full_while|break {
     char* str_val = yytext + 1;
     str_val[strlen(str_val)-1]='\0';
 
-    yylval = makeNode("str", str_val, NULL);
+    yylval = new NodeToken("str",str_val);
     return STR;
 }
 
 ==|<>|<|<=|>|>= {
-    yylval = makeNode("relop", yytext, NULL);
+    yylval = new NodeToken("relop",yytext);
     return RELOP;
 }
 
 \+|\- {
-    yylval = makeNode("addop", yytext, NULL);
+    yylval = new NodeToken("addop",yytext);
     return ADDOP;
 }
 \*|\/ {
-    yylval = makeNode("mulop", yytext, NULL);
+    yylval = new NodeToken("mulop",yytext);
     return MULOP;
 }
 \= {
-    yylval = makeNode("assign", yytext, NULL);
+    yylval = new NodeToken("assign",yytext);
     return ASSIGN;
 }
 \&\& {
-    yylval = makeNode("and", yytext, NULL);
+    yylval = new NodeToken("and",yytext);
     return AND;
 }
 
 \|\| {
-    yylval = makeNode("or", yytext, NULL);
+    yylval = new NodeToken("or",yytext);
     return OR;
 }
 
 \! {
-    yylval = makeNode("not", yytext, NULL);
+    yylval = new NodeToken("not",yytext);
     return NOT;
 }
 
 {symbols} {
-    yylval = makeNode(yytext, NULL, NULL);
-    return yytext[0];
+    yylval = new NodeToken(yytext);
+    return yytext[0]; //Use the char itself as the token
 }
 
 {whitespace}|{newline}  ;
@@ -100,6 +100,7 @@ int|float|void|write|read|while|do|if|then|else|return|full_while|break {
 
 %%
 
+//"Switch-case" of identifier from the given yytext
 int getTokenFromString(const char* str){
     if(strcmp(str, "int") == 0)
         return INT;
