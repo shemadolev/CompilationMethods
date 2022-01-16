@@ -27,7 +27,7 @@ NodeToken::NodeToken(string type, string value) : ParserNode(type), value(value)
 
 
 void NodeToken::dumpParseTree(int depth){
-  string indent(depth,' ');
+  string indent(depth * 2,' ');
   if(value.length() > 0)
     cout << indent << "(<" << type << "," << value << ">)" << endl;
   else
@@ -35,12 +35,12 @@ void NodeToken::dumpParseTree(int depth){
 }
 
 void NodeSymbol::dumpParseTree(int depth){
-  string indent(depth,' ');
+  string indent(depth * 2,' ');
   cout << indent << "(<" << type << ">" << endl;
   for (ParserNode* curChild = child; curChild != NULL; curChild = curChild->sibling) {
     curChild->dumpParseTree(depth + 1);
   }
-  cout << ")" << endl;
+  cout << indent << ")" << endl;
 }
 
 /**************************************************************************/
