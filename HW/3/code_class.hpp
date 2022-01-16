@@ -8,9 +8,17 @@
 
 using namespace std;
 
-class bpList : public list<int> {};
+class BpList : public list<int> {
+public:
+	/**
+	 * @brief Make a new list of lines for backpatching
+	 * 
+	 * @param line The first line to insert to the list
+	 */
+	BpList(int line);
+};
 
-class codeClass {
+class CodeClass {
 protected:
 
 	vector<string> codeVec;
@@ -31,7 +39,7 @@ public:
 	 * 
 	 * @return int next line number of code
 	 */
-	int nextquad();
+	int nextQuad();
 
 	/**
 	 * @brief Backpatch 'goto 0' commands
@@ -39,7 +47,7 @@ public:
 	 * @param lineList List of line numbers with 'goto 0' to be back-patched
 	 * @param lineNo The line number to be filled in
 	 */
-	void backpatch(bpList lineList, int lineNo);
+	void backpatch(BpList lineList, int lineNo);
 
 	/**
 	 * @brief Print all code by order

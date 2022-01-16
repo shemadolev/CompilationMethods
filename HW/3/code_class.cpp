@@ -9,18 +9,21 @@ bool replace(std::string& str, const std::string& from, const std::string& to) {
     return true;
 }
 
-int codeClass::emit(string c){
+int CodeClass::emit(string c){
     codeVec.push_back(c);
     return codeVec.size();
 }
 
 
-int codeClass::nextquad(){
+int CodeClass::nextQuad(){
     return codeVec.size() + 1;
 }
 
+BpList::BpList(int line){
+    this->push_back(line);
+}
 
-void codeClass::backpatch(bpList lineList, int lineNo){
+void CodeClass::backpatch(BpList lineList, int lineNo){
     const string replaceFrom = " 0";
     for(int codeLine : lineList){
         string replaceTo = " " + to_string(lineNo);
@@ -31,7 +34,7 @@ void codeClass::backpatch(bpList lineList, int lineNo){
     }
 }
 
-void codeClass::print(){
+void CodeClass::print(){
     for(string c : codeVec){
         cout << c << endl;
     }

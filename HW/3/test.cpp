@@ -6,12 +6,11 @@ using namespace std;
 
 int main(){
 
-    codeClass myCode;
+    CodeClass myCode;
     myCode.emit("JLINK 0");
     myCode.emit("HALT");
 
-    bpList lineList;
-    lineList.push_back(1);
+    BpList lineList(1);
 
     myCode.backpatch(lineList, 10);
 
