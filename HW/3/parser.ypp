@@ -1,7 +1,7 @@
 %{
     #include <iostream>
-    #include "part2_helpers.h"
-    #include "code_class.hpp"
+    #include "part2_helpers.hpp"
+    //#include "code_class.hpp"
     using namespace std;
 
     extern int yylex();
@@ -11,7 +11,7 @@
     extern const char* yytext;
 
     ParserNode *parseTree; 
-    codeClass code;
+    //codeClass code;
 %}
 
 // Reserved words 

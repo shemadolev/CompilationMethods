@@ -66,7 +66,7 @@ public:
 //todo continue here
 
 //Macro for a special "epsilon" symbol node
-#define EPSILON new NodeSymbol("EPSILON",NULL)
+#define EPSILON new NodeToken("EPSILON")
 
 /**
  * @brief Concatenate a child to the end of its children list.
