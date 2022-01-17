@@ -1,0 +1,9 @@
+- We don't have any global/static vars, but we do have *constant* strings. We maybe should allocate constant strings at memory, and write the string startin addr & length on symbol table.
+- Memory allocator class: NOT FOR STACK (which is runtime), but for static data only
+_________________
+|     STACK     |
+|     ....      |
+|               |
+|_______________| <-- Memory allocator should remember this location + mapping for existing data
+|  STATIC DATA  |
+|_______________|

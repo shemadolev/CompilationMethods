@@ -19,17 +19,21 @@ int CodeClass::nextQuad(){
     return codeVec.size() + 1;
 }
 
-BpList::BpList(int line){
+CodeLineList::CodeLineList(){}
+
+CodeLineList::CodeLineList(int line){
     this->push_back(line);
 }
 
-void CodeClass::backpatch(BpList lineList, int lineNo){
-    const string replaceFrom = " 0";
+void CodeClass::backpatch(CodeLineList lineList, int lineNo){
+    //todo Make sure linker replaces 'goto -1' commands
+    const string replaceFrom = " -1";
+    string replaceTo = " " + to_string(lineNo);
     for(int codeLine : lineList){
-        string replaceTo = " " + to_string(lineNo);
         if(!replace(codeVec[codeLine - 1], replaceFrom, replaceTo)){
             cerr << "codeClass::backpatch Error parsing line to backpatch:" << endl
                 << "Line " << codeLine << ": " << codeVec[codeLine - 1] << endl;
+            exit(1);
         }
     }
 }

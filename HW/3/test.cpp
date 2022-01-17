@@ -4,17 +4,20 @@ using namespace std;
 #include <string>
 #include <list>
 
+#define FP string("I3")
+
 int main(){
 
     CodeClass myCode;
-    myCode.emit("JLINK 0");
-    myCode.emit("HALT");
+    myCode.emit("JLINK -1");
+    myCode.emit("HALT " + FP);
 
-    BpList lineList(1);
+    CodeLineList lineList(1);
 
-    myCode.backpatch(lineList, 10);
+    myCode.backpatch(lineList, 25);
 
     myCode.print();
+
 
     return 0;
 }
