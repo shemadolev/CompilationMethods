@@ -24,9 +24,7 @@ class VarScopeTable{
 protected:
     TypedVarScopeTable* intTable;
     TypedVarScopeTable* floatTable;
-
     VarScopeTable *parent;
-
 public:
     ~VarScopeTable();
 
@@ -39,15 +37,13 @@ public:
     // }
 
     static void popBlock();
-    // { //fixme
+    // { //fixme Remember - copy current offsets of int/float tables 
     //     VarScopeTable *currentTable = globalPointer;
     //     globalPointer = currentTable->parent;
     //     delete currentTable;
     // }
 
     string newTemp(idTypes type);
-
-    void clearTemps();
 
     string newVar(string id, idTypes type);
 
@@ -84,9 +80,6 @@ public:
      * @return varEntry& Allocated new var
      */
     string newTemp();
-
-
-    void clearTemps();
 
     /**
      * @brief Allocate a new var for specific id
