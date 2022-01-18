@@ -28,15 +28,23 @@ public:
 class CodeClass {
 protected:
 	vector<string> codeVec;
+
+	string spreadString(string str);
+
+	template<typename T, typename... Args>
+	string spreadString(T t, Args... args);
+
 public:
 
 	/**
 	 * @brief Emit code
 	 * 
-	 * @param c Code to emit
+	 * @tparam Args Arguments of type string
+	 * @param args Arguments of type string
 	 * @return int Line number of emitted code
 	 */
-	int emit(string c);
+	template<typename... Args>
+	int emit(Args... args);
 
 	/**
 	 * @brief Get next line number of code

@@ -125,18 +125,18 @@ fullwhile : FULL_WHILE N M bexp DO M stmt {
 
                 fullwhile = new NodeBexp("FULLWHILE",concatList(concatList(concatList($1,$2),$3),$4));
 
-                code->emit(string("UJUMP ") + M1->quad);
+                code->emit("UJUMP", M1->quad);
                 code->backpatch(N->nextlist,code->nextQuad());
                 string res = varScopeTable->newTemp(eINT);
-                code->emit(string("COPYI ") + res + string(" 0"));
-                code->emit(string("UJUMP ") + M1->quad);
+                code->emit("COPYI", res , "0"); 
+                code->emit("UJUMP", M1->quad);
                 code->backpatch(bexp->truelist,code->nextQuad());
-                code->emit(string("COPYI ") + res + string(" 1"));
-                code->emit(string("UJUMP ") + M2->quad);
+                code->emit("COPYI", res , "1"); 
+                code->emit("UJUMP", M2->quad);
                 code->backpatch(bexp->falselist,code->nextQuad());
                 fullwhile->falselist = CodeLineList(code->nextQuad());
                 fullwhile->falselist.merge(stmt->breaklist);
-                code->emit(string("BREQZ ") + res + string(" -1"));
+                code->emit("BREQZ", res , "-1"); 
                 fullwhile->truelist = CodeLineList(code->nextQuad());
                 code->emit("UJUMP -1");
                 code->backpatch(stmt->nextlist,M1->quad);
@@ -186,7 +186,7 @@ cntrl : IF bexp THEN M stmt N ELSE M stmt     {
                 code->backpatch(bexp->truelist,M2->quad);
                 code->backpatch(stmt->nextlist,M1->quad);
                 cntrl->nextlist.merge(bexp->falselist);
-                code->emit(string("UJUMP ") + M1->quad); //support "fall through" from stmt
+                code->emit("UJUMP", M1->quad); //support "fall through" from stmt
         } 
         | fullwhile                     {
                 NodeStatement *cntrl = $$;
@@ -245,7 +245,7 @@ bexp :  bexp OR M bexp                  {
                 code->emit(...something to support different RELOP, some switch case)
                 // branch for res
                 bexp->truelist.push_back(code->nextQuad());
-                code->emit(string("UJUMP ") + res);
+                code->emit("UJUMP", res);
                 
                 // TODO: should check that exp1 and exp2 have the same type ->>> or semantic error 
         }

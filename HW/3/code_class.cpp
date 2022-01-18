@@ -1,8 +1,19 @@
 #include "code_class.hpp"
 #include "part2_helpers.hpp"
 
-int CodeClass::emit(string c){
-    codeVec.push_back(c);
+string CodeClass::spreadString(string str) {
+    return str;
+}
+
+template<typename T, typename... Args>
+string CodeClass::spreadString(T t, Args... args) {
+    return spreadString(t) + string(" ") + spreadString(args...) ;
+}
+
+template<typename... Args>
+int CodeClass::emit(Args... args){
+    string code = spreadString(args...);
+    codeVec.push_back(code);
     return codeVec.size();
 }
 
