@@ -2,8 +2,18 @@
 /* part2_helpers.c - Helper functions for project part 2 - implementation  */
 #include <stdio.h>
 #include "part2_helpers.hpp"
+#include "code_class.hpp"
 
 extern ParserNode *parseTree; /* Root of parse tree. Defined in the parser. */
+extern CodeClass code;
+
+bool replace(std::string& str, const std::string& from, const std::string& to) {
+    size_t start_pos = str.find(from);
+    if(start_pos == std::string::npos)
+        return false;
+    str.replace(start_pos, from.length(), to);
+    return true;
+}
 
 extern int yyparse (void);
 

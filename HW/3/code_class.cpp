@@ -1,19 +1,10 @@
 #include "code_class.hpp"
-
-
-bool replace(std::string& str, const std::string& from, const std::string& to) {
-    size_t start_pos = str.find(from);
-    if(start_pos == std::string::npos)
-        return false;
-    str.replace(start_pos, from.length(), to);
-    return true;
-}
+#include "part2_helpers.hpp"
 
 int CodeClass::emit(string c){
     codeVec.push_back(c);
     return codeVec.size();
 }
-
 
 int CodeClass::nextQuad(){
     return codeVec.size() + 1;
@@ -38,8 +29,8 @@ void CodeClass::backpatch(CodeLineList lineList, int lineNo){
     }
 }
 
-void CodeClass::print(){
+void CodeClass::print(ofstream& file){
     for(string c : codeVec){
-        cout << c << endl;
+        file << c << endl;
     }
 }

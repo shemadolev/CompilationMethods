@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <list>
+#include <fstream>
 
 using namespace std;
 
@@ -26,11 +27,8 @@ public:
 
 class CodeClass {
 protected:
-
 	vector<string> codeVec;
-	
 public:
-	// ~code() {}
 
 	/**
 	 * @brief Emit code
@@ -59,7 +57,7 @@ public:
 	 * @brief Print all code by order
 	 * 
 	 */
-	void print();
+	void print(ofstream& file);
 };
 
 
