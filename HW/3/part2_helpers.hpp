@@ -10,8 +10,14 @@
 
 using namespace std;
 
+#define YYSTYPE ParserNode* // Define yystype as the wanted struct
+
 enum idTypes {eINT, eFLOAT, eVOID};
 
+/**
+ * @brief Virtual class for parse tree nodes
+ * 
+ */
 class ParserNode{
 public:
     string type;
@@ -26,6 +32,10 @@ public:
     virtual void dumpParseTree(int depth) = 0;
 };
 
+/**
+ * @brief Parse tree node for symbols
+ * 
+ */
 class NodeSymbol : public ParserNode{
     ParserNode *child;
 public:
@@ -35,6 +45,10 @@ public:
     void dumpParseTree(int depth);
 };
 
+/**
+ * @brief Parse tree node for tokens
+ * 
+ */
 class NodeToken : public ParserNode{
     string value;
 public:
@@ -43,27 +57,62 @@ public:
     void dumpParseTree(int depth);
 };
 
-// class NodeExpression : public NodeSymbol{
-// public:
-//     idTypes expType;
-//     string place;
-// };
+class NodeExpression : public NodeSymbol{
+public:
+    idTypes expType;
+    string place;
+};
 
-// class NodeStatement : public NodeSymbol{
-// public:
-//     BpList nextList;
-//     BpList breakList;
-// };
+class NodeStatement : public NodeSymbol{
+public:
+    CodeLineList nextList;
+    CodeLineList breakList;
+};
 
-// class NodeBexp : public NodeSymbol{
-// public:
-//     BpList trueList;
-//     BpList falseList;
-// };
+class NodeBexp : public NodeSymbol{
+public:
+    CodeLineList trueList;
+    CodeLineList falseList;
+};
 
-#define YYSTYPE ParserNode* // Define yystype as the wanted struct
+//Not a node
+class argDeclaration{
+public:
+    string name;
+    idTypes type;
 
-//todo continue here
+    argDeclaration(string name, idTypes type) : name(name), type(type){}
+};
+
+class NodeDeclaration : public NodeSymbol{
+public:
+    list<string> idList;
+    idTypes idType;
+
+    /**
+     * @brief Construct a new Node Declaration object for single id & type
+     * 
+     * @param type Legal type for the var
+     * @param id ID of var
+     */
+    NodeDeclaration(string type, ParserNode* child, idTypes idType, string id);
+
+    /**
+     * @brief Construct a new Node Declaration object for concatenated list
+     * 
+     * @param id The new id to add to the list
+     * @param prevDeclare Previous decalartion node object
+     */
+    NodeDeclaration(string type, ParserNode* child, string id, NodeDeclaration prevDeclare);
+
+};
+
+class NodeFuncApi : public NodeSymbol{
+public:
+    string name;
+    list<NodeDeclaration> argDeclarations;
+
+};
 
 //Macro for a special "epsilon" symbol node
 #define EPSILON new NodeToken("EPSILON")
@@ -76,11 +125,5 @@ public:
  * @return ParserNode* Pointer to the list's head.
  */
 ParserNode *concatList(ParserNode *listHead,ParserNode *newItem);
-
-// /**
-//  * @brief Print the tree which its root is stored in ParserNode* parseTree.
-//  * 
-//  */
-// void dumpParseTree(void);
 
 #endif //COMMON_H
