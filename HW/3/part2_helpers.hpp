@@ -5,6 +5,7 @@
 #define COMMON_H
 #include <stdlib.h>
 #include <string>
+#include <fstream>
 
 #include "code_class.hpp"
 
@@ -12,7 +13,11 @@ using namespace std;
 
 #define YYSTYPE ParserNode* // Define yystype as the wanted struct
 
+#define PRINT_PARSE_TREE 1
+
 enum idTypes {eINT, eFLOAT, eVOID};
+
+bool replace(std::string& str, const std::string& from, const std::string& to);
 
 /**
  * @brief Virtual class for parse tree nodes
@@ -113,6 +118,19 @@ public:
     list<NodeDeclaration> argDeclarations;
 
 };
+
+class NodeMarkerM : public NodeSymbol{
+public:
+    int quad;
+    NodeMarkerM(); //todo use global code pointer
+};
+
+class NodeMarkerN : public NodeSymbol{
+public:
+    CodeLineList nextlist;
+    NodeMarkerN(); //todo use global code pointer
+};
+
 
 //Macro for a special "epsilon" symbol node
 #define EPSILON new NodeToken("EPSILON")

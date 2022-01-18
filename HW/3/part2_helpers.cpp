@@ -67,37 +67,6 @@ NodeDeclaration::NodeDeclaration(string type, ParserNode* child, string id, Node
 
 
 /**************************************************************************/
-/*                             MAKE a node                                */
-/**************************************************************************/
-
-// ParserNode *makeNode(const char* type,const char* value, ParserNode *child)
-// {
-//   ParserNode *p;
-
-//   if ((p = (ParserNode*)(malloc(sizeof(ParserNode)))) == 0)
-//     fprintf(stderr, "Failed malloc(struct node)\n");
-//   else {
-//     p->type = strdup(type);
-//     if (value != NULL) {
-//       p->value = strdup(value);
-//     } else {
-//       p->value = NULL;
-//     }
-//     p->child = child;
-//     p->sibling = (ParserNode*)NULL;
-//   }
-//   return(p);
-// }
-
-// ParserNode *makeSymbol(const char* type, ParserNode *child){
-//   return makeNode(type, NULL, child);
-// }
-
-// ParserNode *makeToken(const char* type,const char* value){
-//   return makeNode(type, value, NULL);
-// }
-
-/**************************************************************************/
 /*                           Concate item to list                         */
 /**************************************************************************/
 
@@ -115,58 +84,31 @@ ParserNode *concatList(ParserNode *listHead,ParserNode *newItem)
 
 
 /**************************************************************************/
-/*                    Functions to dump parse tree                        */
-/**************************************************************************/
-
-// /* Helper function for dumping of parse tree. Recursively invoked. */
-// /* Used by dumpParseTree()                                         */
-// static void dumpParseSubtree(ParserNode *parentNode, int depth)
-// {
-//     ParserNode *curChild;
-//     char indent[(depth * 2) + 1];
-//     memset(indent, ' ', depth * 2); // Indentation is two spaces per depth level
-//     indent[depth * 2] = 0; // NULL terminate string.
-
-//     if (parentNode == NULL) // probably reached "child" of a leaf
-//         return;
-//     printf("%s(<%s", indent, parentNode->type);
-//     if (parentNode->value != NULL)
-//         printf(",%s", parentNode->value);
-//     printf(">");
-//     // Handle children
-//     if (parentNode->child != NULL) {
-//         printf("\n");
-//         for (curChild = parentNode->child; curChild != NULL; curChild = curChild->sibling) {
-//             dumpParseSubtree(curChild, depth + 1);
-//         }
-//         printf("%s)\n", indent);
-//     } else { // No children - just close node parenthesis
-//         printf(")\n");
-//     }
-// }
-
-// /* This is the entry function to dump of parse tree. Assumes parseTree points to tree root. */
-// void dumpParseTree(void)
-// {
-//     if (parseTree == NULL) {
-//         fprintf(stderr,"*** Parse tree is empty!\n");
-//     } else {
-//         dumpParseSubtree(parseTree, 0);
-//     }
-// }
-
-/**************************************************************************/
 /*                           Main of parser                               */
 /**************************************************************************/
-int main(void)
-{
+int main (int argc, char **argv) {
     int rc;
 #if YYDEBUG
     yydebug=1;
 #endif
     rc = yyparse();
     if (rc == 0) { // Parsed successfully
-        parseTree->dumpParseTree();
+        if(PRINT_PARSE_TREE)
+          parseTree->dumpParseTree();
+        //Create output file
+        ofstream outFile;
+        string outputName = argv[1];
+        bool replaceName = replace(outputName, ".cmm", ".rsk");
+        if(!replaceName){
+          //Couldn't find .cmm in input file name
+          exit(1); //todo exit on specific code?
+        }
+        outFile.open(outputName); //todo anything on open fail?
+        //Print headers (for linker)
+        //...
+        //Print code
+        code.print(outFile);
+        outFile.close();
     }
     delete parseTree;
     return rc;
