@@ -43,6 +43,19 @@ void NodeSymbol::dumpParseTree(int depth){
   cout << indent << ")" << endl;
 }
 
+
+NodeDeclaration::NodeDeclaration(string type, ParserNode* child, idTypes idType, string id)
+ : NodeSymbol(type, child), idType(idType) {
+  idList.push_back(id);
+}
+
+NodeDeclaration::NodeDeclaration(string type, ParserNode* child, string id, NodeDeclaration prevDeclare)
+ : NodeSymbol(type, child), idType(prevDeclare.idType) {
+   idList = prevDeclare.idList;
+   idList.push_back(id);
+}
+
+
 /**************************************************************************/
 /*                             MAKE a node                                */
 /**************************************************************************/
