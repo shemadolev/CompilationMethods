@@ -42,6 +42,54 @@ using namespace std;
 
 // };
 
+class varEntry{
+public:
+    string place;
+    idTypes type;
+};
+
+class VarScopeTable{
+protected:
+    int _curOffset;
+    idTypes _type;
+    vector<varEntry&> _varEntries;
+
+public:
+    /**
+     * @brief Construct a new Register Allocator object
+     * 
+     * @param startingIndex 
+     * @param type 
+     */
+    VarScopeTable(int startingIndex, idTypes type);
+
+    /**
+     * @brief Allocate a new temp var
+     * 
+     * @return varEntry& Allocated new var
+     */
+    varEntry& newTemp();
+
+    /**
+     * @brief Allocate a new var for specific id
+     * @exception Will be thrown for taken id
+     * 
+     * @param id The id of the var
+     * @return varEntry& Allocated new var
+     */
+    varEntry& newId(string id);
+
+    /**
+     * @brief Get var entry by id
+     * @exception Will be thrown if id not found
+     * 
+     * @param id The id of the var
+     * @return varEntry& Entry of the existing var
+     */
+    varEntry& getId(string id);
+};
+
+
 //Parent class for different types of SymbolTable entries
 class SymbolEntry{
 
@@ -52,8 +100,8 @@ protected:
     idTypes _type;
     string _id;
     vector<tuple<idTypes, string>> _args;
-    BpList callList;
 public:
+    CodeLineList callList;
     unsigned int startingLine;
     bool isDefinition;
 
@@ -81,6 +129,10 @@ public:
      */
     vector<tuple<idTypes, string>> getArgs();
     
+};
+
+class GlobalSymbolTable{
+    map<string,SymbolEntry_Function> functionTable;
 };
 
 class SymbolTable {
