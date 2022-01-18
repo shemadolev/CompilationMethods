@@ -49,7 +49,7 @@
 
 %%
 
-program : N fdefs                         {parseTree=new NodeSymbol("PROGRAM",$1);}
+program : fdefs                         {parseTree=new NodeSymbol("PROGRAM",$1);}
 ;
 
 fdefs : /* epsilon */                   {$$=new NodeSymbol("FDEFS", EPSILON);}
@@ -135,7 +135,7 @@ fullwhile : FULL_WHILE N M bexp DO M stmt {
                 code->emit(string("UJUMP ") + M2->quad);
                 code->backpatch(bexp->falselist,code->nextQuad());
                 fullwhile->falselist = CodeLineList(code->nextQuad());
-                fullwhile->falselist.merge(stmt.breaklist);
+                fullwhile->falselist.merge(stmt->breaklist);
                 code->emit(string("BREQZ ") + res + string(" -1"));
                 fullwhile->truelist = CodeLineList(code->nextQuad());
                 code->emit("UJUMP -1");
@@ -144,33 +144,129 @@ fullwhile : FULL_WHILE N M bexp DO M stmt {
 ;
 
 cntrl : IF bexp THEN M stmt N ELSE M stmt     {
-                $$=new NodeStatement("CNTRL",concatList(concatList(concatList(concatList(concatList($1,$2),$3),$4),$5),$6));
+                NodeStatement *cntrl = $$;
                 NodeBexp *bexp = $2;
-                NodeBexp *M1 = $4;
+                NodeMarkerM *M1 = $4;
                 NodeBexp *stmt1 = $5;
-                NodeBexp *N = $6;
-                NodeBexp *M2 = $8;
+                NodeMarkerN *N = $6;
+                NodeMarkerM *M2 = $8;
                 NodeBexp *stmt2 = $9;
-
-                //...
+                
+                cntrl = new NodeStatement("CNTRL",concatList(concatList(concatList(concatList(concatList($1,$2),$3),$4),$5),$6));
+                
+                code->backpatch(bexp->truelist, M1->quad);
+                code->backpatch(bexp->falselist, M2->quad);
+                cntrl->nextlist.merge(N->nextlist);
+                cntrl->nextlist.merge(stmt1->nextlist);
+                cntrl->nextlist.merge(stmt2->nextlist);
+                
         } 
         | IF bexp THEN M stmt             {
-                $$=new NodeStatement("CNTRL",concatList(concatList(concatList($1,$2),$3),$4));
-                //...
+                NodeStatement *cntrl = $$;
+                NodeBexp *bexp = $2;
+                NodeMarkerM *M = $4;
+                NodeBexp *stmt = $5;
+                
+                cntrl = new NodeStatement("CNTRL",concatList(concatList(concatList($1,$2),$3),$4));
+                
+                code->backpatch(bexp->truelist, M->quad);
+                cntrl->nextlist.merge(bexp->falselist);
+                cntrl->nextlist.merge(stmt->nextlist);
+        
         } 
         | WHILE M bexp DO M stmt            {
-                $$=new NodeStatement("CNTRL",concatList(concatList(concatList($1,$2),$3),$4));
-                //...
+                NodeStatement *cntrl = $$;
+                NodeMarkerM *M1 = $2;
+                NodeBexp *bexp = $3;
+                NodeMarkerM *M2 = $5;
+                NodeStatement *stmt = $6;
+
+                cntrl = new NodeStatement("CNTRL",concatList(concatList(concatList($1,$2),$3),$4));
+
+                code->backpatch(bexp->truelist,M2->quad);
+                code->backpatch(stmt->nextlist,M1->quad);
+                cntrl->nextlist.merge(bexp->falselist);
+                code->emit(string("UJUMP ") + M1->quad); //support "fall through" from stmt
         } 
-        | fullwhile                     {$$=new NodeStatement("CNTRL",$1);}
+        | fullwhile                     {
+                NodeStatement *cntrl = $$;
+                NodeBexp *fullwhile = $1;
+                
+                cntrl = new NodeStatement("CNTRL",$1);
+                // fullwhile has truelist & falselist that in a case of cntrl statement both points on the same "goto line"  
+                cntrl->nextlist.merge(fullwhile->truelist);
+                cntrl->nextlist.merge(fullwhile->falselist);
+        }
 ;
 
-bexp :  bexp OR M bexp                    {$$=new NodeBexp("BEXP",concatList(concatList($1,$2),$3));}
-        | bexp AND M bexp                 {$$=new NodeBexp("BEXP",concatList(concatList($1,$2),$3));}
-        | NOT bexp                      {$$=new NodeBexp("BEXP",concatList($1,$2));}
-        | exp RELOP exp                 {$$=new NodeBexp("BEXP",concatList(concatList($1,$2),$3));}
-        | '(' bexp ')'                  {$$=new NodeBexp("BEXP",concatList(concatList($1,$2),$3));}
-        | fullwhile                     {$$=new NodeBexp("BEXP",$1);}
+bexp :  bexp OR M bexp                  {
+                NodeBexp *bexp = $$;
+                NodeBexp *bexp1 = $1;
+                NodeMarkerM *M = $3;
+                NodeBexp *bexp2 = $4;
+                
+                bexp = new NodeBexp("BEXP",concatList(concatList($1,$2),$3));
+        
+                code->backpatch(bexp1->falselist, M->quad);
+                bexp->truelist.merge(bexp1->truelist);
+                bexp->truelist.merge(bexp2->truelist);
+                bexp->falselist.merge(bexp2->falselist);
+        }
+        | bexp AND M bexp               {
+                NodeBexp *bexp = $$;
+                NodeBexp *bexp1 = $1;
+                NodeMarkerM *M = $3;
+                NodeBexp *bexp2 = $4;
+                
+                bexp = new NodeBexp("BEXP",concatList(concatList($1,$2),$3));
+                
+                code->backpatch(bexp1->truelist,M->quad);
+                bexp->truelist.merge(bexp2->truelist);
+                bexp->falselist.merge(bexp1->falselist);
+                bexp->falselist.merge(bexp2->falselist);
+        }
+        | NOT bexp                      {
+                NodeBexp *bexp = $$;        
+                NodeBexp *bexp1 = $2;        
+                
+                bexp = new NodeBexp("BEXP",concatList($1,$2));
+
+                bexp->falselist.merge(bexp1->truelist);
+                bexp->truelist.merge(bexp1->falselist);
+        }
+        | exp RELOP exp                 {
+                NodeBexp *bexp = $$;        
+                NodeBexp *bexp1 = $2;
+
+                bexp = new NodeBexp("BEXP",concatList(concatList($1,$2),$3));
+                
+                // calculate RELOP
+                string res = varScopeTable->newTemp(eINT);
+                code->emit(...something to support different RELOP, some switch case)
+                // branch for res
+                bexp->truelist.push_back(code->nextQuad());
+                code->emit(string("UJUMP ") + res);
+                
+                // TODO: should check that exp1 and exp2 have the same type ->>> or semantic error 
+        }
+        | '(' bexp ')'                  {
+                NodeBexp *bexp = $$;        
+                NodeBexp *bexp1 = $2;
+                
+                bexp = new NodeBexp("BEXP",concatList(concatList($1,$2),$3));
+
+                bexp->truelist = bexp1->truelist;        
+                bexp->falselist = bexp1->falselist;        
+        }
+        | fullwhile                     {
+                NodeBexp *bexp = $$;        
+                NodeBexp *fullwhile = $1;
+                
+                bexp = new NodeBexp("BEXP",$1);
+
+                bexp->truelist = fullwhile->truelist;        
+                bexp->falselist = fullwhile->falselist;        
+        }
 ;
 
 exp :   exp ADDOP exp 	                {$$=new NodeSymbol("EXP",concatList(concatList($1,$2),$3));}
