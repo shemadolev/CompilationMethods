@@ -119,16 +119,21 @@ public:
 
 };
 
+class NodeArgsList : public NodeSymbol{
+public:
+    list<NodeExpression> argsList;
+};
+
 class NodeMarkerM : public NodeSymbol{
 public:
-    int quad;
-    NodeMarkerM(); //todo use global code pointer
+    string quad;
+    NodeMarkerM(); //todo use global code pointer: store quad
 };
 
 class NodeMarkerN : public NodeSymbol{
 public:
     CodeLineList nextlist;
-    NodeMarkerN(); //todo use global code pointer
+    NodeMarkerN(); //todo use global code pointer: emit goto
 };
 
 

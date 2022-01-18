@@ -1,7 +1,7 @@
 %{
     #include <iostream>
     #include "part2_helpers.hpp"
-    //#include "code_class.hpp"
+    #include "code_class.hpp"
     using namespace std;
 
     extern int yylex();
@@ -53,7 +53,9 @@ program : fdefs                         {parseTree=new NodeSymbol("PROGRAM",$1);
 ;
 
 fdefs : /* epsilon */                   {$$=new NodeSymbol("FDEFS", EPSILON);}
-	| fdefs func_api blk            {$$=new NodeSymbol("FDEFS",concatList(concatList($1,$2),$3));}
+	| fdefs func_api M blk            {
+                $$=new NodeSymbol("FDEFS",concatList(concatList($1,$2),$3));
+        }
         | fdefs func_api ';'            {$$=new NodeSymbol("FDEFS",concatList(concatList($1,$2),$3));}
 ;
 
@@ -112,21 +114,62 @@ assn : lval ASSIGN exp ';'              {$$=new NodeSymbol("ASSN",concatList(con
 lval : ID                               {$$=new NodeSymbol("LVAL",$1);}
 ;
 
-fullwhile : FULL_WHILE bexp DO stmt     {$$=new NodeSymbol("FULLWHILE",concatList(concatList(concatList($1,$2),$3),$4));} 
+fullwhile : FULL_WHILE N M bexp DO M stmt {
+                NodeBexp *fullwhile = $$;
+                NodeMarkerN *N = $2;
+                NodeMarkerM *M1 = $3;
+                NodeBexp *bexp = $4;
+                NodeMarkerM *M2 = $6;
+                NodeStatement *stmt = $7;
+
+                fullwhile = new NodeBexp("FULLWHILE",concatList(concatList(concatList($1,$2),$3),$4));
+
+                code->emit(string("UJUMP ") + M1->quad);
+                code->backpatch(N->nextlist,code->nextQuad());
+                string res = varScopeTable->newTemp(eINT);
+                code->emit(string("COPYI ") + res + string(" 0"));
+                code->emit(string("UJUMP ") + M1->quad);
+                code->backpatch(bexp->truelist,code->nextQuad());
+                code->emit(string("COPYI ") + res + string(" 1"));
+                code->emit(string("UJUMP ") + M2->quad);
+                code->backpatch(bexp->falselist,code->nextQuad());
+                fullwhile->falselist = CodeLineList(code->nextQuad());
+                fullwhile->falselist.merge(stmt.breaklist);
+                code->emit(string("BREQZ ") + res + string(" -1"));
+                fullwhile->truelist = CodeLineList(code->nextQuad());
+                code->emit("UJUMP -1");
+                code->backpatch(stmt->nextlist,M1->quad);
+        } 
 ;
 
-cntrl : IF bexp THEN stmt ELSE stmt     {$$=new NodeSymbol("CNTRL",concatList(concatList(concatList(concatList(concatList($1,$2),$3),$4),$5),$6));} 
-        | IF bexp THEN stmt             {$$=new NodeSymbol("CNTRL",concatList(concatList(concatList($1,$2),$3),$4));} 
-        | WHILE bexp DO stmt            {$$=new NodeSymbol("CNTRL",concatList(concatList(concatList($1,$2),$3),$4));} 
-        | fullwhile                     {$$=new NodeSymbol("CNTRL",$1);}
+cntrl : IF bexp THEN M stmt N ELSE M stmt     {
+                $$=new NodeStatement("CNTRL",concatList(concatList(concatList(concatList(concatList($1,$2),$3),$4),$5),$6));
+                NodeBexp *bexp = $2;
+                NodeBexp *M1 = $4;
+                NodeBexp *stmt1 = $5;
+                NodeBexp *N = $6;
+                NodeBexp *M2 = $8;
+                NodeBexp *stmt2 = $9;
+
+                //...
+        } 
+        | IF bexp THEN M stmt             {
+                $$=new NodeStatement("CNTRL",concatList(concatList(concatList($1,$2),$3),$4));
+                //...
+        } 
+        | WHILE M bexp DO M stmt            {
+                $$=new NodeStatement("CNTRL",concatList(concatList(concatList($1,$2),$3),$4));
+                //...
+        } 
+        | fullwhile                     {$$=new NodeStatement("CNTRL",$1);}
 ;
 
-bexp :  bexp OR bexp                    {$$=new NodeSymbol("BEXP",concatList(concatList($1,$2),$3));}
-        | bexp AND bexp                 {$$=new NodeSymbol("BEXP",concatList(concatList($1,$2),$3));}
-        | NOT bexp                      {$$=new NodeSymbol("BEXP",concatList($1,$2));}
-        | exp RELOP exp                 {$$=new NodeSymbol("BEXP",concatList(concatList($1,$2),$3));}
-        | '(' bexp ')'                  {$$=new NodeSymbol("BEXP",concatList(concatList($1,$2),$3));}
-        | fullwhile                     {$$=new NodeSymbol("BEXP",$1);}
+bexp :  bexp OR M bexp                    {$$=new NodeBexp("BEXP",concatList(concatList($1,$2),$3));}
+        | bexp AND M bexp                 {$$=new NodeBexp("BEXP",concatList(concatList($1,$2),$3));}
+        | NOT bexp                      {$$=new NodeBexp("BEXP",concatList($1,$2));}
+        | exp RELOP exp                 {$$=new NodeBexp("BEXP",concatList(concatList($1,$2),$3));}
+        | '(' bexp ')'                  {$$=new NodeBexp("BEXP",concatList(concatList($1,$2),$3));}
+        | fullwhile                     {$$=new NodeBexp("BEXP",$1);}
 ;
 
 exp :   exp ADDOP exp 	                {$$=new NodeSymbol("EXP",concatList(concatList($1,$2),$3));}
@@ -142,17 +185,39 @@ num :   INTEGERNUM                      {$$=new NodeSymbol("NUM",$1);}
         | REALNUM                       {$$=new NodeSymbol("NUM",$1);}
 ;
 
-call : ID '(' call_args ')'             {$$=new NodeSymbol("CALL",concatList(concatList(concatList($1,$2),$3),$4));}
+call : ID '(' call_args ')'             {
+        $$=new NodeSymbol("CALL",concatList(concatList(concatList($1,$2),$3),$4));
+        //...
+        varScopeTable->storeIds();
+        //Back FP
+        //Pass arguments to function
+        //...
+        varScopeTable->loadIds();
+        //...
+
+        }
 ;
 
 call_args : call_arglist                {$$=new NodeSymbol("CALL_ARGS",$1);}
             |/* epsilon */              {$$=new NodeSymbol("CALL_ARGS", EPSILON);} 
 ;
 
-call_arglist :  call_arglist ',' exp    {$$=new NodeSymbol("CALL_ARGLIST",concatList(concatList($1,$2),$3));}
-                | exp                   {$$=new NodeSymbol("CALL_ARGLIST",$1);}
+call_arglist :  call_arglist ',' exp    {
+                $$=new NodeArgsList("CALL_ARGLIST",concatList(concatList($1,$2),$3));
+                $$->argsList = $1->argsList;
+                $$->argsList.push_back(exp);
+        }
+        | exp                           {
+                $$=new NodeArgsList("CALL_ARGLIST",$1);
+                $$->argsList.push_back(exp);
+        }
 ;
 
+M : /*epsilon*/                         {$$=new NodeMarkerM();}
+;
+
+N : /*epsilon*/                         {$$=new NodeMarkerN();}
+;
 
 %%
 
