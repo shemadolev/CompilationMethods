@@ -10,37 +10,9 @@
 #include "part2_helpers.hpp"
 #include "code_class.hpp"
 
-//***************************************
-//TODO - I think I'm mixing up 'temp' managements with symbol table
-//***************************************
 
 using namespace std;
 
-// #define REG_NUM 1024
-
-// class tempEntry{
-// public:
-//     string type;
-//     string assignedReg;
-
-// };
-
-// class regTable{
-// protected:
-//     vector<tempEntry&> _table;
-// public:
-
-//     regTable(int capacity);
-
-//     /**
-//      * @brief Get a new temp register
-//      * 
-//      * @param type What type it holds
-//      * @return tempEntry& 
-//      */
-//     tempEntry& newTemp(string type, string id);
-
-// };
 
 class varEntry{
 public:
@@ -50,25 +22,71 @@ public:
 
 class VarScopeTable{
 protected:
-    int _curOffset;
-    idTypes _type;
-    vector<varEntry&> _varEntries;
+    TypedVarScopeTable* intTable;
+    TypedVarScopeTable* floatTable;
+
+    VarScopeTable *parent;
 
 public:
+    ~VarScopeTable();
+
+    VarScopeTable(VarScopeTable *parent);
+
+    static void pushBlock();
+    // { //fixme
+    //     VarScopeTable newTable = new VarScopeTable(globalPointer);
+    //     globalPointer = newTable;
+    // }
+
+    static void popBlock();
+    // { //fixme
+    //     VarScopeTable *currentTable = globalPointer;
+    //     globalPointer = currentTable->parent;
+    //     delete currentTable;
+    // }
+
+    string newTemp(idTypes type);
+
+    void clearTemps();
+
+    string newVar(string id, idTypes type);
+
+    bool getVar(varEntry& var, string id);
+
+    void storeIds();
+
+    void loadIds();
+
+};
+
+class TypedVarScopeTable{
+protected:
+    int _curVarOffset;
+    int _curTempOffset;
+    idTypes _type;
+    map<string,int> _varEntries;
+    const int size = 1024;
+
+public:
+    TypedVarScopeTable *parent;
+
     /**
      * @brief Construct a new Register Allocator object
      * 
      * @param startingIndex 
      * @param type 
      */
-    VarScopeTable(int startingIndex, idTypes type);
+    TypedVarScopeTable(int startingIndex, idTypes type);
 
     /**
      * @brief Allocate a new temp var
      * 
      * @return varEntry& Allocated new var
      */
-    varEntry& newTemp();
+    string newTemp();
+
+
+    void clearTemps();
 
     /**
      * @brief Allocate a new var for specific id
@@ -77,32 +95,24 @@ public:
      * @param id The id of the var
      * @return varEntry& Allocated new var
      */
-    varEntry& newId(string id);
+    varEntry newVar(string id);
 
-    /**
-     * @brief Get var entry by id
-     * @exception Will be thrown if id not found
-     * 
-     * @param id The id of the var
-     * @return varEntry& Entry of the existing var
-     */
-    varEntry& getId(string id);
+    bool getId(string& var, string id);
+
+    void storeIds();
+
+    void loadIds();    
 };
 
 
-//Parent class for different types of SymbolTable entries
-class SymbolEntry{
-
-};
-
-class SymbolEntry_Function : public SymbolEntry{
+class SymbolEntry_Function{
 protected:
     idTypes _type;
     string _id;
     vector<tuple<idTypes, string>> _args;
 public:
     CodeLineList callList;
-    unsigned int startingLine;
+    int startingLine;
     bool isDefinition;
 
     /**
@@ -120,7 +130,13 @@ public:
      * @return true Added successfully 
      * @return false Failed - either duplicate name or invalid type
      */
-    bool addArg(idTypes type, string name);
+
+    /**
+     * @brief Set the Args object
+     * 
+     * @param args Vector of pairs of arguments (type, id)
+     */
+    void setArgs(vector<tuple<idTypes, string>> args);
 
     /**
      * @brief Get the Args object
@@ -128,7 +144,15 @@ public:
      * @return vector<tuple<idTypes, string>> 
      */
     vector<tuple<idTypes, string>> getArgs();
-    
+
+    /**
+     * @brief Get the Place of definition, or "-1" for backpatching
+     * 
+     * @param currentLine Needed for backpatching if not defined yet
+     * @return string Place of definition / "-1"
+     */
+    string getPlace(int currentLine);
+
 };
 
 class GlobalSymbolTable{
@@ -164,6 +188,5 @@ public:
 	 */
 	void print();
 };
-
 
 #endif

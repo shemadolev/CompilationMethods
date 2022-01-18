@@ -11,7 +11,8 @@
     extern const char* yytext;
 
     ParserNode *parseTree; 
-    //codeClass code;
+    codeClass code;
+    VarScopeTable *varScopeTable;
 %}
 
 // Reserved words 

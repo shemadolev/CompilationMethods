@@ -1,9 +1,20 @@
 - We don't have any global/static vars, but we do have *constant* strings. We maybe should allocate constant strings at memory, and write the string startin addr & length on symbol table.
 - Memory allocator class: NOT FOR STACK (which is runtime), but for static data only
-_________________
-|     STACK     |
-|     ....      |
-|               |
-|_______________| <-- Memory allocator should remember this location + mapping for existing data
-|  STATIC DATA  |
-|_______________|
+    _________________
+    |     STACK     |
+    |     ....      |
+    |               |
+    |_______________| <-- Memory allocator should remember this location + mapping for existing data
+    |  STATIC DATA  |
+    |_______________|
+
+Register mapping. X should be known, independent on program
+0                 X          1023
+_____________________________
+| Saved registers | Temp     |
+|_________________|__________|
+
+- Register assignment: separate for var and temp - each starts in "temp" region from different sides
+- Symbol tables
+    - vars
+        - 
