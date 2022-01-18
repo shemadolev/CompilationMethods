@@ -49,12 +49,13 @@
 
 %%
 
-program : fdefs                         {parseTree=new NodeSymbol("PROGRAM",$1);}
+program : N fdefs                         {parseTree=new NodeSymbol("PROGRAM",$1);}
 ;
 
 fdefs : /* epsilon */                   {$$=new NodeSymbol("FDEFS", EPSILON);}
 	| fdefs func_api M blk            {
                 $$=new NodeSymbol("FDEFS",concatList(concatList($1,$2),$3));
+                //todo - backpatch all callers
         }
         | fdefs func_api ';'            {$$=new NodeSymbol("FDEFS",concatList(concatList($1,$2),$3));}
 ;

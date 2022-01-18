@@ -10,9 +10,7 @@
 #include "part2_helpers.hpp"
 #include "code_class.hpp"
 
-
 using namespace std;
-
 
 class varEntry{
 public:

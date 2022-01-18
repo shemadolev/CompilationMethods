@@ -16,5 +16,8 @@ _____________________________
 
 - Register assignment: separate for var and temp - each starts in "temp" region from different sides
 - Symbol tables
-    - vars
-        - 
+    - varScopeTable
+    - stringTable
+    - functionTable
+- Insert code of storing all strings at rule of program, using N marker to jump to the end (and jump back to the top).
+    But wait - isn't the linker jumping to main? Will this code ever be executed?
