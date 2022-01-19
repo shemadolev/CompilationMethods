@@ -108,25 +108,42 @@ stmt :  dcl ';'                         {$$=new NodeSymbol("STMT",concatList($1,
         | BREAK ';'                     {$$=new NodeSymbol("STMT",concatList($1,$2));}
 ;
 
-return : RETURN exp ';'                 {$$=new NodeSymbol("RETURN",concatList(concatList($1,$2),$3));}
-        | RETURN ';'                    {$$=new NodeSymbol("RETURN",concatList($1,$2));}
+return : RETURN exp ';'                 {
+            NodeExpression *exp = $2;
+            
+            $$=new NodeSymbol("RETURN",concatList(concatList($1,$2),$3));
+
+            //Store return value in "return register"
+            if(exp->expType == eINT)
+                code->emit("COPYI", $RT_I, exp->place);
+            else if(exp->expType == eFLOAT)
+                code->emit("COPYF", $RT_F, exp->place);
+
+            //todo set $SP and $FP according to ABI
+
+            }
+        | RETURN ';'                    {
+            $$=new NodeSymbol("RETURN",concatList($1,$2));
+
+            //todo set $SP and $FP according to ABI
+            }
 ;
 
 write : WRITE '(' exp ')' ';'           {
-                $$=new NodeSymbol("WRITE",concatList(concatList(concatList(concatList($1,$2),$3),$4),$5));
-                
                 NodeExpression *exp = $3;
+                
+                $$=new NodeSymbol("WRITE",concatList(concatList(concatList(concatList($1,$2),$3),$4),$5));
 
                 if(exp->expType == eINT)
                     code->emit("PRNTI", exp->place);
                 else if(exp->expType == eFLOAT)
                     code->emit("PRNTF", exp->place);
-                else //eVOID
-                    unexpected_error("Tried to print void expression");
+                
                 } 
         | WRITE '(' STR ')' ';'         {
-                $$=new NodeSymbol("WRITE",concatList(concatList(concatList(concatList($1,$2),$3),$4),$5));
                 NodeToken *STR = $3;
+
+                $$=new NodeSymbol("WRITE",concatList(concatList(concatList(concatList($1,$2),$3),$4),$5));
 
                 string str = STR->value;
                 for(int i=0; i<str.length();i++){
