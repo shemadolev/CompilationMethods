@@ -392,6 +392,16 @@ void unexpected_error(const char* err){
     exit(10);
 }
 
+void operational_error(const char* err){
+    cout << "Operational error: " << err <<endl;
+    exit(9);
+}
+
+void semantic_error(const char* err){
+    cout << "Semantic error: " err << "in line number " yylineno <<endl;
+    exit(3)
+}
+
 void yyerror(const char*) {
     cout << "Syntax error: '" << yytext << "' in line number " << yylineno << endl;
     exit(2);
