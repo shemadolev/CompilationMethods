@@ -141,11 +141,11 @@ write : WRITE '(' exp ')' ';'           {
                 
                 } 
         | WRITE '(' STR ')' ';'         {
-                NodeToken *STR = $3;
+                NodeToken *strToken = $3;
 
                 $$=new NodeSymbol("WRITE",concatList(concatList(concatList(concatList($1,$2),$3),$4),$5));
 
-                string str = STR->value;
+                string str = strToken->value;
                 for(int i=0; i<str.length();i++){
                     if(str[i] == '\\'){
                         i++;
