@@ -6,6 +6,7 @@
 
     extern int yylex();
     void yyerror(const char*);
+    void unexpected_error(const char*);
 
     extern int yylineno;
     extern const char* yytext;
@@ -102,8 +103,44 @@ return : RETURN exp ';'                 {$$=new NodeSymbol("RETURN",concatList(c
         | RETURN ';'                    {$$=new NodeSymbol("RETURN",concatList($1,$2));}
 ;
 
-write : WRITE '(' exp ')' ';'           {$$=new NodeSymbol("WRITE",concatList(concatList(concatList(concatList($1,$2),$3),$4),$5));} 
-        | WRITE '(' STR ')' ';'         {$$=new NodeSymbol("WRITE",concatList(concatList(concatList(concatList($1,$2),$3),$4),$5));} 
+write : WRITE '(' exp ')' ';'           {
+                $$=new NodeSymbol("WRITE",concatList(concatList(concatList(concatList($1,$2),$3),$4),$5));
+                
+                NodeExpression *exp = $3;
+
+                if(exp->expType == eINT)
+                    code->emit("PRNTI", exp->place);
+                else if(exp->expType == eFLOAT)
+                    code->emit("PRNTF", exp->place);
+                else //eVOID
+                    unexpected_error("Tried to print void expression");
+                } 
+        | WRITE '(' STR ')' ';'         {
+                $$=new NodeSymbol("WRITE",concatList(concatList(concatList(concatList($1,$2),$3),$4),$5));
+                NodeToken *STR = $3;
+
+                string str = STR->value;
+                for(int i=0; i<str.length();i++){
+                    if(str[i] == '\\'){
+                        i++;
+                        switch(str[i]){
+                            case 'n':
+                                code->emit("PRNTC 10");
+                                break;
+                            case 't':
+                                code->emit("PRNTC 9");
+                                break;
+                            case '"':
+                                code->emit("PRNTC 34");
+                                break;
+                            default:
+                                unexpected_error("Unknown char after \\");
+                        }
+                    } else {
+                        code->emit("PRNTC", to_string(int(str[i])));
+                    }
+                }
+        } 
 ;
 
 read : READ '(' lval ')' ';'            {$$=new NodeSymbol("READ",concatList(concatList(concatList(concatList($1,$2),$3),$4),$5));} 
@@ -317,6 +354,11 @@ N : /*epsilon*/                         {$$=new NodeMarkerN();}
 ;
 
 %%
+
+void unexpected_error(const char* err){
+    cout << err << endl;
+    exit(10);
+}
 
 void yyerror(const char*) {
     cout << "Syntax error: '" << yytext << "' in line number " << yylineno << endl;
