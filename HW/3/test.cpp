@@ -16,8 +16,7 @@ int main(){
 
     myCode.backpatch(lineList, 25);
 
-    myCode.print();
-
+    // myCode.print();
 
     return 0;
 }
