@@ -2,6 +2,8 @@
     #include <iostream>
     #include "part2_helpers.hpp"
     #include "code_class.hpp"
+    #include "symbol_table.hpp"
+    
     using namespace std;
 
     extern int yylex();
