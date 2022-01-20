@@ -136,6 +136,28 @@ public:
     NodeMarkerN(); //todo use global code pointer: emit goto
 };
 
+/**
+ * @brief code to use when there is a string compare hit
+ */
+enum string_code {
+    eEq,
+    eNeq,
+    eLt, //less than
+    eLtEq,
+    eGt, // greater than
+    eGtEq,
+    eDefault
+};
+
+string_code RelopHit (std::string const& inString) {
+    if (inString == "==") return eEq;
+    if (inString == "<>") return eNeq;
+    if (inString == "<") return eLt;
+    if (inString == "<=") return eLtEq;
+    if (inString == ">") return eGt;
+    if (inString == ">=") return eGtEq;
+    return eDefault;
+}
 
 //Macro for a special "epsilon" symbol node
 #define EPSILON new NodeToken("EPSILON")
