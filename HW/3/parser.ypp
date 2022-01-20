@@ -17,6 +17,8 @@
     codeClass code;
     VarScopeTable *varScopeTable;
 
+    //return address pointer
+    #define $RA "I0"
     //frame start pointer
     #define $FP "I1"
     //stack pointer (next write pointer in stack)
@@ -144,7 +146,7 @@ write : WRITE '(' exp ')' ';'           {
                 $$=new NodeSymbol("WRITE",concatList(concatList(concatList(concatList($1,$2),$3),$4),$5));
 
                 NodeExpression *exp = $3;
-                
+                //TODO: what about void exp? --> semantic_error?
                 if(exp->expType == eINT)
                     code->emit("PRNTI", exp->place);
                 else if(exp->expType == eFLOAT)
@@ -181,16 +183,52 @@ write : WRITE '(' exp ')' ';'           {
 ;
 
 read : READ '(' lval ')' ';'            {
-                $$=new NodeSymbol("READ",concatList(concatList(concatList(concatList($1,$2),$3),$4),$5));
+                NodeStatement *read = $$;
+                NodeExpression *lval = $3;
                 
-                } 
+                read=new NodeStatement("READ",concatList(concatList(concatList(concatList($1,$2),$3),$4),$5));
+
+                // lval can't be void - it's guarrnteed at this point
+                string type = (lval->expType == eINT) ? "I" : "F";
+                code->emit(string("COPY")+type, lval->place, exp->place);                
+        } 
 ;
 
-assn : lval ASSIGN exp ';'              {$$=new NodeSymbol("ASSN",concatList(concatList(concatList($1,$2),$3),$4));} 
+assn : lval ASSIGN exp ';'              {
+                NodeStatement *assn = $$;
+                NodeExpression *lval = $1;
+                NodeExpression *exp1 = $3;
+                
+                // assn is a stmt with an empty nextlist
+                assn=new NodeStatement("ASSN",concatList(concatList(concatList($1,$2),$3),$4));
+
+                if(lval->expType != exp->expType)
+                        semantic_error("Assignment of different types");
+
+                // lval can't be void - it's guarrnteed at this point
+                string type = (lval->expType == eINT) ? "I" : "F";
+                code->emit(string("COPY")+type, lval->place, exp->place);
+        } 
 ;
 
-lval : ID                               {$$=new NodeSymbol("LVAL",$1);}
-;
+lval : ID                               {
+                NodeExpression *lval = $$;
+                NodeToken *id = $1;
+                
+                lval = new NodeExpression("LVAL",id);
+                
+                // search ID in the symbol table (must have been declared)
+                varEntry idEntry;
+                bool found = VarScopeTable->getVar(id->value);
+                if(!found)
+                        semantic_error("Accessed undeclared variable");
+                if(lval->expType == eVOID)
+                        semantic_error("Can't assign/read void expressions");
+
+                lval->expType = idEntry->type;
+                lval->place = place;
+        }
+;       
 
 fullwhile : FULL_WHILE N M bexp DO M stmt {
                 NodeBexp *fullwhile = $$;
@@ -319,7 +357,7 @@ bexp :  bexp OR M bexp                  {
 
                 if(exp1->expType != exp2->expType)
                         semantic_error("RELOP between incompatible types");                
-                string type = (type == eINT) ? "I" : "F"; 
+                string type = (exp1->expType == eINT) ? "I" : "F"; 
 
                 bexp = new NodeBexp("BEXP",concatList(concatList($1,$2),$3));
                 
@@ -327,32 +365,32 @@ bexp :  bexp OR M bexp                  {
                 string res = varScopeTable->newTemp(eINT);
                 switch (RelopHit($1->value)){
                 case eEq:
-                        code->emit("SEQU"+type, res, exp1->place, exp2->place);
+                        code->emit(string("SEQU")+type, res, exp1->place, exp2->place);
                         bexp->truelist.push_back(code->nextQuad());
                         code->emit("BNEQZ", res, "-1"); //expressions equal --> res=1 
                         break;
                 case eNeq:
-                        code->emit("SNEQ"+type, res, exp1->place, exp2->place);
+                        code->emit(string("SNEQ")+type, res, exp1->place, exp2->place);
                         bexp->truelist.push_back(code->nextQuad());
                         code->emit("BNEQZ", res, "-1");
                         break;
                 case eLt:
-                        code->emit("SLET"+type, res, exp1->place, exp2->place);
+                        code->emit(string("SLET")+type, res, exp1->place, exp2->place);
                         bexp->truelist.push_back(code->nextQuad());
                         code->emit("BNEQZ", res, "-1");
                         break;
                 case eLtEq:
-                        code->emit("SGRT"+type, res, exp1->place, exp2->place);
+                        code->emit(string("SGRT")+type, res, exp1->place, exp2->place);
                         bexp->truelist.push_back(code->nextQuad());
                         code->emit("BEQZ", res, "-1"); //exp1 <= exp2 --> res=0
                         break;
                 case eGt:
-                        code->emit("SGRT"+type, res, exp1->place, exp2->place);
+                        code->emit(string("SGRT")+type, res, exp1->place, exp2->place);
                         bexp->truelist.push_back(code->nextQuad());
                         code->emit("BNEQZ", res, "-1");
                         break;
                 case eGtEq:
-                        code->emit("SLET"+type, res, exp1->place, exp2->place);
+                        code->emit(string("SLET")+type, res, exp1->place, exp2->place);
                         bexp->truelist.push_back(code->nextQuad());
                         code->emit("BEQZ", res, "-1"); //exp1 >= exp2 --> res=0
                         break;
@@ -469,6 +507,7 @@ num :   INTEGERNUM                      {
 call : ID '(' call_args ')'             {
         $$=new NodeExpression("CALL",concatList(concatList(concatList($1,$2),$3),$4));
         //...
+        // 
         varScopeTable->storeIds();
         //Back FP
         //Pass arguments to function

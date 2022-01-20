@@ -45,6 +45,12 @@ public:
 
     string newVar(string id, idTypes type);
 
+    /**
+     * @brief Get the Var object, the symbol table entry of a given id
+     * @param var - pointer for the returned entry 
+     * @param id - looked-up id
+     * @return true/false - found the entry
+     */
     bool getVar(varEntry& var, string id);
 
     void storeIds();
