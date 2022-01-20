@@ -347,21 +347,90 @@ bexp :  bexp OR M bexp                  {
         }
 ;
 
-exp :   exp ADDOP exp 	                {$$=new NodeSymbol("EXP",concatList(concatList($1,$2),$3));}
-        | exp MULOP exp                 {$$=new NodeSymbol("EXP",concatList(concatList($1,$2),$3));}
-        | '(' exp ')'                   {$$=new NodeSymbol("EXP",concatList(concatList($1,$2),$3));}
-        | '(' type ')' exp              {$$=new NodeSymbol("EXP",concatList(concatList(concatList($1,$2),$3),$4));}
-        | ID                            {$$=new NodeSymbol("EXP",$1);}
-        | num                           {$$=new NodeSymbol("EXP",$1);}
-        | call                          {$$=new NodeSymbol("EXP",$1);}
+exp :   exp ADDOP exp 	                {$$=new NodeExpression("EXP",concatList(concatList($1,$2),$3));}
+        | exp MULOP exp                 {$$=new NodeExpression("EXP",concatList(concatList($1,$2),$3));}
+        | '(' exp ')'                   {
+            $$=new NodeExpression("EXP",concatList(concatList($1,$2),$3));
+            NodeExpression *exp = $$;
+            NodeExpression *exp1 = $2;
+
+            exp->place = exp1->place;
+            exp->expType = exp1->expType;
+        }
+        | '(' type ')' exp              {
+            $$=new NodeExpression("EXP",concatList(concatList(concatList($1,$2),$3),$4));
+            NodeExpression *exp = $$;
+            NodeType *type = $2;
+            NodeExpression *exp1 = $4;
+
+            if(type->typeValue == eVOID)
+                semantic_error("can't cast to void");
+            if(exp1->expType == eVOID)
+                semantic_error("can't cast from void");
+
+            if(type->typeValue == exp1->expType){
+                //No cast needed
+                exp->place = exp1->place;
+                exp->expType = exp1->expType;
+            } else {
+                if(type->typeValue == eINT){
+                    exp->place = varScopeTable->newTemp(eINT);
+                    code->emit("CFTOI", exp->place, exp1->place);
+                } else { //eFLOAT
+                    exp->place = varScopeTable->newTemp(eFLOAT);
+                    code->emit("CITOF", exp->place, exp1->place)
+                }
+            }
+
+        }
+        | ID                            {
+                $$=new NodeExpression("EXP",$1);
+                NodeExpression *exp = $$;
+                NodeToken *id = $1; 
+                
+                varEntry idVar;
+                bool found = varScopeTable->getVar(idVar, id->value);
+                if(!found)
+                    semantic_error("tried evaluating undeclared variable");
+                exp->expType = idVar.type;
+                exp->place = idVar.place;
+        }
+        | num                           {
+                $$=new NodeExpression("EXP",$1);
+                NodeExpression *exp = $$;
+                NodeExpression *num = $1;
+
+                exp->place = num->place;
+                exp->expType = num->expType;
+        }
+        | call                          {
+                $$=new NodeExpression("EXP",$1);
+                NodeExpression *exp = $$;
+                NodeExpression *call = $1;
+
+                exp->place = call->place;
+                exp->expType = call->expType;
+        }
 ;
 
-num :   INTEGERNUM                      {$$=new NodeSymbol("NUM",$1);}
-        | REALNUM                       {$$=new NodeSymbol("NUM",$1);}
+num :   INTEGERNUM                      {
+                $$=new NodeExpression("NUM",$1);
+                NodeExpression *num = $$;
+
+                num->place = varScopeTable->newTemp(eINT);
+                num->expType = eINT;
+        }
+        | REALNUM                       {
+                $$=new NodeExpression("NUM",$1);
+                NodeExpression *num = $$;
+
+                num->place = varScopeTable->newTemp(eFLOAT);
+                num->expType = eFLOAT;
+        }
 ;
 
 call : ID '(' call_args ')'             {
-        $$=new NodeSymbol("CALL",concatList(concatList(concatList($1,$2),$3),$4));
+        $$=new NodeExpression("CALL",concatList(concatList(concatList($1,$2),$3),$4));
         //...
         varScopeTable->storeIds();
         //Back FP
@@ -369,7 +438,7 @@ call : ID '(' call_args ')'             {
         //...
         varScopeTable->loadIds();
         //...
-
+        //Pass place & type of return value to 'call' Node
         }
 ;
 

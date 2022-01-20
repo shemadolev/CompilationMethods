@@ -21,3 +21,9 @@ _____________________________
     - functionTable
 - Insert code of storing all strings at rule of program, using N marker to jump to the end (and jump back to the top).
     But wait - isn't the linker jumping to main? Will this code ever be executed?
+
+- Optimization: when parsing exp->num, we can skip assignment of temp register, and just assign the known value into exp.knownValue
+    But this means, that whenever accessing exp from now on, we first need to check if knownValue exists.
+
+- Think how to handle return value: should 'call' create a temp? If not, and it passed the place of the fixed return value reg, what
+    if another function is called? (e.g a = foo(a) + foo(a))
