@@ -1,0 +1,10 @@
+INT
+0   function return address
+1   frame pointer
+2   stack pointer
+3   int return value
+4-1023 named + temp vars
+
+FLOAT
+0   float return value
+1-1023 named + temp vars
