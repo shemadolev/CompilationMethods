@@ -236,18 +236,55 @@ bexp :  bexp OR M bexp                  {
         }
         | exp RELOP exp                 {
                 NodeBexp *bexp = $$;        
-                NodeBexp *bexp1 = $2;
+                NodeExpression *exp1 = $1;
+                NodeExpression *exp1 = $3;
+
+                if(exp1->expType != exp2->expType)
+                        semantic_error("RELOP between incompatible types");                
+                string type = (type == eINT) ? "I" : "F"; 
 
                 bexp = new NodeBexp("BEXP",concatList(concatList($1,$2),$3));
                 
                 // calculate RELOP
                 string res = varScopeTable->newTemp(eINT);
-                code->emit(...something to support different RELOP, some switch case)
-                // branch for res
-                bexp->truelist.push_back(code->nextQuad());
-                code->emit("UJUMP", res);
+                switch (RelopHit($1->value)){
+                case eEq:
+                        code->emit("SEQU"+type, res, exp1->place, exp2->place);
+                        bexp->truelist.push_back(code->nextQuad());
+                        code->emit("BNEQZ", res, "-1"); //expressions equal --> res=1 
+                        break;
+                case eNeq:
+                        code->emit("SNEQ"+type, res, exp1->place, exp2->place);
+                        bexp->truelist.push_back(code->nextQuad());
+                        code->emit("BNEQZ", res, "-1");
+                        break;
+                case eLt:
+                        code->emit("SLET"+type, res, exp1->place, exp2->place);
+                        bexp->truelist.push_back(code->nextQuad());
+                        code->emit("BNEQZ", res, "-1");
+                        break;
+                case eLtEq:
+                        code->emit("SGRT"+type, res, exp1->place, exp2->place);
+                        bexp->truelist.push_back(code->nextQuad());
+                        code->emit("BEQZ", res, "-1"); //exp1 <= exp2 --> res=0
+                        break;
+                case eGt:
+                        code->emit("SGRT"+type, res, exp1->place, exp2->place);
+                        bexp->truelist.push_back(code->nextQuad());
+                        code->emit("BNEQZ", res, "-1");
+                        break;
+                case eGtEq:
+                        code->emit("SLET"+type, res, exp1->place, exp2->place);
+                        bexp->truelist.push_back(code->nextQuad());
+                        code->emit("BEQZ", res, "-1"); //exp1 >= exp2 --> res=0
+                        break;
+                default:
+                        break;
+                }       
+
+                bexp->falselist.push_back(code->nextQuad());
+                code->emit("UJUMP -1");
                 
-                // TODO: should check that exp1 and exp2 have the same type ->>> or semantic error 
         }
         | '(' bexp ')'                  {
                 NodeBexp *bexp = $$;        
