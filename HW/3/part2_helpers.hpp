@@ -68,6 +68,11 @@ public:
     string place;
 };
 
+class NodeType : public NodeSymbol{
+public:
+    idTypes typeValue;
+};
+
 class NodeStatement : public NodeSymbol{
 public:
     CodeLineList nextList;

@@ -90,9 +90,18 @@ dcl :   ID ':' type                     {$$=new NodeSymbol("DCL",concatList(conc
         | ID ',' dcl                    {$$=new NodeSymbol("DCL",concatList(concatList($1,$2),$3));}
 ;
 
-type :  INT                             {$$=new NodeSymbol("TYPE",$1);}
-        | FLOAT                         {$$=new NodeSymbol("TYPE",$1);}
-        | VOID                          {$$=new NodeSymbol("TYPE",$1);} 
+type :  INT                             {
+                $$=new NodeType("TYPE",$1);
+                $$->typeValue = eINT;
+        }
+        | FLOAT                         {
+                $$=new NodeType("TYPE",$1);
+                $$->typeValue = eFLOAT;
+        }
+        | VOID                          {
+                $$=new NodeType("TYPE",$1);
+                $$->typeValue = eVOID;
+        }
 ;
 
 stlist : stlist stmt                    {$$=new NodeSymbol("STLIST",concatList($1,$2));}
