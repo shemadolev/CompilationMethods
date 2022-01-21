@@ -99,7 +99,8 @@ dcl :   ID ':' type                     {
                         semantic_error("variable can't be 'void'");
 
                 // variable can't be declared twice in the same block
-                bool found = varScopeTable->getVar(id->value);
+                varEntry idEntry;
+                bool found = varScopeTable->lookup(idEntry, id->value);
                 if(found)
                         semantic_error("declaration of an already declared variable within the block"); 
                 
@@ -114,7 +115,8 @@ dcl :   ID ':' type                     {
                 dcl=new NodeType("DCL",concatList(concatList($1,$2),$3));
                 
                 // variable can't be declared twice in the same block
-                bool found = varScopeTable->getVar(id->value);
+                varEntry idEntry;
+                bool found = varScopeTable->lookup(idEntry, id->value);
                 if(found)
                         semantic_error("declaration of an already declared variable within the block"); 
                 
@@ -250,7 +252,7 @@ lval : ID                               {
                 
                 // search ID in the symbol table (must have been declared)
                 varEntry idEntry;
-                bool found = varScopeTable->getVar(id->value);
+                bool found = varScopeTable->lookup(idEntry, id->value);
                 if(!found)
                         semantic_error("accessed undeclared variable");
                 if(lval->expType == eVOID)
@@ -495,7 +497,7 @@ exp :   exp ADDOP exp 	                {$$=new NodeExpression("EXP",concatList(c
                 NodeToken *id = $1; 
                 
                 varEntry idVar;
-                bool found = varScopeTable->getVar(idVar, id->value);
+                bool found = varScopeTable->lookup(idVar, id->value);
                 if(!found)
                     semantic_error("tried evaluating undeclared variable");
                 exp->expType = idVar.type;

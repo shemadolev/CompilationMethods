@@ -41,22 +41,31 @@ public:
     //     delete currentTable;
     // }
 
-    string newTemp(idTypes type);
+    
     /**
-     * @brief Allocate a new register for a given variable id
+     * @brief Allocate a new temporary register for the compiler use.
+     *          We assume that there isn't stack overflow.
+     * @param type - type of the register needed.
+     * @return string - Register ("-1" indicates an error).
+     */
+    string newTemp(idTypes type);
+    
+    /**
+     * @brief Allocate a new register for a given variable id.
+     *          We assume that there isn't stack overflow. 
      * @param id - Identifier of the variable 
-     * @param type - Type of the variable
-     * @return string - Register
+     * @param type - Type of the variable (can be eFLOAT/eINT)
+     * @return string - Register ("-1" indicates an error)
      */
     string newVar(string id, idTypes type);
 
     /**
-     * @brief Get the Var object, the symbol table entry of a given id
+     * @brief Search id and get the Var object
      * @param var - pointer for the returned entry 
      * @param id - looked-up id
      * @return true/false - found the entry
      */
-    bool getVar(varEntry& var, string id);
+    bool lookup(varEntry& var, string id);
 
     void storeIds();
 
@@ -69,6 +78,7 @@ protected:
     int _curVarOffset;
     int _curTempOffset;
     idTypes _type;
+    string _typeLetter;
     map<string,int> _varEntries;
     const int size = 1024;
 
@@ -78,8 +88,8 @@ public:
     /**
      * @brief Construct a new Register Allocator object
      * 
-     * @param startingIndex 
-     * @param type 
+     * @param startingIndex - the index after the last var in the parent block
+     * @param type - the type of the register in this file
      */
     TypedVarScopeTable(int startingIndex, idTypes type);
 
@@ -92,14 +102,20 @@ public:
 
     /**
      * @brief Allocate a new var for specific id
-     * @exception Will be thrown for taken id
+     * @exception Will be thrown for taken id. NOTE: happens in ypp file?
      * 
      * @param id The id of the var
-     * @return varEntry& Allocated new var
+     * @return varEntry& Allocated new var. NOTE: seems that it can be void
      */
-    varEntry newVar(string id);
+    string newVar(string id);
 
-    bool getId(string& var, string id);
+    /**
+     * @brief Search id and get the Var object
+     * @param var - pointer for the returned entry 
+     * @param id - looked-up id
+     * @return true/false - found the entry
+     */
+    bool lookup(varEntry& var, string id);
 
     void storeIds();
 
