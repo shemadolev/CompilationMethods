@@ -75,14 +75,14 @@ public:
 
 class NodeStatement : public NodeSymbol{
 public:
-    CodeLineList nextList;
-    CodeLineList breakList;
+    CodeLineList nextlist;
+    CodeLineList breaklist;
 };
 
 class NodeBexp : public NodeSymbol{
 public:
-    CodeLineList trueList;
-    CodeLineList falseList;
+    CodeLineList truelist;
+    CodeLineList falselist;
 };
 
 //Not a node

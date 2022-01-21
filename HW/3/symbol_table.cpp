@@ -1,29 +1,47 @@
 #include "symbol_table.hpp"
+extern VarScopeTable *varScopeTable;
 
+//TODO: change the global pointer to stack <varscopetable>
+// update lookup func, typedTables don't need *parent.
+
+void
+VarScopeTable::pushBlock(){
+    VarScopeTable* newTable = new VarScopeTable(this);
+    newTable->intTable.parent = &intTable;
+    newTable->floatTable.parent = &floatTable;
+    varScopeTable = newTable; 
+}
+
+void
+VarScopeTable::popBlock(){
+    VarScopeTable *oldTable = varScopeTable;
+    varScopeTable = varScopeTable->parent;  
+    delete oldTable;
+    varScopeTable->intTable.resetTmps();
+    varScopeTable->floatTable.resetTmps();
+}
 
 string 
 VarScopeTable::newVar(string id, idTypes type){
     if(type == eVOID)
         return "-1";
-    return (type == eINT) ? intTable->newVar(id) : floatTable->newVar(id);
+    return (type == eINT) ? intTable.newVar(id) : floatTable.newVar(id);
 }
 
 string
 VarScopeTable::newTemp(idTypes type){
     if(type == eVOID)
         return "-1";
-    return (type == eINT) ? intTable->newTemp() : floatTable->newTemp();
+    return (type == eINT) ? intTable.newTemp() : floatTable.newTemp();
 }
 
 bool
 VarScopeTable::lookup(varEntry& var, string id){
-    //NOTE: maybe can add a check that the same id isn't stored in both table
-    bool inIntTable = intTable->lookup(var, id);
-    bool inFloatTable = intTable->lookup(var, id);
-    //if inInt & inFloat --> operational error
+    bool inIntTable = intTable.lookup(var, id);
+    bool inFloatTable = floatTable.lookup(var, id);
+    assert(inIntTable && inFloatTable);
     return intTable || inFloatTable;
 }
-
 
 TypedVarScopeTable::TypedVarScopeTable(int startingIndex, idTypes type):
         _curVarOffset(startingIndex), _curTempOffset(size-1), _type(type){
@@ -57,7 +75,12 @@ TypedVarScopeTable::lookup(varEntry& var, string id){
     }
     else{
         // search at the parent
-        bool found = (parent) ? parent->lookup(var, id) : false;
-        return found;
+        return (parent) ? parent->lookup(var, id) : false;
     }
 }
+
+void
+TypedVarScopeTable::resetTmps(){
+    _curTempOffset = size-1;
+}
+

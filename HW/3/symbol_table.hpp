@@ -20,28 +20,26 @@ public:
 
 class VarScopeTable{
 protected:
-    TypedVarScopeTable* intTable;
-    TypedVarScopeTable* floatTable;
-    VarScopeTable *parent;
+    TypedVarScopeTable intTable;
+    TypedVarScopeTable floatTable;
+    VarScopeTable *_parent;
 public:
     ~VarScopeTable();
 
     VarScopeTable(VarScopeTable *parent);
 
-    static void pushBlock();
-    // { //fixme
-    //     VarScopeTable newTable = new VarScopeTable(globalPointer);
-    //     globalPointer = newTable;
-    // }
-
-    static void popBlock();
-    // { //fixme Remember - copy current offsets of int/float tables 
-    //     VarScopeTable *currentTable = globalPointer;
-    //     globalPointer = currentTable->parent;
-    //     delete currentTable;
-    // }
-
+    /**
+     * @brief 
+     * 
+     */
+    void pushBlock();
     
+    /**
+     * @brief 
+     * 
+     */
+    void popBlock();
+        
     /**
      * @brief Allocate a new temporary register for the compiler use.
      *          We assume that there isn't stack overflow.
@@ -119,7 +117,9 @@ public:
 
     void storeIds();
 
-    void loadIds();    
+    void loadIds(); 
+
+    void resetTmps();   
 };
 
 
