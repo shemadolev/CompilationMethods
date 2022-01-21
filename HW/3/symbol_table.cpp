@@ -49,12 +49,15 @@ TypedVarScopeTable::newTemp(){
 bool 
 TypedVarScopeTable::lookup(varEntry& var, string id){
     auto it = _varEntries.find(id);
-    if(it != _varEntries.end()){ // the id is within the symbol table
+    if(it != _varEntries.end()){ // id is within the symbol table
         var.type = _type;
         string reg = _typeLetter + to_string(it->second);
         var.place = reg;
         return true;
     }
-    else
-        return false;
+    else{
+        // search at the parent
+        bool found = (parent) ? parent->lookup(var, id) : false;
+        return found;
+    }
 }
