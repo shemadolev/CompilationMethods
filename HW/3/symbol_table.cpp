@@ -33,7 +33,7 @@ TypedVarScopeTable::TypedVarScopeTable(int startingIndex, idTypes type):
 string
 TypedVarScopeTable::newVar(string id){
     string reg = _typeLetter + to_string(_curVarOffset);
-    _verEntries.insert(pair<string,int>(reg,_curVarOffset));
+    _varEntries.insert(pair<string,int>(reg,_curVarOffset));
     _curVarOffset++;
     return reg;
 }
@@ -41,7 +41,7 @@ TypedVarScopeTable::newVar(string id){
 string
 TypedVarScopeTable::newTemp(){
     string reg = _typeLetter + to_string(_curTempOffset);
-    _verEntries.insert(pair<string,int>(reg,_curTempOffset));
+    _varEntries.insert(pair<string,int>(reg,_curTempOffset));
     _curTempOffset--;
     return reg;
 }
