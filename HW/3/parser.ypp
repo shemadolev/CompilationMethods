@@ -70,6 +70,8 @@ fdefs : /* epsilon */                   {$$=new NodeSymbol("FDEFS", EPSILON);}
 	| fdefs func_api M blk            {
                 $$=new NodeSymbol("FDEFS",concatList(concatList($1,$2),$3));
                 //todo - backpatch all callers
+                //TODO catch & print semantic error uncatched breaklists
+
         }
         | fdefs func_api ';'            {$$=new NodeSymbol("FDEFS",concatList(concatList($1,$2),$3));}
 ;
@@ -85,7 +87,16 @@ func_arglist :  func_arglist ',' dcl    {$$=new NodeSymbol("FUNC_ARGLIST",concat
                 | dcl                   {$$=new NodeSymbol("FUNC_ARGLIST",$1);}
 ;
 
-blk : '{' stlist '}'                    {$$=new NodeSymbol("BLK",concatList(concatList($1,$2),$3));} 
+blk : '{'                             { varScopeTable->pushBlock(); } 
+        stlist '}'                    {
+                $$=new NodeStatement("BLK",concatList(concatList($1,$2),$3));
+                NodeStatement *blk = $$;
+                NodeStatement *stlist = $1;
+
+                blk->nextlist = stlist->nextlist;
+                blk->breaklist = stlist->breaklist;
+                varScopeTable->popBlock();
+                } 
 ;
 
 dcl :   ID ':' type                     {
@@ -146,19 +157,41 @@ stlist : stlist M stmt                    {
 
                 code->backpatch(stlist1.nextlist, M->quad);
                 stlist->nextlist.merge(stmt->nextlist);
+                stlist->breaklist.merge(stmt->breaklist);
         }
          |/* epsilon */                 {$$=new NodeSymbol("STLIST", EPSILON);}
 ;
 
-stmt :  dcl ';'                         {$$=new NodeSymbol("STMT",concatList($1,$2));}
-        | assn                          {$$=new NodeSymbol("STMT",$1);}
-        | exp ';'                       {$$=new NodeSymbol("STMT",concatList($1,$2));}
-        | cntrl                         {$$=new NodeSymbol("STMT",$1);}
-        | read                          {$$=new NodeSymbol("STMT",$1);}
-        | write                         {$$=new NodeSymbol("STMT",$1);}
-        | return                        {$$=new NodeSymbol("STMT",$1);}
-        | blk                           {$$=new NodeSymbol("STMT",$1);}
-        | BREAK ';'                     {$$=new NodeSymbol("STMT",concatList($1,$2));}
+stmt :  dcl ';'                         {$$=new NodeStatement("STMT",concatList($1,$2));}
+        | assn                          {$$=new NodeStatement("STMT",$1);}
+        | exp ';'                       {$$=new NodeStatement("STMT",concatList($1,$2));}
+        | cntrl                         {
+                $$=new NodeStatement("STMT",$1);
+                NodeStatement *stmt = $$;
+                NodeStatement *cntrl = $1;
+
+                stmt->nextlist = cntrl->nextlist;
+                stmt->breaklist = cntrl->breaklist;
+        }
+        | read                          {$$=new NodeStatement("STMT",$1);}
+        | write                         {$$=new NodeStatement("STMT",$1);}
+        | return                        {$$=new NodeStatement("STMT",$1);}
+        | blk                           {
+                $$=new NodeStatement("STMT",$1);
+                NodeStatement *stmt = $$;
+                NodeStatement *blk = $1;
+
+                stmt->nextlist = blk->nextlist;
+                stmt->breaklist = blk->breaklist;
+                
+        }
+        | BREAK ';'                     {
+                $$=new NodeStatement("STMT",concatList($1,$2));
+                NodeStatement *stmt = $$;
+
+                stmt->breaklist.push_back(code->nextQuad());
+                code->emit("UJUMP -1");
+        }
 ;
 
 return : RETURN exp ';'                 {
@@ -225,8 +258,8 @@ write : WRITE '(' exp ')' ';'           {
 ;
 
 read : READ '(' lval ')' ';'            {
-                $$=new NodeStatement("READ",concatList(concatList(concatList(concatList($1,$2),$3),$4),$5));
-                NodeStatement *read = $$;
+                $$=new NodeSymbol("READ",concatList(concatList(concatList(concatList($1,$2),$3),$4),$5));
+                NodeSymbol *read = $$;
                 NodeExpression *lval = $3;
                 
                 // lval can't be void - it's guarrnteed at this point
@@ -335,6 +368,7 @@ cntrl : IF bexp THEN M stmt N ELSE M stmt     {
                 code->backpatch(bexp->truelist,M2->quad);
                 code->backpatch(stmt->nextlist,M1->quad);
                 cntrl->nextlist.merge(bexp->falselist);
+                cntrl->nextlist.merge(stmt->breaklist);
                 code->emit("UJUMP", M1->quad); //support "fall through" from stmt
         } 
         | fullwhile                     {
