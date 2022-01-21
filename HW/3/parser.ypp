@@ -88,8 +88,39 @@ func_arglist :  func_arglist ',' dcl    {$$=new NodeSymbol("FUNC_ARGLIST",concat
 blk : '{' stlist '}'                    {$$=new NodeSymbol("BLK",concatList(concatList($1,$2),$3));} 
 ;
 
-dcl :   ID ':' type                     {$$=new NodeSymbol("DCL",concatList(concatList($1,$2),$3));}
-        | ID ',' dcl                    {$$=new NodeSymbol("DCL",concatList(concatList($1,$2),$3));}
+dcl :   ID ':' type                     {
+                NodeType *dcl = $$;
+                NodeToken *id = $1;
+                NodeType *type = $3;
+
+                dcl=new NodeType("DCL",concatList(concatList($1,$2),$3));
+
+                if(type->typeValue == eVOID)
+                        semantic_error("variable can't be 'void'");
+
+                // variable can't be declared twice in the same block
+                bool found = varScopeTable->getVar(id->value);
+                if(found)
+                        semantic_error("declaration of an already declared variable within the block"); 
+                
+                varScopeTable->newVar(id->value, type->typeValue);
+                dcl->typeValue = type->typeValue;
+        }
+        | ID ',' dcl                    {
+                NodeType *dcl = $$;
+                NodeToken *id = $1;
+                NodeType *dcl1 = $3;
+                
+                dcl=new NodeType("DCL",concatList(concatList($1,$2),$3));
+                
+                // variable can't be declared twice in the same block
+                bool found = varScopeTable->getVar(id->value);
+                if(found)
+                        semantic_error("declaration of an already declared variable within the block"); 
+                
+                varScopeTable->newVar(id->value, dcl1->typeValue);
+                dcl->typeValue = dcl1->typeValue;
+        }
 ;
 
 type :  INT                             {
@@ -203,7 +234,7 @@ assn : lval ASSIGN exp ';'              {
                 assn=new NodeStatement("ASSN",concatList(concatList(concatList($1,$2),$3),$4));
 
                 if(lval->expType != exp->expType)
-                        semantic_error("Assignment of different types");
+                        semantic_error("assignment of different types");
 
                 // lval can't be void - it's guarrnteed at this point
                 string type = (lval->expType == eINT) ? "I" : "F";
@@ -219,11 +250,11 @@ lval : ID                               {
                 
                 // search ID in the symbol table (must have been declared)
                 varEntry idEntry;
-                bool found = VarScopeTable->getVar(id->value);
+                bool found = varScopeTable->getVar(id->value);
                 if(!found)
-                        semantic_error("Accessed undeclared variable");
+                        semantic_error("accessed undeclared variable");
                 if(lval->expType == eVOID)
-                        semantic_error("Can't assign/read void expressions");
+                        semantic_error("can't assign/read void expressions");
 
                 lval->expType = idEntry->type;
                 lval->place = place;

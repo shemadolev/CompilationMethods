@@ -42,7 +42,12 @@ public:
     // }
 
     string newTemp(idTypes type);
-
+    /**
+     * @brief Allocate a new register for a given variable id
+     * @param id - Identifier of the variable 
+     * @param type - Type of the variable
+     * @return string - Register
+     */
     string newVar(string id, idTypes type);
 
     /**
