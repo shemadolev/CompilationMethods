@@ -280,7 +280,6 @@ assn : lval ASSIGN exp ';'              {
 
                 if(lval->expType != exp->expType)
                         semantic_error("assignment of different types");
-
                 // lval can't be void - it's guarrnteed at this point
                 string type = (lval->expType == eINT) ? "I" : "F";
                 code->emit(string("COPY")+type, lval->place, exp->place);
@@ -425,7 +424,9 @@ bexp :  bexp OR M bexp                  {
                 NodeExpression *exp1 = $3;
 
                 if(exp1->expType != exp2->expType)
-                        semantic_error("RELOP between incompatible types");                
+                        semantic_error("RELOP between incompatible types");
+                if(exp1->expType == eVOID)
+                        semantic_error("RELOP can't be done with 'void'");                
                 string type = (exp1->expType == eINT) ? "I" : "F"; 
                 
                 // calculate RELOP
@@ -462,6 +463,7 @@ bexp :  bexp OR M bexp                  {
                         code->emit("BEQZ", res, "-1"); //exp1 >= exp2 --> res=0
                         break;
                 default:
+                        operational_error("can't find RELOP match")
                         break;
                 }       
 
@@ -487,8 +489,66 @@ bexp :  bexp OR M bexp                  {
         }
 ;
 
-exp :   exp ADDOP exp 	                {$$=new NodeExpression("EXP",concatList(concatList($1,$2),$3));}
-        | exp MULOP exp                 {$$=new NodeExpression("EXP",concatList(concatList($1,$2),$3));}
+exp :   exp ADDOP exp 	                {
+                $$=new NodeExpression("EXP",concatList(concatList($1,$2),$3));
+                NodeExpression *exp = $$;
+                NodeExpression *exp1 = $1;
+                NodeToken *addop = $2;
+                NodeExpression *exp2 = $3;
+
+                if(exp1->expType != exp2->expType)
+                        semantic_error("assignment of different types");
+                if(exp1->expType == eVOID)
+                        semantic_error("ADDOP can't be done with 'void'");
+                
+                string type = (exp1->expType == eINT) ? "I" : "F";
+                // calculate ADDOP
+                string res = varTable.front().newTemp(exp1->expType);
+                switch (ArithHit(addop->value)){
+                case eAdd:
+                        code->emit(string("ADD2")+type, res, exp1->place, exp2->place);
+                        break;
+                case eNeq:
+                        code->emit(string("SUBT")+type, res, exp1->place, exp2->place);
+                        break;
+                default:
+                        operational_error("can't find ADDOP match")
+                        break;
+                }
+
+                exp->expType = exp1->expType;
+                exp->place = res;
+        }
+        | exp MULOP exp                 {
+                $$=new NodeExpression("EXP",concatList(concatList($1,$2),$3));
+                NodeExpression *exp = $$;
+                NodeExpression *exp1 = $1;
+                NodeToken *mulop = $2;
+                NodeExpression *exp2 = $3;
+
+                if(exp1->expType != exp2->expType)
+                        semantic_error("assignment of different types");
+                if(exp1->expType == eVOID)
+                        semantic_error("ADDOP can't be done with 'void'");
+                
+                string type = (exp1->expType == eINT) ? "I" : "F";
+                // calculate MULOP
+                string res = varTable.front().newTemp(exp1->expType);
+                switch (ArithHit(addop->value)){
+                case eMul:
+                        code->emit(string("MULT")+type, res, exp1->place, exp2->place);
+                        break;
+                case eDiv:
+                        code->emit(string("DIVD")+type, res, exp1->place, exp2->place);
+                        break;
+                default:
+                        operational_error("can't find ADDOP match")
+                        break;
+                }
+
+                exp->expType = exp1->expType;
+                exp->place = res;
+        }
         | '(' exp ')'                   {
             $$=new NodeExpression("EXP",concatList(concatList($1,$2),$3));
             NodeExpression *exp = $$;

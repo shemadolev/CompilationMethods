@@ -151,6 +151,10 @@ enum string_code {
     eLtEq,
     eGt, // greater than
     eGtEq,
+    eAdd,
+    eSub,
+    eMul,
+    eDiv,
     eDefault
 };
 
@@ -161,6 +165,14 @@ string_code RelopHit (std::string const& inString) {
     if (inString == "<=") return eLtEq;
     if (inString == ">") return eGt;
     if (inString == ">=") return eGtEq;
+    return eDefault;
+}
+
+string_code ArithHit (std::string const& inString) {
+    if (inString == "+") return eAdd;
+    if (inString == "-") return eSub;
+    if (inString == "*") return eMul;
+    if (inString == "/") return eDiv;
     return eDefault;
 }
 
