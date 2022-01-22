@@ -4,23 +4,6 @@ extern VarScopeTable *varScopeTable;
 //TODO: change the global pointer to stack <varscopetable>
 // update lookup func, typedTables don't need *parent.
 
-void
-VarScopeTable::pushBlock(){
-    VarScopeTable* newTable = new VarScopeTable(this);
-    newTable->intTable.parent = &intTable;
-    newTable->floatTable.parent = &floatTable;
-    varScopeTable = newTable; 
-}
-
-void
-VarScopeTable::popBlock(){
-    VarScopeTable *oldTable = varScopeTable;
-    varScopeTable = varScopeTable->parent;  
-    delete oldTable;
-    varScopeTable->intTable.resetTmps();
-    varScopeTable->floatTable.resetTmps();
-}
-
 string 
 VarScopeTable::newVar(string id, idTypes type){
     if(type == eVOID)
@@ -41,6 +24,12 @@ VarScopeTable::lookup(varEntry& var, string id){
     bool inFloatTable = floatTable.lookup(var, id);
     assert(inIntTable && inFloatTable);
     return intTable || inFloatTable;
+}
+
+void
+VarScopeTable::resetTmps(){
+    intTable.resetTmps();
+    floatTable.resetTmps();
 }
 
 TypedVarScopeTable::TypedVarScopeTable(int startingIndex, idTypes type):
@@ -73,10 +62,7 @@ TypedVarScopeTable::lookup(varEntry& var, string id){
         var.place = reg;
         return true;
     }
-    else{
-        // search at the parent
-        return (parent) ? parent->lookup(var, id) : false;
-    }
+    return false;
 }
 
 void
@@ -84,3 +70,13 @@ TypedVarScopeTable::resetTmps(){
     _curTempOffset = size-1;
 }
 
+bool lookupVarTableList(list<VarScopeTable>& tables, varEntry& var, string id){
+    // Assuming a new table is always inserted in the front of the list, 
+        // iterating from the head of the list ensures the right ordering for looking-up
+    for (auto it = tables.begin(); it != tables.end(); it++){
+        if(it->lookup(var, id)) //found the variable within this table
+            return true;
+    }
+    //didn;t find the variable in any var table from the list
+    return
+}

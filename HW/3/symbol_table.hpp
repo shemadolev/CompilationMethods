@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 #include <tuple>
-// #include <list>
+#include <list>
 
 #include "part2_helpers.hpp"
 #include "code_class.hpp"
@@ -22,24 +22,16 @@ class VarScopeTable{
 protected:
     TypedVarScopeTable intTable;
     TypedVarScopeTable floatTable;
-    VarScopeTable *_parent;
 public:
+
+    /**
+     * @brief Construct a new Var Scope Table object, 
+     *          Call the constructor of its inner tables (for int & float)
+     */
+    VarScopeTable();
+
     ~VarScopeTable();
 
-    VarScopeTable(VarScopeTable *parent);
-
-    /**
-     * @brief 
-     * 
-     */
-    void pushBlock();
-    
-    /**
-     * @brief 
-     * 
-     */
-    void popBlock();
-        
     /**
      * @brief Allocate a new temporary register for the compiler use.
      *          We assume that there isn't stack overflow.
@@ -69,6 +61,8 @@ public:
 
     void loadIds();
 
+    void resetTmps();
+
 };
 
 class TypedVarScopeTable{
@@ -81,7 +75,6 @@ protected:
     const int size = 1024;
 
 public:
-    TypedVarScopeTable *parent;
 
     /**
      * @brief Construct a new Register Allocator object
@@ -122,6 +115,7 @@ public:
     void resetTmps();   
 };
 
+bool lookupVarTableList(list<VarScopeTable>& tables, varEntry& var, string id);
 
 class SymbolEntry_Function{
 protected:

@@ -3,7 +3,7 @@
     #include "part2_helpers.hpp"
     #include "code_class.hpp"
     #include "symbol_table.hpp"
-
+    #include <list>
     using namespace std;
 
     extern int yylex();
@@ -15,7 +15,7 @@
 
     ParserNode *parseTree; 
     codeClass code;
-    VarScopeTable *varScopeTable;
+    list<VarScopeTable> varTable;
 
     //return address pointer
     #define $RA "I0"
@@ -87,7 +87,10 @@ func_arglist :  func_arglist ',' dcl    {$$=new NodeSymbol("FUNC_ARGLIST",concat
                 | dcl                   {$$=new NodeSymbol("FUNC_ARGLIST",$1);}
 ;
 
-blk : '{'                             { varScopeTable->pushBlock(); } 
+blk : '{'                             { 
+                VarScopeTable newTable = VarScopeTable();
+                varTable.push_front(newTable); 
+        } 
         stlist '}'                    {
                 $$=new NodeStatement("BLK",concatList(concatList($1,$2),$3));
                 NodeStatement *blk = $$;
@@ -95,7 +98,8 @@ blk : '{'                             { varScopeTable->pushBlock(); }
 
                 blk->nextlist = stlist->nextlist;
                 blk->breaklist = stlist->breaklist;
-                varScopeTable->popBlock();
+                varTable.pop_front();
+                varTable.front().resetTmps();
                 } 
 ;
 
@@ -110,11 +114,11 @@ dcl :   ID ':' type                     {
 
                 // variable can't be declared twice in the same block
                 varEntry idEntry;
-                bool found = varScopeTable->lookup(idEntry, id->value);
+                bool found = lookupVarTableList(varTable, idEntry, id->value);
                 if(found)
                         semantic_error("declaration of an already declared variable within the block"); 
                 
-                varScopeTable->newVar(id->value, type->typeValue);
+                varTable.front().newVar(id->value, type->typeValue);
                 dcl->typeValue = type->typeValue;
         }
         | ID ',' dcl                    {
@@ -125,11 +129,11 @@ dcl :   ID ':' type                     {
                 
                 // variable can't be declared twice in the same block
                 varEntry idEntry;
-                bool found = varScopeTable->lookup(idEntry, id->value);
+                bool found = lookupVarTableList(varTable, idEntry, id->value);
                 if(found)
                         semantic_error("declaration of an already declared variable within the block"); 
                 
-                varScopeTable->newVar(id->value, dcl1->typeValue);
+                varTable.front().newVar(id->value, dcl1->typeValue);
                 dcl->typeValue = dcl1->typeValue;
         }
 ;
@@ -290,7 +294,7 @@ lval : ID                               {
                 
                 // search ID in the symbol table (must have been declared)
                 varEntry idEntry;
-                bool found = varScopeTable->lookup(idEntry, id->value);
+                bool found = lookupVarTableList(varTable, idEntry, id->value);
                 if(!found)
                         semantic_error("accessed undeclared variable");
                 if(lval->expType == eVOID)
@@ -312,7 +316,7 @@ fullwhile : FULL_WHILE N M bexp DO M stmt {
 
                 code->emit("UJUMP", M1->quad);
                 code->backpatch(N->nextlist,code->nextQuad());
-                string res = varScopeTable->newTemp(eINT);
+                string res = varTable.front().newTemp(eINT);
                 code->emit("COPYI", res , "0"); 
                 code->emit("UJUMP", M1->quad);
                 code->backpatch(bexp->truelist,code->nextQuad());
@@ -425,7 +429,7 @@ bexp :  bexp OR M bexp                  {
                 string type = (exp1->expType == eINT) ? "I" : "F"; 
                 
                 // calculate RELOP
-                string res = varScopeTable->newTemp(eINT);
+                string res = varTable.front().newTemp(eINT);
                 switch (RelopHit($1->value)){
                 case eEq:
                         code->emit(string("SEQU")+type, res, exp1->place, exp2->place);
@@ -510,10 +514,10 @@ exp :   exp ADDOP exp 	                {$$=new NodeExpression("EXP",concatList(c
                 exp->expType = exp1->expType;
             } else {
                 if(type->typeValue == eINT){
-                    exp->place = varScopeTable->newTemp(eINT);
+                    exp->place = varTable.front().newTemp(eINT);
                     code->emit("CFTOI", exp->place, exp1->place);
                 } else { //eFLOAT
-                    exp->place = varScopeTable->newTemp(eFLOAT);
+                    exp->place = varTable.front().newTemp(eFLOAT);
                     code->emit("CITOF", exp->place, exp1->place)
                 }
             }
@@ -524,12 +528,12 @@ exp :   exp ADDOP exp 	                {$$=new NodeExpression("EXP",concatList(c
                 NodeExpression *exp = $$;
                 NodeToken *id = $1; 
                 
-                varEntry idVar;
-                bool found = varScopeTable->lookup(idVar, id->value);
+                varEntry idEntry;
+                bool found = lookupVarTableList(varTable, idEntry, id->value);
                 if(!found)
                     semantic_error("tried evaluating undeclared variable");
-                exp->expType = idVar.type;
-                exp->place = idVar.place;
+                exp->expType = idEntry.type;
+                exp->place = idEntry.place;
         }
         | num                           {
                 $$=new NodeExpression("EXP",$1);
@@ -554,7 +558,7 @@ num :   INTEGERNUM                      {
                 NodeExpression *num = $$;
                 NodeToken *integer = $1;
 
-                num->place = varScopeTable->newTemp(eINT);
+                num->place = varTable.front().newTemp(eINT);
                 num->expType = eINT;
                 code->emit("COPYI", num->place , integer->value); 
         }
@@ -563,7 +567,7 @@ num :   INTEGERNUM                      {
                 NodeExpression *num = $$;
                 NodeToken *real = $1;
 
-                num->place = varScopeTable->newTemp(eFLOAT);
+                num->place = varTable.front().newTemp(eFLOAT);
                 num->expType = eFLOAT;
                 code->emit("COPYF", num->place , real->value); 
         }
@@ -573,11 +577,11 @@ call : ID '(' call_args ')'             {
         $$=new NodeExpression("CALL",concatList(concatList(concatList($1,$2),$3),$4));
         //...
         // 
-        varScopeTable->storeIds();
+        varTable.front().storeIds();
         //Back FP
         //Pass arguments to function
         //...
-        varScopeTable->loadIds();
+        varTable.front().loadIds();
         //...
         //Pass place & type of return value to 'call' Node
         }
