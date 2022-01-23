@@ -175,41 +175,35 @@ blk : '{'                             {
                 blk->breaklist = stlist->breaklist;
                 varTable.pop_front();
                 varTable.front().resetTmps();
-                } 
+        } 
 ;
 
 dcl :   ID ':' type                     {
-                $$=new NodeType("DCL",concatList(concatList($1,$2),$3));
-                NodeType *dcl = $$;
+                $$=new NodeDeclaration("DCL",concatList(concatList($1,$2),$3));
+                NodeDeclaration *dcl = $$;
                 NodeToken *id = $1;
                 NodeType *type = $3;
 
                 if(type->typeValue == eVOID)
                         semantic_error("variable can't be 'void'");
 
-                // variable can't be declared twice in the same block
-                varEntry idEntry;
-                bool found = lookupVarTableList(varTable, idEntry, id->value);
-                if(found)
-                        semantic_error("declaration of an already declared variable within the block"); 
-                
-                varTable.front().newVar(id->value, type->typeValue);
-                dcl->typeValue = type->typeValue;
-        }
+                dcl->idType = type->typeValue;
+                dcl->idList.push_front(id->value);
+                }
         | ID ',' dcl                    {
                 &&=new NodeType("DCL",concatList(concatList($1,$2),$3));
                 NodeType *dcl = $$;
                 NodeToken *id = $1;
                 NodeType *dcl1 = $3;
-                
-                // variable can't be declared twice in the same block
-                varEntry idEntry;
-                bool found = lookupVarTableList(varTable, idEntry, id->value);
-                if(found)
-                        semantic_error("declaration of an already declared variable within the block"); 
-                
-                varTable.front().newVar(id->value, dcl1->typeValue);
-                dcl->typeValue = dcl1->typeValue;
+
+                //Check if previously decalred samed name
+                if(dcl1->idList.find(id->value) != dcl1->idList.end()){
+                    semantic_error("Can't redecalre same variable name");
+                }
+
+                dcl->idType = dcl1->typeValue;
+                dcl->idList = dcl1->idList;
+                dcl->idList.push_front(id->value);
         }
 ;
 
@@ -242,7 +236,20 @@ stlist : stlist M stmt                    {
          |/* epsilon */                 {$$=new NodeSymbol("STLIST", EPSILON);}
 ;
 
-stmt :  dcl ';'                         {$$=new NodeStatement("STMT",concatList($1,$2));}
+stmt :  dcl ';'                         {
+                $$=new NodeStatement("STMT",concatList($1,$2));
+                NodeDeclaration *dcl = $1;
+
+                for(string id : dcl->idList){
+                    // variable can't be declared twice in the same block
+                    varEntry idEntry;
+                    bool found = lookupVarTableList(varTable, idEntry, id); //fixme check at first table only?
+                    if(found)
+                        semantic_error("declaration of an already declared variable within the block"); 
+                    
+                    varTable.front().newVar(id, dcl->idType);
+                }
+        }
         | assn                          {$$=new NodeStatement("STMT",$1);}
         | exp ';'                       {$$=new NodeStatement("STMT",concatList($1,$2));}
         | cntrl                         {
