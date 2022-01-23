@@ -1,7 +1,7 @@
 /* 046266 Compilation Methods, EE Faculty, Technion                        */
 /* part2_helpers.c - Helper functions for project part 2 - implementation  */
 #include <stdio.h>
-#include "part2_helpers.hpp"
+#include "part3_helpers.hpp"
 #include "code_class.hpp"
 
 extern ParserNode *parseTree; /* Root of parse tree. Defined in the parser. */
@@ -92,6 +92,7 @@ int main (int argc, char **argv) {
     yydebug=1;
 #endif
     rc = yyparse();
+    //todo try/catch
     if (rc == 0) { // Parsed successfully
         if(PRINT_PARSE_TREE)
           parseTree->dumpParseTree();
@@ -112,4 +113,9 @@ int main (int argc, char **argv) {
     }
     delete parseTree;
     return rc;
+}
+
+void operational_error(const char* err){
+    cout << "Operational error: " << err <<endl;
+    exit(9);
 }

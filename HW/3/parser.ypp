@@ -16,6 +16,7 @@
     ParserNode *parseTree; 
     codeClass code;
     list<VarScopeTable> varTable;
+    FunctionTable funcTable;
 
     //return address pointer
     #define $RA "I0"
@@ -67,24 +68,100 @@ program : fdefs                         {parseTree=new NodeSymbol("PROGRAM",$1);
 ;
 
 fdefs : /* epsilon */                   {$$=new NodeSymbol("FDEFS", EPSILON);}
-	| fdefs func_api M blk            {
+	| fdefs func_api {
+                NodeFuncApi *func_api = $2;
+                
+                SymbolEntry_Function* funcEntry = funcTable.find(func_api->funcProps.id);
+                if(funcEntry != nullptr){
+                    funcEntry = funcTable.insert(func_api->funcProps);
+                } else { //found
+                    if(!funcEntry.matchExisting(func_api->funcProps))
+                        semantic_error("duplicate declaration of function with different API");
+                }
+                if(funcEntry->isDefined())
+                    semantic_error("duplicate definition of a function");
+                funcEntry->define(code->nextQuad());
+
+                //todo calle entrance - assign regs to vars
+        } blk            {
                 $$=new NodeSymbol("FDEFS",concatList(concatList($1,$2),$3));
-                //todo - backpatch all callers
-                //TODO catch & print semantic error uncatched breaklists
+                NodeStatement *blk = $3;
 
+                if(!blk->breaklist.empty())
+                    semantic_error("break statement not within loop");
+
+                code->emit("RETRN"); //fallback, for when not defined
         }
-        | fdefs func_api ';'            {$$=new NodeSymbol("FDEFS",concatList(concatList($1,$2),$3));}
+        | fdefs func_api ';'            {
+                $$=new NodeSymbol("FDEFS",concatList(concatList($1,$2),$3));
+                NodeFuncApi *func_api = $2;
+
+                SymbolEntry_Function* funcEntry = funcTable.find(func_api->funcProps.id);
+                if(funcEntry != nullptr){
+                    funcTable.insert(func_api->funcProps);
+                } else { //found
+                    if(!funcEntry.matchExisting(func_api->funcProps)){
+                        semantic_error("duplicate declaration of function with different API");
+                    } 
+        }
+                    } 
+                }
+        }
 ;
 
-func_api : type ID '(' func_args ')'    {$$=new NodeSymbol("FUNC_API",concatList(concatList(concatList(concatList($1,$2),$3),$4),$5));} 
+func_api : type ID '(' func_args ')'    {
+                $$=new NodeFuncApi("FUNC_API",concatList(concatList(concatList(concatList($1,$2),$3),$4),$5));
+                NodeFuncApi* func_api;
+                NodeType *type = $1;
+                NodeToken *id = $2;
+                NodeArgsList *func_args = $4;
+
+                FunctionProps funcProps = {
+                    type->typeValue,
+                    id->value,
+                    func_args->argsList
+                };
+                func_api->funcProps = funcProps;
+            } 
 ;
 
-func_args : func_arglist                {$$=new NodeSymbol("FUNC_ARGS",$1);}       
-            | /* epsilon */             {$$=new NodeSymbol("FUNC_ARGS", EPSILON);}
+func_args : func_arglist                {
+                $$=new NodeArgsList("FUNC_ARGS",$1);
+                NodeArgsList* func_args = $$;
+                NodeArgsList* func_arglist = $1;
+
+                func_args->argsList = func_arglist->argsList;
+            }       
+            | /* epsilon */             {$$=new NodeArgsList("FUNC_ARGS", EPSILON);}
 ;
 
-func_arglist :  func_arglist ',' dcl    {$$=new NodeSymbol("FUNC_ARGLIST",concatList(concatList($1,$2),$3));} 
-                | dcl                   {$$=new NodeSymbol("FUNC_ARGLIST",$1);}
+func_arglist :  func_arglist ',' dcl    {
+                $$=new NodeArgsList("FUNC_ARGLIST",concatList(concatList($1,$2),$3));
+                NodeArgsList *func_arglist = $$;
+                NodeArgsList *func_arglist1 = $1;
+                NodeDeclaration *dcl = $3;
+
+                func_arglist->argsList = func_arglist1->argsList;
+                for(string id : dcl->idList) {
+                    //check duplicate arg names
+                    for(argDeclaration argIt : func_arglist->argsList){
+                        if(argIt.name == id)
+                            semantic_error("Can't redecalre same variable name");
+                    }
+                    argDeclaration arg(id, dcl->idType);
+                    func_arglist->argsList.push_back(arg);
+                }
+        } 
+        | dcl                   {
+                $$=new NodeArgsList("FUNC_ARGLIST",$1);
+                NodeArgsList *func_arglist = $$;
+                NodeDeclaration *dcl = $1;
+
+                for(string id : dcl->idList){
+                    argDeclaration arg(id, dcl->idType);
+                    func_arglist->argsList.push_back(arg);
+                }
+        }
 ;
 
 blk : '{'                             { 
@@ -200,8 +277,14 @@ stmt :  dcl ';'                         {$$=new NodeStatement("STMT",concatList(
 
 return : RETURN exp ';'                 {
             $$=new NodeSymbol("RETURN",concatList(concatList($1,$2),$3));
-            
             NodeExpression *exp = $2;
+            
+            //check return type matches function's return type
+            if(funcTable.getCurrent()->props.type != exp->expType)
+                semantic_error("return value type isn't matching function's declaration");
+
+            if(exp->expType == eVOID)
+                semantic_error("return value type can't be void");
 
             //Store return value in "return register"
             if(exp->expType == eINT)
@@ -209,14 +292,16 @@ return : RETURN exp ';'                 {
             else if(exp->expType == eFLOAT)
                 code->emit("COPYF", $RT_F, exp->place);
 
-            //todo set $SP and $FP according to ABI
-
-            }
+            code->emit("RETRN");
+        }
         | RETURN ';'                    {
             $$=new NodeSymbol("RETURN",concatList($1,$2));
 
-            //todo set $SP and $FP according to ABI
-            }
+            if(funcTable.getCurrent()->props.type != eVOID)
+                semantic_error("expected a return argument");
+
+            code->emit("RETRN");
+        }
 ;
 
 write : WRITE '(' exp ')' ';'           {
@@ -673,11 +758,6 @@ N : /*epsilon*/                         {$$=new NodeMarkerN();}
 void unexpected_error(const char* err){
     cout << err << endl;
     exit(10);
-}
-
-void operational_error(const char* err){
-    cout << "Operational error: " << err <<endl;
-    exit(9);
 }
 
 void semantic_error(const char* err){

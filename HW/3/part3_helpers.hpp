@@ -98,35 +98,16 @@ class NodeDeclaration : public NodeSymbol{
 public:
     list<string> idList;
     idTypes idType;
-
-    /**
-     * @brief Construct a new Node Declaration object for single id & type
-     * 
-     * @param type Legal type for the var
-     * @param id ID of var
-     */
-    NodeDeclaration(string type, ParserNode* child, idTypes idType, string id);
-
-    /**
-     * @brief Construct a new Node Declaration object for concatenated list
-     * 
-     * @param id The new id to add to the list
-     * @param prevDeclare Previous decalartion node object
-     */
-    NodeDeclaration(string type, ParserNode* child, string id, NodeDeclaration prevDeclare);
-
 };
 
 class NodeFuncApi : public NodeSymbol{
 public:
-    string name;
-    list<NodeDeclaration> argDeclarations;
-
+    FunctionProps funcProps;
 };
 
 class NodeArgsList : public NodeSymbol{
 public:
-    list<NodeExpression> argsList;
+    list<argDeclaration> argsList;
 };
 
 class NodeMarkerM : public NodeSymbol{
@@ -187,5 +168,12 @@ string_code ArithHit (std::string const& inString) {
  * @return ParserNode* Pointer to the list's head.
  */
 ParserNode *concatList(ParserNode *listHead,ParserNode *newItem);
+
+/**
+ * @brief Failed to allocate memory, wrong input etc.
+ * 
+ * @param err Error message
+ */
+void operational_error(const char* err){
 
 #endif //COMMON_H

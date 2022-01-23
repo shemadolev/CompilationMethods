@@ -7,8 +7,9 @@
 #include <tuple>
 #include <list>
 
-#include "part2_helpers.hpp"
+#include "part3_helpers.hpp"
 #include "code_class.hpp"
+#include <cassert>
 
 using namespace std;
 
@@ -33,8 +34,8 @@ public:
     ~VarScopeTable();
 
     /**
-     * @brief Allocate a new temporary register for the compiler use.
-     *          We assume that there isn't stack overflow.
+     * @brief Allocate a new temporary register to be used until next entrance/exit of a block.
+     *          We assume enough registers are available.
      * @param type - type of the register needed.
      * @return string - Register ("-1" indicates an error).
      */
@@ -171,34 +172,36 @@ class GlobalSymbolTable{
     map<string,SymbolEntry_Function> functionTable;
 };
 
-class SymbolTable {
+class FunctionTable{
 protected:
-
-    //todo second type should prbably be a list of something
-	map<string,string> _table;
-    SymbolTable* _parent;
+    map<string,SymbolEntry_Function> _functionTable;
+    SymbolEntry_Function* _current;
 public:
-
-    // regTable intTable;
-    // regTable floatTable;
+    
+    /**
+     * @brief Find definition of a function in the table
+     * 
+     * @param id Name of function
+     * @return SymbolEntry_Function* If found - pointer to entry. Eitherwise - NULL.
+     */
+    SymbolEntry_Function* find(string id);
 
     /**
-     * @brief Construct a new Symbol Table object
+     * @brief Insert new function entry. Updates the 'current' function.
      * 
+     * @param funcProps 
+     * @return SymbolEntry_Function* 
      */
-	SymbolTable();
+    SymbolEntry_Function* insert(FunctionProps& funcProps);
 
     /**
-     * @brief Construct a new Symbol Table object
+     * @brief Get the Current function (last inserted)
      * 
-     */
-	SymbolTable(SymbolTable* parent);
-
-	/**
-	 * @brief Print all contens
 	 * 
-	 */
-	void print();
+     * 
+     * @return SymbolEntry_Function* 
+     */
+    SymbolEntry_Function* getCurrent();
 };
 
 #endif
