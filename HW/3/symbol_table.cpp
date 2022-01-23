@@ -23,7 +23,7 @@ VarScopeTable::lookup(varEntry& var, string id){
     bool inIntTable = intTable.lookup(var, id);
     bool inFloatTable = floatTable.lookup(var, id);
     assert(inIntTable && inFloatTable);
-    return intTable || inFloatTable;
+    return inIntTable || inFloatTable;
 }
 
 void
@@ -70,13 +70,19 @@ TypedVarScopeTable::resetTmps(){
     _curTempOffset = size-1;
 }
 
-bool lookupVarTableList(list<VarScopeTable>& tables, varEntry& var, string id){
+bool VariableTable::lookupVarTableList(varEntry& var, string id){
     // Assuming a new table is always inserted in the front of the list, 
         // iterating from the head of the list ensures the right ordering for looking-up
-    for (auto it = tables.begin(); it != tables.end(); it++){
+    for (auto it = _tables.begin(); it != _tables.end(); it++){
         if(it->lookup(var, id)) //found the variable within this table
             return true;
     }
-    //didn;t find the variable in any var table from the list
-    return
+    //didn't find the variable in any var table from the list
+    return false;
+}
+
+vector<tuple<idTypes, string>> SymbolEntry_Function::getArgs(){}
+
+string SymbolEntry_Function::getPlace(int currentLine){
+
 }

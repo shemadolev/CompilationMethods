@@ -116,40 +116,42 @@ public:
     void resetTmps();   
 };
 
-bool lookupVarTableList(list<VarScopeTable>& tables, varEntry& var, string id);
+
+class VariableTable{
+protected:
+    list<VarScopeTable> _tables;
+public:
+    bool lookupVarTableList(varEntry& var, string id);
+    
+    void storeIds();
+
+    void loadIds(); 
+
+    VarScopeTable& front();
+
+    void push(VarScopeTable& newTable);
+    void pop();
+};
+
+typedef struct _functionProps {
+    idTypes type;
+    string id;
+    list<argDeclaration> args;
+} FunctionProps;
 
 class SymbolEntry_Function{
 protected:
-    idTypes _type;
-    string _id;
-    vector<tuple<idTypes, string>> _args;
+    int _definitionLine;
 public:
+    FunctionProps props;
     CodeLineList callList;
-    int startingLine;
-    bool isDefinition;
 
     /**
-     * @brief Construct a new SymbolEntry_Function object
+     * @brief Construct a new SymbolEntry_Function object without definition
      * 
-     * @param type Type of function return value
+     * @param funcProps Props of the function
      */
-    SymbolEntry_Function(idTypes type, string id);
-
-    /**
-     * @brief Add an argument for function API
-     * 
-     * @param type Type of the argument
-     * @param name Name of the argument
-     * @return true Added successfully 
-     * @return false Failed - either duplicate name or invalid type
-     */
-
-    /**
-     * @brief Set the Args object
-     * 
-     * @param args Vector of pairs of arguments (type, id)
-     */
-    void setArgs(vector<tuple<idTypes, string>> args);
+    SymbolEntry_Function(FunctionProps& funcProps);
 
     /**
      * @brief Get the Args object
@@ -166,10 +168,29 @@ public:
      */
     string getPlace(int currentLine);
 
-};
+    /**
+     * @brief Store the starting line of definition, backpath all callers
+     * 
+     * @param definitionLine starting line of definition
+     */
+    void define(int definitionLine);
 
-class GlobalSymbolTable{
-    map<string,SymbolEntry_Function> functionTable;
+    /**
+     * @brief Is this function defined yet
+     * 
+     * @return true 
+     * @return false 
+     */
+    bool isDefined();
+
+    /**
+     * @brief Check if given props match this function entry
+     * 
+     * @param funcProps Function props to compare with entry
+     * @return true 
+     * @return false 
+     */
+    bool matchExisting(FunctionProps& funcProps);
 };
 
 class FunctionTable{
@@ -196,8 +217,6 @@ public:
 
     /**
      * @brief Get the Current function (last inserted)
-     * 
-	 * 
      * 
      * @return SymbolEntry_Function* 
      */

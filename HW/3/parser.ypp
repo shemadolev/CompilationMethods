@@ -15,7 +15,7 @@
 
     ParserNode *parseTree; 
     codeClass code;
-    list<VarScopeTable> varTable;
+    VariableTable varTable;
     FunctionTable funcTable;
 
     //return address pointer
@@ -164,7 +164,7 @@ func_arglist :  func_arglist ',' dcl    {
 
 blk : '{'                             { 
                 VarScopeTable newTable = VarScopeTable();
-                varTable.push_front(newTable); 
+                varTable.push(newTable); 
         } 
         stlist '}'                    {
                 $$=new NodeStatement("BLK",concatList(concatList($1,$2),$3));
@@ -173,7 +173,7 @@ blk : '{'                             {
 
                 blk->nextlist = stlist->nextlist;
                 blk->breaklist = stlist->breaklist;
-                varTable.pop_front();
+                varTable.pop();
                 varTable.front().resetTmps();
         } 
 ;
@@ -243,7 +243,7 @@ stmt :  dcl ';'                         {
                 for(string id : dcl->idList){
                     // variable can't be declared twice in the same block
                     varEntry idEntry;
-                    bool found = lookupVarTableList(varTable, idEntry, id); //fixme check at first table only?
+                    bool found = varTable.lookupVarTableList(idEntry, id); //fixme check at first table only?
                     if(found)
                         semantic_error("declaration of an already declared variable within the block"); 
                     
@@ -384,7 +384,7 @@ lval : ID                               {
                 
                 // search ID in the symbol table (must have been declared)
                 varEntry idEntry;
-                bool found = lookupVarTableList(varTable, idEntry, id->value);
+                bool found = varTable.lookupVarTableList(idEntry, id->value);
                 if(!found)
                         semantic_error("accessed undeclared variable");
                 if(lval->expType == eVOID)
@@ -683,7 +683,7 @@ exp :   exp ADDOP exp 	                {
                 NodeToken *id = $1; 
                 
                 varEntry idEntry;
-                bool found = lookupVarTableList(varTable, idEntry, id->value);
+                bool found = varTable.lookupVarTableList(idEntry, id->value);
                 if(!found)
                     semantic_error("tried evaluating undeclared variable");
                 exp->expType = idEntry.type;
