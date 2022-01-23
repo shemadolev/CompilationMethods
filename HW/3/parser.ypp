@@ -103,8 +103,6 @@ fdefs : /* epsilon */                   {$$=new NodeSymbol("FDEFS", EPSILON);}
                     if(!funcEntry.matchExisting(func_api->funcProps)){
                         semantic_error("duplicate declaration of function with different API");
                     } 
-        }
-                    } 
                 }
         }
 ;
@@ -230,7 +228,7 @@ type :  INT                             {
 ;
 
 stlist : stlist M stmt                    {
-                $$=new NodeSymbol("STLIST",concatList($1,$2));
+                $$=new NodeStatement("STLIST",concatList(concatList($1,$2),$3));
                 NodeStatement *stlist=$$;
                 NodeStatement *stlist1=$1;
                 NodeMarkerM *M=$2;
@@ -239,6 +237,7 @@ stlist : stlist M stmt                    {
                 code->backpatch(stlist1.nextlist, M->quad);
                 stlist->nextlist.merge(stmt->nextlist);
                 stlist->breaklist.merge(stmt->breaklist);
+                stlist->breaklist.merge(stlist1->breaklist);
         }
          |/* epsilon */                 {$$=new NodeSymbol("STLIST", EPSILON);}
 ;
@@ -431,6 +430,8 @@ cntrl : IF bexp THEN M stmt N ELSE M stmt     {
                 cntrl->nextlist.merge(N->nextlist);
                 cntrl->nextlist.merge(stmt1->nextlist);
                 cntrl->nextlist.merge(stmt2->nextlist);
+                cntrl->breaklist.merge(stmt1->breaklist);
+                cntrl->breaklist.merge(stmt2->breaklist);
                 
         } 
         | IF bexp THEN M stmt             {
@@ -443,6 +444,7 @@ cntrl : IF bexp THEN M stmt N ELSE M stmt     {
                 code->backpatch(bexp->truelist, M->quad);
                 cntrl->nextlist.merge(bexp->falselist);
                 cntrl->nextlist.merge(stmt->nextlist);
+                cntrl->breaklist.merge(stmt->breaklist);
         
         } 
         | WHILE M bexp DO M stmt            {
@@ -548,7 +550,7 @@ bexp :  bexp OR M bexp                  {
                         code->emit("BEQZ", res, "-1"); //exp1 >= exp2 --> res=0
                         break;
                 default:
-                        operational_error("can't find RELOP match")
+                        unexpected_error("can't find RELOP match");
                         break;
                 }       
 
@@ -597,7 +599,7 @@ exp :   exp ADDOP exp 	                {
                         code->emit(string("SUBT")+type, res, exp1->place, exp2->place);
                         break;
                 default:
-                        operational_error("can't find ADDOP match")
+                        unexpected_error("can't find ADDOP match");
                         break;
                 }
 
@@ -627,7 +629,7 @@ exp :   exp ADDOP exp 	                {
                         code->emit(string("DIVD")+type, res, exp1->place, exp2->place);
                         break;
                 default:
-                        operational_error("can't find ADDOP match")
+                        unexpected_error("can't find ADDOP match")
                         break;
                 }
 
