@@ -1,5 +1,4 @@
 #include "symbol_table.hpp"
-extern VarScopeTable *varScopeTable;
 
 //TODO: change the global pointer to stack <varscopetable>
 // update lookup func, typedTables don't need *parent.
