@@ -1,4 +1,7 @@
 #include "symbol_table.hpp"
+#include "code_class.hpp"
+
+extern CodeClass code; //defined in parser
 
 //TODO: change the global pointer to stack <varscopetable>
 // update lookup func, typedTables don't need *parent.
@@ -80,8 +83,32 @@ bool VariableTable::lookupVarTableList(varEntry& var, string id){
     return false;
 }
 
-vector<tuple<idTypes, string>> SymbolEntry_Function::getArgs(){}
+SymbolEntry_Function::SymbolEntry_Function(FunctionProps& funcProps) : _definitionLine(-1) , props(funcProps) {}
 
 string SymbolEntry_Function::getPlace(int currentLine){
+    if(!isDefined()){
+        callList.push_back(currentLine);
+    }
+    return to_string(_definitionLine); //will be "-1" if not defined
+}
 
+void SymbolEntry_Function::define(int definitionLine){
+    _definitionLine = definitionLine;
+    code.backpatch(callList, definitionLine);
+}
+
+bool SymbolEntry_Function::isDefined(){
+    return (_definitionLine != -1);
+}
+
+bool SymbolEntry_Function::matchExisting(FunctionProps& funcProps){
+    if(funcProps.type != props.type || funcProps.id != props.id || funcProps.args.size() != props.args.size())
+        return false;
+    
+    for(auto myIt = props.args.begin(), otherIt = funcProps.args.begin();myIt != props.args.end(); myIt++,otherIt++){
+        if(myIt->type != otherIt->type) //different arg names allowed
+            return false;
+    }
+
+    return true;
 }

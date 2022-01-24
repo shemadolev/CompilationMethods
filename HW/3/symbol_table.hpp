@@ -116,10 +116,10 @@ public:
     void resetTmps();   
 };
 
-
 class VariableTable{
 protected:
     list<VarScopeTable> _tables;
+    VarScopeTable _functionApi; //todo merge this into _tables on first push. Must always be overwritten on function entry!!
 public:
     bool lookupVarTableList(varEntry& var, string id);
     
@@ -153,12 +153,6 @@ public:
      */
     SymbolEntry_Function(FunctionProps& funcProps);
 
-    /**
-     * @brief Get the Args object
-     * 
-     * @return vector<tuple<idTypes, string>> 
-     */
-    vector<tuple<idTypes, string>> getArgs();
 
     /**
      * @brief Get the Place of definition, or "-1" for backpatching

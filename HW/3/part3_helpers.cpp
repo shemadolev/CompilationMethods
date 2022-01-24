@@ -5,7 +5,7 @@
 #include "code_class.hpp"
 
 extern ParserNode *parseTree; /* Root of parse tree. Defined in the parser. */
-extern CodeClass code;
+extern CodeClass code; //defined in parser
 
 bool replace(std::string& str, const std::string& from, const std::string& to) {
     size_t start_pos = str.find(from);
