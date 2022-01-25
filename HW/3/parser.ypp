@@ -73,7 +73,7 @@ fdefs : /* epsilon */                   {$$=new NodeSymbol("FDEFS", EPSILON);}
 	| fdefs func_api {
                 NodeFuncApi *func_api = $2;
                 
-                SymbolEntry_Function* funcEntry = funcTable.find(func_api->funcProps.id);
+                FunctionEntry* funcEntry = funcTable.find(func_api->funcProps.id);
                 if(funcEntry != nullptr){
                     funcEntry = funcTable.insert(func_api->funcProps);
                 } else { //found
@@ -100,7 +100,7 @@ fdefs : /* epsilon */                   {$$=new NodeSymbol("FDEFS", EPSILON);}
                 $$=new NodeSymbol("FDEFS",concatList(concatList($1,$2),$3));
                 NodeFuncApi *func_api = $2;
 
-                SymbolEntry_Function* funcEntry = funcTable.find(func_api->funcProps.id);
+                FunctionEntry* funcEntry = funcTable.find(func_api->funcProps.id);
                 if(funcEntry != nullptr){
                     funcTable.insert(func_api->funcProps);
                 } else { //found
@@ -744,7 +744,7 @@ call : ID '(' call_args ')'             {
         //todo import $x to pointers
 
 
-        SymbolEntry_Function* funcEntry = funcTable.find(id->value);
+        FunctionEntry* funcEntry = funcTable.find(id->value);
         if(funcEntry == nullptr)
             semantic_error(...);
         //store $RA

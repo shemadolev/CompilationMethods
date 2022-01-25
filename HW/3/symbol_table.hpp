@@ -40,8 +40,6 @@ public:
      */
     VarScopeTable(VarScopeTable& prevTable);
 
-    ~VarScopeTable();
-
     /**
      * @brief Allocate a new temporary register to be used until next entrance/exit of a block.
      *          We assume enough registers are available.
@@ -67,11 +65,14 @@ public:
      */
     bool lookup(varEntry& var, string id);
 
+    /**
+     * @brief remove the temporary register in its innet TypedVarScopeTables
+     */
+    void resetTmps();
+
     void storeIds();
 
     void loadIds();
-
-    void resetTmps();
 
 };
 
@@ -118,8 +119,14 @@ public:
      */
     bool lookup(varEntry& var, string id);
 
+    /**
+     * @brief Remove all temporary registers.
+     */
     void resetTmps();
 
+    /**
+     * @brief Get the Last Var Offest pointer.
+     */
     int getLastVarOffest();
 };
 
@@ -128,19 +135,42 @@ protected:
     list<VarScopeTable> _tables;
 public:
     list<argDeclaration> functionArgs; //todo merge this into _tables on first push. Must always be overwritten on function entry!!
+    
+    /**
+     * @brief Push a new VarScopeTable into the tables list.
+     */
+    void push();
+
+    /**
+     * @brief Pop the VarScopeTable in the head of the tables list.
+     */
+    void pop();
+    
+    /**
+     * @brief Get the head of the VarScopeTables list.
+     * 
+     * @return VarScopeTable& 
+     */
+    VarScopeTable& front();
+
+    /**
+     * @brief Search an id among all VarScopeTables and get the first appeared Var object
+     * @param var - pointer for the returned entry 
+     * @param id - looked-up id
+     * @return true/false - found the entry
+     */
     bool lookupVarTableList(varEntry& var, string id);
+    
+    /**
+     * @brief Set the Function Api into the arguments list.
+     * @param args 
+     */
+    void setFunctionApi(list<argDeclaration> &args);
     
     int storeIds();
 
     int loadIds();
 
-    VarScopeTable& front();
-
-    void push();
-
-    void pop();
-
-    void setFunctionApi(list<argDeclaration> &args);
 };
 
 typedef struct _functionProps {
@@ -149,7 +179,7 @@ typedef struct _functionProps {
     list<argDeclaration> args;
 } FunctionProps;
 
-class SymbolEntry_Function{
+class FunctionEntry{
 protected:
     int _definitionLine;
 public:
@@ -157,11 +187,11 @@ public:
     CodeLineList callList;
 
     /**
-     * @brief Construct a new SymbolEntry_Function object without definition
+     * @brief Construct a new FunctionEntry object without definition
      * 
      * @param funcProps Props of the function
      */
-    SymbolEntry_Function(FunctionProps& funcProps);
+    FunctionEntry(FunctionProps& funcProps);
 
 
     /**
@@ -199,32 +229,29 @@ public:
 
 class FunctionTable{
 protected:
-    map<string,SymbolEntry_Function> _functionTable;
-    SymbolEntry_Function* _current;
+    map<string,FunctionEntry> _functionTable;
+    FunctionEntry* _current;
 public:
     
     /**
      * @brief Find definition of a function in the table
      * 
      * @param id Name of function
-     * @return SymbolEntry_Function* If found - pointer to entry. Eitherwise - NULL.
+     * @return FunctionEntry* If found - pointer to entry. Eitherwise - NULL.
      */
-    SymbolEntry_Function* find(string id);
+    FunctionEntry* find(string id);
 
     /**
      * @brief Insert new function entry. Updates the 'current' function.
-     * 
-     * @param funcProps 
-     * @return SymbolEntry_Function* 
      */
-    SymbolEntry_Function* insert(FunctionProps& funcProps);
+    void insert(FunctionProps& funcProps);
 
     /**
      * @brief Get the Current function (last inserted)
      * 
-     * @return SymbolEntry_Function* 
+     * @return FunctionEntry* 
      */
-    SymbolEntry_Function* getCurrent();
+    FunctionEntry* getCurrent();
 };
 
 #endif
