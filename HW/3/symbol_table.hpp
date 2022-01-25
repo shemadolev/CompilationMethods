@@ -16,7 +16,7 @@ using namespace std;
 #define SAVED_REGS_INT 4
 #define SAVED_REGS_FLOAT 1
 
-class varEntry{
+class VarEntry{
 public:
     string place;
     idTypes type;
@@ -63,7 +63,7 @@ public:
      * @param id - looked-up id
      * @return true/false - found the entry
      */
-    bool lookup(varEntry& var, string id);
+    bool lookup(VarEntry& var, string id);
 
     /**
      * @brief remove the temporary register in its innet TypedVarScopeTables
@@ -104,7 +104,7 @@ public:
     /**
      * @brief Allocate a new temp var
      * 
-     * @return varEntry& Allocated new var
+     * @return VarEntry& Allocated new var
      */
     string newTemp();
 
@@ -113,7 +113,7 @@ public:
      * @exception Will be thrown for taken id. NOTE: happens in ypp file?
      * 
      * @param id The id of the var
-     * @return varEntry& Allocated new var. NOTE: seems that it can be void
+     * @return VarEntry& Allocated new var. NOTE: seems that it can be void
      */
     string newVar(string id);
 
@@ -123,7 +123,7 @@ public:
      * @param id - looked-up id
      * @return true/false - found the entry
      */
-    bool lookup(varEntry& var, string id);
+    bool lookup(VarEntry& var, string id);
 
     /**
      * @brief Remove all temporary registers.
@@ -152,7 +152,7 @@ class VariableTable{
 protected:
     list<VarScopeTable> _tables;
 public:
-    list<argDeclaration> functionArgs; //todo merge this into _tables on first push. Must always be overwritten on function entry!!
+    list<ArgDeclaration> functionArgs; //todo merge this into _tables on first push. Must always be overwritten on function entry!!
     
     /**
      * @brief Push a new VarScopeTable into the tables list.
@@ -177,13 +177,13 @@ public:
      * @param id - looked-up id
      * @return true/false - found the entry
      */
-    bool lookupVarTableList(varEntry& var, string id);
+    bool lookupVarTableList(VarEntry& var, string id);
     
     /**
      * @brief Set the Function Api into the arguments list.
      * @param args 
      */
-    void setFunctionApi(list<argDeclaration> &args);
+    void setFunctionApi(list<ArgDeclaration> &args);
     
     /**
      * @brief Execute storeIds of _tables.head VarScopeTable 
@@ -195,12 +195,20 @@ public:
      */
     void loadIds();
 
+    /**
+     * @brief Indicate if an 'id' of a var exists in the current scope
+     * 
+     * @param id 
+     * @return true 
+     * @return false 
+     */
+    bool isInScope(string id);
 };
 
 typedef struct _functionProps {
     idTypes type;
     string id;
-    list<argDeclaration> args;
+    list<ArgDeclaration> args;
 } FunctionProps;
 
 class FunctionEntry{
@@ -268,7 +276,7 @@ public:
     /**
      * @brief Insert new function entry.
      */
-    void insert(FunctionProps& funcProps);
+    FunctionEntry* insert(FunctionProps& funcProps);
 
     /**
      * @brief Get the Current function (last inserted)
@@ -282,6 +290,11 @@ public:
      * @param funcEntry 
      */
     void setCurrent(FunctionEntry* funcEntry);
+
+    string getUnimplementedCalls();
+
+    string getImplemented();
+
 };
 
 #endif

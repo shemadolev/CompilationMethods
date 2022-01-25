@@ -15,6 +15,20 @@ using namespace std;
 
 #define PRINT_PARSE_TREE 1
 
+
+//return address pointer
+#define $RA "I0"
+//frame start pointer
+#define $FP "I1"
+//stack pointer (next write pointer in stack)
+#define $SP "I2"
+//return int type
+#define $RT_I "I3"
+//return float type
+#define $RT_F "F0"
+
+#define FUNC_ARGS_OFFSET 1
+
 enum idTypes {eINT, eFLOAT, eVOID};
 
 bool replace(std::string& str, const std::string& from, const std::string& to);
@@ -98,7 +112,7 @@ public:
 
 class NodeArgsList : public NodeSymbol{
 public:
-    list<argDeclaration> argsList;
+    list<NodeExpression> exprList;
 };
 
 class NodeMarkerM : public NodeSymbol{
@@ -113,12 +127,12 @@ public:
     NodeMarkerN(); //todo use global code pointer: emit goto
 };
 
-class argDeclaration{
+class ArgDeclaration{
 public:
     string id;
     idTypes type;
 
-    argDeclaration(string id, idTypes type) : id(id), type(type){}
+    ArgDeclaration(string id, idTypes type) : id(id), type(type){}
 };
 
 /**

@@ -18,18 +18,6 @@
     VariableTable varTable;
     FunctionTable funcTable;
 
-    //return address pointer
-    #define $RA "I0"
-    //frame start pointer
-    #define $FP "I1"
-    //stack pointer (next write pointer in stack)
-    #define $SP "I2"
-    //return int type
-    #define $RT_I "I3"
-    //return float type
-    #define $RT_F "F0"
-
-    #define FUNC_ARGS_OFFSET 1
 %}
 
 // Reserved words 
@@ -145,11 +133,11 @@ func_arglist :  func_arglist ',' dcl    {
                 func_arglist->argsList = func_arglist1->argsList;
                 for(string id : dcl->idList) {
                     //check duplicate arg names
-                    for(argDeclaration argIt : func_arglist->argsList){
+                    for(ArgDeclaration argIt : func_arglist->argsList){
                         if(argIt.id == id)
                             semantic_error("Can't redecalre same variable name");
                     }
-                    argDeclaration arg(id, dcl->idType);
+                    ArgDeclaration arg(id, dcl->idType);
                     func_arglist->argsList.push_back(arg);
                 }
         } 
@@ -159,7 +147,7 @@ func_arglist :  func_arglist ',' dcl    {
                 NodeDeclaration *dcl = $1;
 
                 for(string id : dcl->idList){
-                    argDeclaration arg(id, dcl->idType);
+                    ArgDeclaration arg(id, dcl->idType);
                     func_arglist->argsList.push_back(arg);
                 }
         }
@@ -169,7 +157,7 @@ blk : '{'                             {
                 varTable.push();
                 if(varTable.functionArgs.size() > 0){
                     int i = FUNC_ARGS_OFFSET;
-                    for(argDeclaration arg : functionArgs){ //Place function args are in the first scope
+                    for(ArgDeclaration arg : functionArgs){ //Place function args are in the first scope
                         string argFunc = newTable.newVar(arg.id, arg.type);
                         code.emit(string("LOAD") + (arg.type == eINT) ? "I" : "F", argFunc, $FP, i);
                         i++;
@@ -198,8 +186,6 @@ dcl :   ID ':' type                     {
                 if(type->typeValue == eVOID)
                         semantic_error("variable can't be 'void'");
                 
-                // TODO: check that isn't declared in the same block
-
                 dcl->idType = type->typeValue;
                 dcl->idList.push_front(id->value);
                 }
@@ -393,7 +379,7 @@ lval : ID                               {
                 NodeToken *id = $1;
                 
                 // search ID in the symbol table (must have been declared)
-                varEntry idEntry;
+                VarEntry idEntry;
                 bool found = varTable.lookupVarTableList(idEntry, id->value);
                 if(!found)
                         semantic_error("accessed undeclared variable");
@@ -692,7 +678,7 @@ exp :   exp ADDOP exp 	                {
                 NodeExpression *exp = $$;
                 NodeToken *id = $1; 
                 
-                varEntry idEntry;
+                VarEntry idEntry;
                 bool found = varTable.lookupVarTableList(idEntry, id->value);
                 if(!found)
                     semantic_error("tried evaluating undeclared variable");
@@ -746,34 +732,41 @@ call : ID '(' call_args ')'             {
         FunctionEntry* funcEntry = funcTable.find(id->value);
         if(funcEntry == nullptr)
             semantic_error("called an undeclared function");
+        if(call_args->exprList.size() != funcEntry->props.args.size())
+            semantic_error("wrong number of arguments passed to function");
 
-        //store Caller's registers (all varScopeTables)
-        varTable.storeIds();
-        //store $RA
-        code.emit("STORI", $RA, $SP, to_string(0));
-        //store $FP
-        code.emit("STORI", $FP, $SP, to_string(1));
-        //assign $FP to point on prev $FP
-        code.emit("ADD2I", $SP, $SP, to_string(1));
-        code.emit("COPYI", $FP, $SP);
+        varTable.storeIds(); //for each var: Mem[$SP++] = var
+        code.emit("STORI", $RA, $SP, "0"); //Mem[$SP] = $RA
+        code.emit("STORI", $FP, $SP, "1"); //Mem[$SP+1] = $FP
+        
+        code.emit("ADD2I", $FP, $SP, "1");
         //store arguments
-        int i = 1;
-        for(argDeclaration argIt : funcEntry->props.args){
-                string type = (argIt->type == eINT) ? "I" : "F";
-                code.emit(string("STOR")+type, TODO: when do these args get variables?, $SP, to_string(i));
+        
+        for(int i = FUNC_ARGS_OFFSET, auto argIt = funcEntry->props.args.begin(), auto expArg = call_args->expList.begin();
+                argIt != funcEntry->props.args.end();
+                i++, argIt++, expArg++){
+            if(expArg->expType != argIt->type)
+                semantic_error("wrong type of argument passed to function");
+
+            string type = (argIt->type == eINT) ? "I" : "F";
+            code.emit(string("STOR")+type, expArg->place, $FP, i);
+            i++;
         }
         //set $SP below arguments
-        code.emit("ADD2I", $SP, $SP, to_string(funcEntry->props.size()+1));
+        code.emit("ADD2I", $SP, $FP, funcEntry->props.size()+FUNC_ARGS_OFFSET);
 
         //jump
-        string L = funcEntry->getPlace(0); //arg is don't care - not for backpatching
+        string L = funcEntry->getPlace(code.nextQuad());
         code.emit("JLINK", L);
         
-        // continue
         //return from callee
-        varTable.front().loadIds();
+        
         //restore $SP, $FP
-        //restore $RA, update $SP--
+        code.emit("COPYI", $SP, $FP); //$SP = $FP
+        code.emit("LOADI", $FP, $FP); //Mem[$SP+1] = $FP
+        code.emit("SUBTI", $SP, 1); //$SP-- 
+        code.emit("LOADI", $RA, $SP, 0); //$RA = Mem[$SP]
+        varTable.loadIds();  //for each var: var = Mem[--$SP]
         
         //store the return value, non-void return value
         if(funcEntry->props.type == eINT){
@@ -785,18 +778,35 @@ call : ID '(' call_args ')'             {
         }
 ;
 
-call_args : call_arglist                {$$=new NodeSymbol("CALL_ARGS",$1);}
+call_args : call_arglist                {
+                $$=new NodeArgsList("CALL_ARGS",$1);
+                NodeArgsList *call_args = $$;
+                NodeArgsList *call_arglist = $1;
+
+                call_args->exprList = call_arglist->exprList;
+            }
             |/* epsilon */              {$$=new NodeSymbol("CALL_ARGS", EPSILON);} 
 ;
 
 call_arglist :  call_arglist ',' exp    {
                 $$=new NodeArgsList("CALL_ARGLIST",concatList(concatList($1,$2),$3));
-                $$->argsList = $1->argsList;
-                $$->argsList.push_back(exp);
+                NodeArgsList *call_arglist = $$;
+                NodeArgsList *call_arglist1 = $1;
+                NodeExpression *exp = $3;
+                
+                if(exp->expType == eVOID)
+                    semantic_error("can't pass argument of type 'void' to a function")
+                call_arglist->exprList = call_arglist1->exprList;
+                call_arglist->exprList.push_back(*exp);
         }
         | exp                           {
                 $$=new NodeArgsList("CALL_ARGLIST",$1);
-                $$->argsList.push_back(exp);
+                NodeArgsList *call_arglist = $$;
+                NodeExpression *exp = $3;
+
+                if(exp->expType == eVOID)
+                    semantic_error("can't pass argument of type 'void' to a function")
+                call_arglist->exprList.push_back(*exp);
         }
 ;
 
