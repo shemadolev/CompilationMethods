@@ -28,7 +28,7 @@ VarScopeTable::newVar(string id, idTypes type){
 }
 
 bool
-VarScopeTable::lookup(varEntry& var, string id){
+VarScopeTable::lookup(VarEntry& var, string id){
     bool inIntTable = intTable.lookup(var, id);
     bool inFloatTable = floatTable.lookup(var, id);
     assert(inIntTable && inFloatTable);
@@ -39,6 +39,71 @@ void
 VarScopeTable::resetTmps(){
     intTable.resetTmps();
     floatTable.resetTmps();
+}
+
+
+/**
+ * @brief Emit the ASM code line for storing the registers in range & 
+ *          Update the $SP to the next available block in the stack.
+ * 
+ * @param firstReg 
+ * @param lastReg 
+ * @param table_type 
+ */
+void emitStoreIds(int firstReg, int lastReg, idTypes table_type){
+    string type = (table_type == eINT) ? "I" : "F";
+    int regs_num = lastReg - firstReg + 1;
+    //Store registers
+    for (int i=0; i<regs_num; i++){
+        code.emit(string("STOR")+type, type+to_string(i), $SP, to_string(i));
+    }
+    //Update $SP
+    code.emit("ADD2I", $SP, $SP, regs_num);
+}
+
+void 
+VarScopeTable::storeIds(){
+    // int vars
+    emitStoreIds(SAVED_REGS_INT, intTable.getLastVarOffest(), eINT);
+    // float vars
+    emitStoreIds(SAVED_REGS_FLOAT, floatTable.getLastVarOffest(), eFLOAT);
+    // int tmps
+    emitStoreIds(intTable.getLastTmpOffest(), intTable.getSize()-1, eINT);
+    // float tmps
+    emitStoreIds(floatTable.getLastTmpOffest(), floatTable.getSize()-1, eFLOAT);
+}
+
+
+/**
+ * @brief Emit the ASM code line for storing the registers in range & 
+ *          Update the $SP to the next available block in the stack.
+ * 
+ * @param firstReg 
+ * @param lastReg 
+ * @param table_type 
+ */
+void emitLoadIds(int firstReg, int lastReg, idTypes table_type){
+    string type = (table_type == eINT) ? "I" : "F";
+    int regs_num = lastReg - firstReg + 1;
+    //Update $SP
+    code.emit("SUBTI", $SP, $SP, regs_num);
+    //Store registers
+    for (int i=0; i<regs_num; i++){
+        code.emit(string("LOAD")+type, type+to_string(i), $SP, to_string(i));
+    }
+}
+
+
+void 
+VarScopeTable::loadIds(){
+    // float tmps
+    emitLoadIds(floatTable.getLastTmpOffest(), floatTable.getSize()-1, eFLOAT);
+    // int tmps
+    emitLoadIds(intTable.getLastTmpOffest(), intTable.getSize()-1, eINT);
+    // float vars
+    emitLoadIds(SAVED_REGS_FLOAT, floatTable.getLastVarOffest(), eFLOAT);
+    // int vars
+    emitLoadIds(SAVED_REGS_INT, intTable.getLastVarOffest(), eINT);
 }
 
 /**
@@ -62,7 +127,7 @@ TypedVarScopeTable::newVar(string id){
 }
 
 bool 
-TypedVarScopeTable::lookup(varEntry& var, string id){
+TypedVarScopeTable::lookup(VarEntry& var, string id){
     auto it = _varEntries.find(id);
     if(it != _varEntries.end()){ // id is within the symbol table
         var.type = _type;
@@ -85,7 +150,7 @@ TypedVarScopeTable::getLastVarOffest(){
 
 int 
 TypedVarScopeTable::getLastTmpOffest(){
-    return _curTmpOffset+1; //last reg that stores tmp
+    return _curTempOffset+1; //last reg that stores tmp
 }
 
 /**
@@ -113,7 +178,7 @@ VariableTable::front(){
 }
 
 bool 
-VariableTable::lookupVarTableList(varEntry& var, string id){
+VariableTable::lookupVarTableList(VarEntry& var, string id){
     // Assuming a new table is always inserted in the front of the list, 
         // iterating from the head of the list ensures the right ordering for looking-up
     for (auto it = _tables.begin(); it != _tables.end(); it++){
@@ -125,7 +190,7 @@ VariableTable::lookupVarTableList(varEntry& var, string id){
 }
 
 void 
-VariableTable::setFunctionApi(list<argDeclaration> &args){
+VariableTable::setFunctionApi(list<ArgDeclaration> &args){
     functionArgs = args;
 }
 
@@ -140,6 +205,10 @@ VariableTable::loadIds(){
     _tables.front().loadIds();
 }
 
+bool
+VariableTable::isInScope(string id){
+    return front().lookup(VarEntry(),id);
+}
 
 /**
  * FunctionEntry implementation
@@ -185,7 +254,7 @@ FunctionEntry*
 FunctionTable::find(string id){
     auto it = _functionTable.find(id);
     if(it != _functionTable.end()) //found the function entry
-        return it->second;
+        return &it->second;
     return nullptr;
 }
 
@@ -209,38 +278,30 @@ FunctionTable::setCurrent(FunctionEntry *funcEntry){
     _current = funcEntry;
 }
 
-/**
- * @brief Emit the ASM code line for storing the registers in range & 
- *          Update the $SP to the next available block in the stack.
- * 
- * @param firstReg 
- * @param lastReg 
- * @param table_type 
- */
-void emitStoresIds(int firstReg, int lastReg, idTypes table_type){
-    string type = (table_type == eINT) ? "I" : "F";
-    int regs_num = lastReg - firstReg + 1;
-    //Store registers
-    for (int i=0; i<regs_num; i++){
-        code.emit(string("STOR")+type, type+to_string(i), $SP, to_string(i));
+string FunctionTable::getUnimplementedCalls(){
+    string str;
+    for (auto const& funcIt : _functionTable){
+        FunctionEntry func = funcIt.second;
+        str += " ";
+        str += func.props.id;
+        for(int line : func.callList){
+            str += ",";
+            str += to_string(line);
+        }
     }
-    //Update $SP
-    code.emit("ADD2I", $SP, $SP, regs_num);
+    return str;
 }
 
-void 
-VarScopeTable::storeIds(){
-    // int vars
-    emitStoresIds(string("I")+to_string(SAVED_REGS_INT), string("I")+to_string(intTable.getLastVarOffest()), eINT);
-    // float vars
-    emitStoresIds(string("F")+to_string(SAVED_REGS_FLOAT), string("F")+to_string(floatTable.getLastVarOffest()), eFLOAT);
-    // int tmps
-    emitStoresIds(string("I")+to_string(intTable.getLastTmpOffest()), string("I")+to_string(intTable.getSize()), eINT);
-    // float tmps
-    emitStoresIds(string("F")+to_string(floatTable.getLastTmpOffest()), string("F")+to_string(floatTable.getSize()), eFLOAT);
-}
-
-void 
-VarScopeTable::loadIds(){
-
+string FunctionTable::getImplemented(){
+    string str;
+    for (auto const& funcIt : _functionTable){
+        FunctionEntry func = funcIt.second;
+        if(func.isDefined()){
+            str += " ";
+            str += func.props.id;
+            str += ",";
+            str += func.getPlace(0);
+        }
+    }
+    return str;
 }
