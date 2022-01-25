@@ -30,10 +30,10 @@ protected:
 	vector<string> codeVec;
 
 	string spreadString(string str);
+	string spreadString(int num);
 
 	template<typename T, typename... Args>
 	string spreadString(T t, Args... args);
-
 public:
 
 	/**

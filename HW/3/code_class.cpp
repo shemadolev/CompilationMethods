@@ -1,8 +1,12 @@
 #include "code_class.hpp"
-#include "part2_helpers.hpp"
+#include "part3_helpers.hpp"
 
 string CodeClass::spreadString(string str) {
     return str;
+}
+
+string CodeClass::spreadString(int num) {
+    return to_string(num);
 }
 
 template<typename T, typename... Args>

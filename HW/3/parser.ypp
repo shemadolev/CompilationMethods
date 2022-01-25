@@ -255,11 +255,8 @@ stmt :  dcl ';'                         {
 
                 for(string id : dcl->idList){
                     // variable can't be declared twice in the same block
-                    varEntry idEntry;
-                    bool found = varTable.lookupVarTableList(idEntry, id); //fixme check at first table only?
-                    if(found)
-                        semantic_error("declaration of an already declared variable within the block"); 
-                    
+                    if(varTable.isInScope(id))
+                        semantic_error("declaration of an already declared variable within the block");                     
                     varTable.front().newVar(id, dcl->idType);
                 }
         }
