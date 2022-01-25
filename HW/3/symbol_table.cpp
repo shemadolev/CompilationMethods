@@ -6,8 +6,7 @@ extern CodeClass code; //defined in parser
 //TODO: change the global pointer to stack <varscopetable>
 // update lookup func, typedTables don't need *parent.
 
-string 
-VarScopeTable::newVar(string id, idTypes type){
+string VarScopeTable::newVar(string id, idTypes type){
     if(type == eVOID)
         return "-1";
     return (type == eINT) ? intTable.newVar(id) : floatTable.newVar(id);
@@ -41,18 +40,13 @@ TypedVarScopeTable::TypedVarScopeTable(int startingIndex, idTypes type):
 
 string
 TypedVarScopeTable::newVar(string id){
-    string reg = _typeLetter + to_string(_curVarOffset);
-    _varEntries.insert(pair<string,int>(reg,_curVarOffset));
-    _curVarOffset++;
-    return reg;
+    _varEntries.insert(pair<string,int>(id,_curVarOffset));
+    return _typeLetter + to_string(_curVarOffset++);
 }
 
 string
 TypedVarScopeTable::newTemp(){
-    string reg = _typeLetter + to_string(_curTempOffset);
-    _varEntries.insert(pair<string,int>(reg,_curTempOffset));
-    _curTempOffset--;
-    return reg;
+    return _typeLetter + to_string(_curTempOffset--);
 }
 
 bool 
@@ -114,17 +108,17 @@ bool SymbolEntry_Function::matchExisting(FunctionProps& funcProps){
 }
 
 void VariableTable::setFunctionApi(list<argDeclaration> &args){
-    _functionArgs = args;
+    functionArgs = args;
 }
 
 void VariableTable::push(){
-    VarScopeTable newTable;
-    if(_tables.size() == 0){ //Function args are in the first scope
-        for(argDeclaration arg : _functionArgs){
-            newTable.newVar(arg.id, arg.type);
-        }
+    if(_tables.size() == 0){ 
+        VarScopeTable newTable;
+        _tables.push_front(newTable);
+    } else {
+        VarScopeTable newTable(_tables.front());
+        _tables.push_front(newTable);
     }
-    _tables.push_front(newTable);
 }
 
 void VariableTable::pop(){
@@ -137,8 +131,13 @@ VarScopeTable& VariableTable::front(){
 
 int storeIds(){
     //get the offset of named & temp from each int/float table, for i: store all in mem
+    int intNamed = 
 }
 
 int loadIds(){
     
 }
+
+VarScopeTable::VarScopeTable() : intTable(SAVED_REGS_INT, eINT), floatTable(SAVED_REGS_FLOAT, eFLOAT) {}
+
+VarScopeTable::VarScopeTable(VarScopeTable& prevTable) : intTable(prevTable.intTable.getLastVarOffest(), eINT), floatTable(prevTable.floatTable.getLastVarOffest(), eFLOAT) {}

@@ -28,6 +28,8 @@
     #define $RT_I "I3"
     //return float type
     #define $RT_F "F0"
+
+    #define FUNC_ARGS_OFFSET 1
 %}
 
 // Reserved words 
@@ -166,6 +168,15 @@ func_arglist :  func_arglist ',' dcl    {
 
 blk : '{'                             { 
                 varTable.push();
+                if(varTable.functionArgs.size() > 0){
+                    int i = 0;
+                    for(argDeclaration arg : functionArgs){ //Place function args are in the first scope
+                        string argFunc = newTable.newVar(arg.id, arg.type);
+                        code.emit(string("LOAD") + (arg.type == eINT) ? "I" : "F", argFunc, $FP, );
+                        i++;
+                    }
+                    varTable.functionArgs = NULL;
+                }
         } 
         stlist '}'                    {
                 $$=new NodeStatement("BLK",concatList(concatList($1,$2),$3));

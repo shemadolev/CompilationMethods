@@ -13,6 +13,9 @@
 
 using namespace std;
 
+#define SAVED_REGS_INT 4
+#define SAVED_REGS_FLOAT 1
+
 class varEntry{
 public:
     string place;
@@ -26,10 +29,16 @@ protected:
 public:
 
     /**
-     * @brief Construct a new Var Scope Table object, 
-     *          Call the constructor of its inner tables (for int & float)
+     * @brief Construct a new Var Scope Table object 
      */
     VarScopeTable();
+
+    /**
+     * @brief Construct a new Var Scope Table object, that is an inner scope of a given table
+     * 
+     * @param prevTable Previous table (containing scope)
+     */
+    VarScopeTable(VarScopeTable& prevTable);
 
     ~VarScopeTable();
 
@@ -109,18 +118,16 @@ public:
      */
     bool lookup(varEntry& var, string id);
 
-    void storeIds();
-
-    void loadIds(); 
-
     void resetTmps();
+
+    int getLastVarOffest();
 };
 
 class VariableTable{
 protected:
     list<VarScopeTable> _tables;
-    list<argDeclaration> _functionArgs; //todo merge this into _tables on first push. Must always be overwritten on function entry!!
 public:
+    list<argDeclaration> functionArgs; //todo merge this into _tables on first push. Must always be overwritten on function entry!!
     bool lookupVarTableList(varEntry& var, string id);
     
     int storeIds();
