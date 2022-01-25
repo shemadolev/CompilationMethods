@@ -3,8 +3,12 @@
 #include <stdio.h>
 #include "part3_helpers.hpp"
 #include "code_class.hpp"
+#include "symbol_table.hpp"
+#include <exception>
+
 
 extern ParserNode *parseTree; /* Root of parse tree. Defined in the parser. */
+extern FunctionTable funcTable; //defined in parser
 extern CodeClass code; //defined in parser
 
 bool replace(std::string& str, const std::string& from, const std::string& to) {
@@ -91,25 +95,30 @@ int main (int argc, char **argv) {
 #if YYDEBUG
     yydebug=1;
 #endif
-    rc = yyparse();
-    //todo try/catch
-    if (rc == 0) { // Parsed successfully
-        if(PRINT_PARSE_TREE)
-          parseTree->dumpParseTree();
-        //Create output file
-        ofstream outFile;
-        string outputName = argv[1];
-        bool replaceName = replace(outputName, ".cmm", ".rsk");
-        if(!replaceName){
-          //Couldn't find .cmm in input file name
-          exit(1); //todo exit on specific code?
-        }
-        outFile.open(outputName); //todo anything on open fail?
-        //Print headers (for linker)
-        //...
-        //Print code
-        code.print(outFile);
-        outFile.close();
+    try{
+      rc = yyparse();
+      if (rc == 0) { // Parsed successfully
+          if(PRINT_PARSE_TREE)
+            parseTree->dumpParseTree();
+          //Create output file
+          ofstream outFile;
+          string outputName = argv[1];
+          bool replaceName = replace(outputName, ".cmm", ".rsk");
+          if(!replaceName){
+            operational_error("invalid file name. must end with .cmm");
+          }
+          outFile.open(outputName); 
+          //Print headers (for linker)
+          outFile << "<header>" << endl;
+          outFile << "<unimplemented>" << funcTable.getUnimplementedCalls() << endl;
+          outFile << "<implemented>" << funcTable.getImplemented() << endl;
+          outFile << "</header>" << endl;
+          //Print code
+          code.print(outFile);
+          outFile.close();
+      }
+    } catch (exception e){
+      operational_error(e.what());
     }
     delete parseTree;
     return rc;
