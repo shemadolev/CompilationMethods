@@ -112,3 +112,33 @@ bool SymbolEntry_Function::matchExisting(FunctionProps& funcProps){
 
     return true;
 }
+
+void VariableTable::setFunctionApi(list<argDeclaration> &args){
+    _functionArgs = args;
+}
+
+void VariableTable::push(){
+    VarScopeTable newTable;
+    if(_tables.size() == 0){ //Function args are in the first scope
+        for(argDeclaration arg : _functionArgs){
+            newTable.newVar(arg.id, arg.type);
+        }
+    }
+    _tables.push_front(newTable);
+}
+
+void VariableTable::pop(){
+    _tables.pop_front();
+}
+
+VarScopeTable& VariableTable::front(){
+    return _tables.front();
+}
+
+int storeIds(){
+    //get the offset of named & temp from each int/float table, for i: store all in mem
+}
+
+int loadIds(){
+    
+}

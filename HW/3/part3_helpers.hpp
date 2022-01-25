@@ -88,10 +88,10 @@ public:
 //Not a node
 class argDeclaration{
 public:
-    string name;
+    string id;
     idTypes type;
 
-    argDeclaration(string name, idTypes type) : name(name), type(type){}
+    argDeclaration(string id, idTypes type) : id(id), type(type){}
 };
 
 class NodeDeclaration : public NodeSymbol{

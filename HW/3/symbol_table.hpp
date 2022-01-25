@@ -113,24 +113,27 @@ public:
 
     void loadIds(); 
 
-    void resetTmps();   
+    void resetTmps();
 };
 
 class VariableTable{
 protected:
     list<VarScopeTable> _tables;
-    VarScopeTable _functionApi; //todo merge this into _tables on first push. Must always be overwritten on function entry!!
+    list<argDeclaration> _functionArgs; //todo merge this into _tables on first push. Must always be overwritten on function entry!!
 public:
     bool lookupVarTableList(varEntry& var, string id);
     
-    void storeIds();
+    int storeIds();
 
-    void loadIds(); 
+    int loadIds();
 
     VarScopeTable& front();
 
-    void push(VarScopeTable& newTable);
+    void push();
+
     void pop();
+
+    void setFunctionApi(list<argDeclaration> &args);
 };
 
 typedef struct _functionProps {

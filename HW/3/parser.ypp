@@ -145,7 +145,7 @@ func_arglist :  func_arglist ',' dcl    {
                 for(string id : dcl->idList) {
                     //check duplicate arg names
                     for(argDeclaration argIt : func_arglist->argsList){
-                        if(argIt.name == id)
+                        if(argIt.id == id)
                             semantic_error("Can't redecalre same variable name");
                     }
                     argDeclaration arg(id, dcl->idType);
@@ -165,8 +165,7 @@ func_arglist :  func_arglist ',' dcl    {
 ;
 
 blk : '{'                             { 
-                VarScopeTable newTable = VarScopeTable();
-                varTable.push(newTable); 
+                varTable.push();
         } 
         stlist '}'                    {
                 $$=new NodeStatement("BLK",concatList(concatList($1,$2),$3));
