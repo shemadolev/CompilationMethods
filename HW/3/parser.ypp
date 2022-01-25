@@ -84,9 +84,8 @@ fdefs : /* epsilon */                   {$$=new NodeSymbol("FDEFS", EPSILON);}
                 }
                 if(funcEntry->isDefined())
                     semantic_error("duplicate definition of a function");
+                funcTable.setCurrent(funcEntry);
                 funcEntry->define(code.nextQuad());
-
-                //todo calle entrance - assign regs to vars
         } blk            {
                 $$=new NodeSymbol("FDEFS",concatList(concatList($1,$2),$3));
                 NodeStatement *blk = $3;
@@ -169,13 +168,13 @@ func_arglist :  func_arglist ',' dcl    {
 blk : '{'                             { 
                 varTable.push();
                 if(varTable.functionArgs.size() > 0){
-                    int i = 0;
+                    int i = FUNC_ARGS_OFFSET;
                     for(argDeclaration arg : functionArgs){ //Place function args are in the first scope
                         string argFunc = newTable.newVar(arg.id, arg.type);
-                        code.emit(string("LOAD") + (arg.type == eINT) ? "I" : "F", argFunc, $FP, );
+                        code.emit(string("LOAD") + (arg.type == eINT) ? "I" : "F", argFunc, $FP, i);
                         i++;
                     }
-                    varTable.functionArgs = NULL;
+                    varTable.functionArgs.clear();
                 }
         } 
         stlist '}'                    {
@@ -198,6 +197,8 @@ dcl :   ID ':' type                     {
 
                 if(type->typeValue == eVOID)
                         semantic_error("variable can't be 'void'");
+                
+                // TODO: check that isn't declared in the same block
 
                 dcl->idType = type->typeValue;
                 dcl->idList.push_front(id->value);
@@ -208,7 +209,7 @@ dcl :   ID ':' type                     {
                 NodeToken *id = $1;
                 NodeType *dcl1 = $3;
 
-                //Check if previously decalred samed name
+                //Check if previously decalred same name
                 if(dcl1->idList.find(id->value) != dcl1->idList.end()){
                     semantic_error("Can't redecalre same variable name");
                 }
@@ -408,7 +409,7 @@ lval : ID                               {
 ;       
 
 fullwhile : FULL_WHILE N M bexp DO M stmt {
-                $$ = new NodeBexp("FULLWHILE",concatList(concatList(concatList($1,$2),$3),$4));
+                $$ = new NodeBexp("FULLWHILE",concatList(concatList(concatList(concatList(concatList(concatList($1,$2),$3),$4)$5)$6)$7));
                 NodeBexp *fullwhile = $$;
                 NodeMarkerN *N = $2;
                 NodeMarkerM *M1 = $3;
@@ -435,7 +436,7 @@ fullwhile : FULL_WHILE N M bexp DO M stmt {
 ;
 
 cntrl : IF bexp THEN M stmt N ELSE M stmt     {
-                $$ = new NodeStatement("CNTRL",concatList(concatList(concatList(concatList(concatList($1,$2),$3),$4),$5),$6));
+                $$ = new NodeStatement("CNTRL",concatList(concatList(concatList(concatList(concatList(concatList(concatList(concatList($1,$2),$3),$4),$5),$6)$7)$8)$9));
                 NodeStatement *cntrl = $$;
                 NodeBexp *bexp = $2;
                 NodeMarkerM *M1 = $4;
@@ -454,7 +455,7 @@ cntrl : IF bexp THEN M stmt N ELSE M stmt     {
                 
         } 
         | IF bexp THEN M stmt             {
-                $$ = new NodeStatement("CNTRL",concatList(concatList(concatList($1,$2),$3),$4));
+                $$ = new NodeStatement("CNTRL",concatList(concatList(concatList(concatList($1,$2),$3),$4)$5));
                 NodeStatement *cntrl = $$;
                 NodeBexp *bexp = $2;
                 NodeMarkerM *M = $4;
@@ -467,7 +468,7 @@ cntrl : IF bexp THEN M stmt N ELSE M stmt     {
         
         } 
         | WHILE M bexp DO M stmt            {
-                $$ = new NodeStatement("CNTRL",concatList(concatList(concatList($1,$2),$3),$4));
+                $$ = new NodeStatement("CNTRL",concatList(concatList(concatList(concatList(concatList($1,$2),$3),$4)$5)$6));
                 NodeStatement *cntrl = $$;
                 NodeMarkerM *M1 = $2;
                 NodeBexp *bexp = $3;
@@ -492,7 +493,7 @@ cntrl : IF bexp THEN M stmt N ELSE M stmt     {
 ;
 
 bexp :  bexp OR M bexp                  {
-                $$ = new NodeBexp("BEXP",concatList(concatList($1,$2),$3));
+                $$ = new NodeBexp("BEXP",concatList(concatList(concatList($1,$2),$3)$4));
                 NodeBexp *bexp = $$;
                 NodeBexp *bexp1 = $1;
                 NodeMarkerM *M = $3;
@@ -504,7 +505,7 @@ bexp :  bexp OR M bexp                  {
                 bexp->falselist.merge(bexp2->falselist);
         }
         | bexp AND M bexp               {
-                $$ = new NodeBexp("BEXP",concatList(concatList($1,$2),$3));
+                $$ = new NodeBexp("BEXP",concatList(concatList(concatList($1,$2),$3)$4));
                 NodeBexp *bexp = $$;
                 NodeBexp *bexp1 = $1;
                 NodeMarkerM *M = $3;
@@ -741,23 +742,49 @@ num :   INTEGERNUM                      {
 
 call : ID '(' call_args ')'             {
         $$=new NodeExpression("CALL",concatList(concatList(concatList($1,$2),$3),$4));
-        //todo import $x to pointers
-
+        NodeExpression *call = $$;
+        NodeToken *id = $1;
+        NodeArgsList *call_args = $3;
 
         FunctionEntry* funcEntry = funcTable.find(id->value);
         if(funcEntry == nullptr)
-            semantic_error(...);
+            semantic_error("called an undeclared function");
+
+        //store Caller's registers (all varScopeTables)
+        varTable.storeIds();
         //store $RA
+        code.emit("STORI", $RA, $SP, to_string(0));
         //store $FP
-        varTable.front().storeIds();
-        //advance $SP by funcEntry->props.size() + 2
+        code.emit("STORI", $FP, $SP, to_string(1));
+        //assign $FP to point on prev $FP
+        code.emit("ADD2I", $SP, $SP, to_string(1));
+        code.emit("COPYI", $FP, $SP);
+        //store arguments
+        int i = 1;
+        for(argDeclaration argIt : funcEntry->props.args){
+                string type = (argIt->type == eINT) ? "I" : "F";
+                code.emit(string("STOR")+type, TODO: when do these args get variables?, $SP, to_string(i));
+        }
+        //set $SP below arguments
+        code.emit("ADD2I", $SP, $SP, to_string(funcEntry->props.size()+1));
 
         //jump
+        string L = funcEntry->getPlace(0); //arg is don't care - not for backpatching
+        code.emit("JLINK", L);
+        
+        // continue
+        //return from callee
         varTable.front().loadIds();
         //restore $SP, $FP
         //restore $RA, update $SP--
-        call.place = VariableTable.newTemp(funcEntry->props.type);
-        //todo assign valuet to new place
+        
+        //store the return value, non-void return value
+        if(funcEntry->props.type == eINT){
+                call->place = VariableTable.newTemp(eINT);
+                code.emit("COPYI", call->place, $RT_I);
+        } else if(funcEntry->props.type == eFLOAT){
+                call->place = VariableTable.newTemp(eFLOAT);
+                code.emit("COPYF", call->place, $RT_F);
         }
 ;
 

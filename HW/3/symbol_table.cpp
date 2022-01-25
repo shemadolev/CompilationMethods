@@ -80,7 +80,12 @@ TypedVarScopeTable::resetTmps(){
 
 int 
 TypedVarScopeTable::getLastVarOffest(){
-    return _curVarOffset;
+    return _curVarOffset-1; //last reg that stores variable
+}
+
+int 
+TypedVarScopeTable::getLastTmpOffest(){
+    return _curTmpOffset+1; //last reg that stores tmp
 }
 
 /**
@@ -122,6 +127,17 @@ VariableTable::lookupVarTableList(varEntry& var, string id){
 void 
 VariableTable::setFunctionApi(list<argDeclaration> &args){
     functionArgs = args;
+}
+
+void 
+VariableTable::storeIds(){
+    // get the offset of named & temp from each int/float table, for i: store all in mem
+    _tables.front().storeIds();
+}
+
+void 
+VariableTable::loadIds(){
+    _tables.front().loadIds();
 }
 
 
@@ -180,7 +196,7 @@ FunctionTable::insert(FunctionProps& funcProps){
     // get a pointer to the funcEntry in the map
     auto it = _functionTable.find(funcProps.id);
     assert(it != _functionTable.end());
-    _current = &it->second;
+    return &it->second;
 }
 
 FunctionEntry* 
@@ -188,18 +204,43 @@ FunctionTable::getCurrent(){
     return _current;
 }
 
-int 
-storeIds(){
-    //get the offset of named & temp from each int/float table, for i: store all in mem
-    // int intNamed = 
-    // NOTE: didn't we said that there's no need to store temps?
-
-    
-
-
+void
+FunctionTable::setCurrent(FunctionEntry *funcEntry){
+    _current = funcEntry;
 }
 
-int 
-loadIds(){
-    
+/**
+ * @brief Emit the ASM code line for storing the registers in range & 
+ *          Update the $SP to the next available block in the stack.
+ * 
+ * @param firstReg 
+ * @param lastReg 
+ * @param table_type 
+ */
+void emitStoresIds(int firstReg, int lastReg, idTypes table_type){
+    string type = (table_type == eINT) ? "I" : "F";
+    int regs_num = lastReg - firstReg + 1;
+    //Store registers
+    for (int i=0; i<regs_num; i++){
+        code.emit(string("STOR")+type, type+to_string(i), $SP, to_string(i));
+    }
+    //Update $SP
+    code.emit("ADD2I", $SP, $SP, regs_num);
+}
+
+void 
+VarScopeTable::storeIds(){
+    // int vars
+    emitStoresIds(string("I")+to_string(SAVED_REGS_INT), string("I")+to_string(intTable.getLastVarOffest()), eINT);
+    // float vars
+    emitStoresIds(string("F")+to_string(SAVED_REGS_FLOAT), string("F")+to_string(floatTable.getLastVarOffest()), eFLOAT);
+    // int tmps
+    emitStoresIds(string("I")+to_string(intTable.getLastTmpOffest()), string("I")+to_string(intTable.getSize()), eINT);
+    // float tmps
+    emitStoresIds(string("F")+to_string(floatTable.getLastTmpOffest()), string("F")+to_string(floatTable.getSize()), eFLOAT);
+}
+
+void 
+VarScopeTable::loadIds(){
+
 }

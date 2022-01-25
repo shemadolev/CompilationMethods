@@ -70,8 +70,14 @@ public:
      */
     void resetTmps();
 
+    /**
+     * @brief store the variables & temporaries. emits STORE ASM functions
+     */
     void storeIds();
 
+    /**
+     * @brief load the variables & temporaries. emits LOAD ASM functions
+     */
     void loadIds();
 
 };
@@ -128,6 +134,18 @@ public:
      * @brief Get the Last Var Offest pointer.
      */
     int getLastVarOffest();
+
+    /**
+     * @brief Get the Last Tmp Offest pointer.
+     */
+    int getLastTmpOffest();
+
+    /**
+     * @brief Get the Size of registers array
+     * 
+     * @return int 
+     */
+    int getSize();
 };
 
 class VariableTable{
@@ -167,9 +185,15 @@ public:
      */
     void setFunctionApi(list<argDeclaration> &args);
     
-    int storeIds();
+    /**
+     * @brief Execute storeIds of _tables.head VarScopeTable 
+     */
+    void storeIds();
 
-    int loadIds();
+    /**
+     * @brief Execute storeIds of _tables.head VarScopeTable 
+     */
+    void loadIds();
 
 };
 
@@ -242,7 +266,7 @@ public:
     FunctionEntry* find(string id);
 
     /**
-     * @brief Insert new function entry. Updates the 'current' function.
+     * @brief Insert new function entry.
      */
     void insert(FunctionProps& funcProps);
 
@@ -252,6 +276,12 @@ public:
      * @return FunctionEntry* 
      */
     FunctionEntry* getCurrent();
+
+    /**
+     * @brief Set the funcEntry as the current function
+     * @param funcEntry 
+     */
+    void setCurrent(FunctionEntry* funcEntry);
 };
 
 #endif

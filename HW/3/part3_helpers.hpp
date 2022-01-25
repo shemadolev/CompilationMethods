@@ -85,15 +85,6 @@ public:
     CodeLineList falselist;
 };
 
-//Not a node
-class argDeclaration{
-public:
-    string id;
-    idTypes type;
-
-    argDeclaration(string id, idTypes type) : id(id), type(type){}
-};
-
 class NodeDeclaration : public NodeSymbol{
 public:
     list<string> idList;
@@ -120,6 +111,14 @@ class NodeMarkerN : public NodeSymbol{
 public:
     CodeLineList nextlist;
     NodeMarkerN(); //todo use global code pointer: emit goto
+};
+
+class argDeclaration{
+public:
+    string id;
+    idTypes type;
+
+    argDeclaration(string id, idTypes type) : id(id), type(type){}
 };
 
 /**
