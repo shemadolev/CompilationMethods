@@ -22,66 +22,6 @@ public:
     idTypes type;
 };
 
-class VarScopeTable{
-protected:
-    TypedVarScopeTable intTable;
-    TypedVarScopeTable floatTable;
-public:
-
-    /**
-     * @brief Construct a new Var Scope Table object 
-     */
-    VarScopeTable();
-
-    /**
-     * @brief Construct a new Var Scope Table object, that is an inner scope of a given table
-     * 
-     * @param prevTable Previous table (containing scope)
-     */
-    VarScopeTable(VarScopeTable& prevTable);
-
-    /**
-     * @brief Allocate a new temporary register to be used until next entrance/exit of a block.
-     *          We assume enough registers are available.
-     * @param type - type of the register needed.
-     * @return string - Register ("-1" indicates an error).
-     */
-    string newTemp(idTypes type);
-    
-    /**
-     * @brief Allocate a new register for a given variable id.
-     *          We assume that there isn't stack overflow. 
-     * @param id - Identifier of the variable 
-     * @param type - Type of the variable (can be eFLOAT/eINT)
-     * @return string - Register ("-1" indicates an error)
-     */
-    string newVar(string id, idTypes type);
-
-    /**
-     * @brief Search id and get the Var object
-     * @param var - pointer for the returned entry 
-     * @param id - looked-up id
-     * @return true/false - found the entry
-     */
-    bool lookup(VarEntry& var, string id);
-
-    /**
-     * @brief remove the temporary register in its innet TypedVarScopeTables
-     */
-    void resetTmps();
-
-    /**
-     * @brief store the variables & temporaries. emits STORE ASM functions
-     */
-    void storeIds();
-
-    /**
-     * @brief load the variables & temporaries. emits LOAD ASM functions
-     */
-    void loadIds();
-
-};
-
 class TypedVarScopeTable{
 protected:
     int _curVarOffset;
@@ -146,6 +86,66 @@ public:
      * @return int 
      */
     int getSize();
+};
+
+class VarScopeTable{
+protected:
+    TypedVarScopeTable intTable;
+    TypedVarScopeTable floatTable;
+public:
+
+    /**
+     * @brief Construct a new Var Scope Table object 
+     */
+    VarScopeTable();
+
+    /**
+     * @brief Construct a new Var Scope Table object, that is an inner scope of a given table
+     * 
+     * @param prevTable Previous table (containing scope)
+     */
+    VarScopeTable(VarScopeTable& prevTable);
+
+    /**
+     * @brief Allocate a new temporary register to be used until next entrance/exit of a block.
+     *          We assume enough registers are available.
+     * @param type - type of the register needed.
+     * @return string - Register ("-1" indicates an error).
+     */
+    string newTemp(idTypes type);
+    
+    /**
+     * @brief Allocate a new register for a given variable id.
+     *          We assume that there isn't stack overflow. 
+     * @param id - Identifier of the variable 
+     * @param type - Type of the variable (can be eFLOAT/eINT)
+     * @return string - Register ("-1" indicates an error)
+     */
+    string newVar(string id, idTypes type);
+
+    /**
+     * @brief Search id and get the Var object
+     * @param var - pointer for the returned entry 
+     * @param id - looked-up id
+     * @return true/false - found the entry
+     */
+    bool lookup(VarEntry& var, string id);
+
+    /**
+     * @brief remove the temporary register in its innet TypedVarScopeTables
+     */
+    void resetTmps();
+
+    /**
+     * @brief store the variables & temporaries. emits STORE ASM functions
+     */
+    void storeIds();
+
+    /**
+     * @brief load the variables & temporaries. emits LOAD ASM functions
+     */
+    void loadIds();
+
 };
 
 class VariableTable{

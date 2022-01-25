@@ -125,6 +125,6 @@ int main (int argc, char **argv) {
 }
 
 void operational_error(const char* err){
-    cout << "Operational error: " << err <<endl;
+    cerr << "Operational error: " << err <<endl;
     exit(9);
 }

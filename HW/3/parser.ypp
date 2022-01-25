@@ -54,7 +54,10 @@
 
 %%
 
-program : fdefs                         {parseTree=new NodeSymbol("PROGRAM",$1);}
+program : fdefs                         {
+    parseTree=new NodeSymbol("PROGRAM",$1);
+    code->emit("HALT");
+    }
 ;
 
 fdefs : /* epsilon */                   {$$=new NodeSymbol("FDEFS", EPSILON);}
@@ -653,10 +656,11 @@ exp :   exp ADDOP exp 	                {
             NodeType *type = $2;
             NodeExpression *exp1 = $4;
 
-            if(type->typeValue == eVOID)
-                semantic_error("can't cast to void");
-            if(exp1->expType == eVOID)
-                semantic_error("can't cast from void");
+            //todo Asked in forum. Anyway, looks like casting to void is legal.
+            // if(type->typeValue == eVOID)
+            //     semantic_error("can't cast to void");
+            // if(exp1->expType == eVOID)
+            //     semantic_error("can't cast from void");
 
             if(type->typeValue == exp1->expType){
                 //No cast needed
@@ -819,16 +823,16 @@ N : /*epsilon*/                         {$$=new NodeMarkerN();}
 %%
 
 void unexpected_error(const char* err){
-    cout << err << endl;
+    cerr << err << endl;
     exit(10);
 }
 
 void semantic_error(const char* err){
-    cout << "Semantic error: " err << "in line number " yylineno <<endl;
+    cerr << "Semantic error: " err << "in line number " yylineno <<endl;
     exit(3)
 }
 
 void yyerror(const char*) {
-    cout << "Syntax error: '" << yytext << "' in line number " << yylineno << endl;
+    cerr << "Syntax error: '" << yytext << "' in line number " << yylineno << endl;
     exit(2);
 }
