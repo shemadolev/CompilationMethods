@@ -12,6 +12,7 @@
 #include <tuple>
 #include <list>
 #include <cassert>
+#include <exception>
 
 using namespace std;
 

@@ -1,4 +1,3 @@
-#include "code_class.hpp"
 #include "part3_helpers.hpp"
 
 CodeClass::CodeClass(){}

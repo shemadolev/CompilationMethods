@@ -1,11 +1,6 @@
 /* 046266 Compilation Methods, EE Faculty, Technion                        */
 /* part2_helpers.c - Helper functions for project part 2 - implementation  */
-#include <stdio.h>
 #include "part3_helpers.hpp"
-#include "code_class.hpp"
-#include "symbol_table.hpp"
-#include <exception>
-
 
 extern ParserNode *parseTree; /* Root of parse tree. Defined in the parser. */
 extern FunctionTable funcTable; //defined in parser

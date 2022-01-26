@@ -1,5 +1,4 @@
-#include "symbol_table.hpp"
-#include "code_class.hpp"
+#include "part3_helpers.hpp"
 
 extern CodeClass code; //defined in parser
 
