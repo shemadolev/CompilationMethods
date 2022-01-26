@@ -697,7 +697,7 @@ exp :   exp ADDOP exp 	                {
                 VarEntry idEntry;
                 bool found = varTable.lookupVarTableList(idEntry, id->value);
                 if(!found)
-                    semantic_error("tried evaluating undeclared variable");
+                    semantic_error(string("tried evaluating undeclared variable '") + id->value + "'");
 
                 string type = (idEntry.type == eINT) ? "I" : "F";
                 string temp = varTable.front().newTemp(idEntry.type);
@@ -854,13 +854,13 @@ N : /*epsilon*/                         {
 
 %%
 
-void unexpected_error(const char* err){
+void unexpected_error(string err){
     cerr << err << endl;
     exit(10);
 }
 
-void semantic_error(const char* err){
-    cerr << "Semantic error: " << err << "in line number " << yylineno <<endl;
+void semantic_error(string err){
+    cerr << "Semantic error: " << err << " in line number " << yylineno <<endl;
     exit(3);
 }
 
