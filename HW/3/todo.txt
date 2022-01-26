@@ -11,6 +11,4 @@ _____________________________
 - Optimization: when parsing exp->num, we can skip assignment of temp register, and just assign the known value into exp.knownValue
     But this means, that whenever accessing exp from now on, we first need to check if knownValue exists.
 
-- header injenction (in main)
-
 - PDF

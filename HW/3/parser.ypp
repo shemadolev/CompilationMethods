@@ -159,12 +159,10 @@ func_arglist :  func_arglist ',' dcl    {
 blk : '{'                             { 
                 varTable.push();
                 if(varTable.functionArgs.size() > 0){
-                    int i = FUNC_ARGS_OFFSET;
-                    for(ArgDeclaration arg : functionArgs){ //Place function args are in the first scope
-                        string argFunc = newTable.newVar(arg.id, arg.type);
-                        code.emit(string("LOAD") + (arg.type == eINT) ? "I" : "F", argFunc, $FP, i);
-                        i++;
+                    for(ArgDeclaration arg : varTable.functionArgs){ //Place function args are in the first scope
+                        newTable.newVar(arg.id, arg.type);
                     }
+                    code.emit("ADD2I",$SP,$SP,varTable.functionArgs.size() * VAR_SIZE);
                     varTable.functionArgs.clear();
                 }
         } 
@@ -248,6 +246,7 @@ stmt :  dcl ';'                         {
                         semantic_error("declaration of an already declared variable within the block");                     
                     varTable.front().newVar(id, dcl->idType);
                 }
+                code.emit("ADD2I",$SP,$SP,dcl->idList.size() * VAR_SIZE);
         }
         | assn                          {$$=new NodeStatement("STMT",$1);}
         | exp ';'                       {$$=new NodeStatement("STMT",concatList($1,$2));}
@@ -358,7 +357,9 @@ read : READ '(' lval ')' ';'            {
                 
                 // lval can't be void - it's guarrnteed at this point
                 string type = (lval->expType == eINT) ? "I" : "F";
-                code.emit(string("COPY")+type, lval->place, exp->place);                
+                string temp = varTable.newTemp(lval->expType);
+                code.emit(string("READ")+type, temp);
+                code.emit(string("STOR")+type, temp, lval->place, 0);
         } 
 ;
 
@@ -372,7 +373,8 @@ assn : lval ASSIGN exp ';'              {
                         semantic_error("assignment of different types");
                 // lval can't be void - it's guarrnteed at this point
                 string type = (lval->expType == eINT) ? "I" : "F";
-                code.emit(string("COPY")+type, lval->place, exp->place);
+
+                code.emit(string("STOR")+type, exp->place, lval->place, 0);
         } 
 ;
 
@@ -385,12 +387,13 @@ lval : ID                               {
                 VarEntry idEntry;
                 bool found = varTable.lookupVarTableList(idEntry, id->value);
                 if(!found)
-                        semantic_error("accessed undeclared variable");
-                if(lval->expType == eVOID)
-                        semantic_error("can't assign/read void expressions");
+                    semantic_error("accessed undeclared variable");
+                
+                string addressReg = varTable.newTemp(eINT);
+                code->emit("ADD2I",addressReg, $DP, idEntry->offset);
 
                 lval->expType = idEntry->type;
-                lval->place = place;
+                lval->place = addressReg;
         }
 ;       
 
@@ -656,17 +659,15 @@ exp :   exp ADDOP exp 	                {
             NodeType *type = $2;
             NodeExpression *exp1 = $4;
 
-            //todo Asked in forum. Anyway, looks like casting to void is legal.
-            // if(type->typeValue == eVOID)
-            //     semantic_error("can't cast to void");
-            // if(exp1->expType == eVOID)
-            //     semantic_error("can't cast from void");
-
             if(type->typeValue == exp1->expType){
                 //No cast needed
                 exp->place = exp1->place;
                 exp->expType = exp1->expType;
             } else {
+                if(type->typeValue == eVOID)
+                    semantic_error("can't cast to void");
+                if(exp1->expType == eVOID)
+                    semantic_error("can't cast from void");
                 if(type->typeValue == eINT){
                     exp->place = varTable.front().newTemp(eINT);
                     code.emit("CFTOI", exp->place, exp1->place);
@@ -686,8 +687,13 @@ exp :   exp ADDOP exp 	                {
                 bool found = varTable.lookupVarTableList(idEntry, id->value);
                 if(!found)
                     semantic_error("tried evaluating undeclared variable");
+
+                string type = (idEntry->type == eINT) ? "I" : "F";
+                string temp = varTable.newTemp(idEntry->type);
+                code.emit(string("LOAD")+type, temp, $DP, idEntry->offset);
+
                 exp->expType = idEntry.type;
-                exp->place = idEntry.place;
+                exp->place = temp.place;
         }
         | num                           {
                 $$=new NodeExpression("EXP",$1);
@@ -740,10 +746,11 @@ call : ID '(' call_args ')'             {
             semantic_error("wrong number of arguments passed to function");
 
         varTable.storeIds(); //for each var: Mem[$SP++] = var
-        code.emit("STORI", $RA, $SP, "0"); //Mem[$SP] = $RA
-        code.emit("STORI", $FP, $SP, "1"); //Mem[$SP+1] = $FP
-        
-        code.emit("ADD2I", $FP, $SP, "1");
+        code.emit("STORI", $RA, $SP, 0); //Mem[$SP] = $RA
+        code.emit("STORI", $DP, $SP, 1); //Mem[$SP+1] = $DP
+        code.emit("STORI", $FP, $SP, 2); //Mem[$SP+2] = $FP
+
+        code.emit("ADD2I", $FP, $SP, 2);
         //store arguments
         
         for(int i = FUNC_ARGS_OFFSET, auto argIt = funcEntry->props.args.begin(), auto expArg = call_args->expList.begin();
@@ -758,6 +765,7 @@ call : ID '(' call_args ')'             {
         }
         //set $SP below arguments
         code.emit("ADD2I", $SP, $FP, funcEntry->props.size()+FUNC_ARGS_OFFSET);
+        code.emit("COPYI", $DP, $SP);
 
         //jump
         string L = funcEntry->getPlace(code.nextQuad());
@@ -768,10 +776,13 @@ call : ID '(' call_args ')'             {
         //restore $SP, $FP
         code.emit("COPYI", $SP, $FP); //$SP = $FP
         code.emit("LOADI", $FP, $FP); //Mem[$SP+1] = $FP
-        code.emit("SUBTI", $SP, 1); //$SP-- 
+        code.emit("SUBTI", $SP, 2); //$SP-=2 
         code.emit("LOADI", $RA, $SP, 0); //$RA = Mem[$SP]
+        code.emit("LOADI", $RA, $SP, 1); //$DP = Mem[$SP+1]
         varTable.loadIds();  //for each var: var = Mem[--$SP]
         
+
+        call->expType = funcEntry->props.type;
         //store the return value, non-void return value
         if(funcEntry->props.type == eINT){
                 call->place = VariableTable.newTemp(eINT);
