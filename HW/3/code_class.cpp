@@ -1,26 +1,6 @@
 #include "code_class.hpp"
 #include "part3_helpers.hpp"
 
-string CodeClass::spreadString(string str) {
-    return str;
-}
-
-string CodeClass::spreadString(int num) {
-    return to_string(num);
-}
-
-template<typename T, typename... Args>
-string CodeClass::spreadString(T t, Args... args) {
-    return spreadString(t) + string(" ") + spreadString(args...) ;
-}
-
-template<typename... Args>
-int CodeClass::emit(Args... args){
-    string code = spreadString(args...);
-    codeVec.push_back(code);
-    return codeVec.size();
-}
-
 int CodeClass::nextQuad(){
     return codeVec.size() + 1;
 }

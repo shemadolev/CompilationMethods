@@ -8,6 +8,7 @@
 #include <fstream>
 
 #include "code_class.hpp"
+#include "symbol_table.hpp"
 
 using namespace std;
 

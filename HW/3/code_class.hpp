@@ -29,11 +29,26 @@ class CodeClass {
 protected:
 	vector<string> codeVec;
 
-	string spreadString(string str);
-	string spreadString(int num);
+	string spreadString(string str) {
+		return str;
+	}
+
+	string spreadString(int num) {
+		return to_string(num);
+	}
 
 	template<typename T, typename... Args>
-	string spreadString(T t, Args... args);
+	string spreadString(T t, Args... args) {
+		return spreadString(t) + string(" ") + spreadString(args...) ;
+	}
+
+	template<typename... Args>
+	int emit(Args... args){
+		string code = spreadString(args...);
+		codeVec.push_back(code);
+		return codeVec.size();
+	}
+
 public:
 
 	/**
