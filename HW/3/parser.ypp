@@ -240,7 +240,7 @@ stlist : stlist M stmt                    {
                 NodeMarkerM *M=dynamic_cast<NodeMarkerM*>($2);
                 NodeStatement *stmt=dynamic_cast<NodeStatement*>($3);
 
-                code.backpatch(stlist1.nextlist, M->quad);
+                code.backpatch(stlist1->nextlist, M->quad);
                 stlist->nextlist.merge(stmt->nextlist);
                 stlist->breaklist.merge(stmt->breaklist);
                 stlist->breaklist.merge(stlist1->breaklist);
@@ -441,10 +441,10 @@ cntrl : IF bexp THEN M stmt ELSE N M stmt     {
                 NodeStatement *cntrl = dynamic_cast<NodeStatement*>($$);
                 NodeBexp *bexp = dynamic_cast<NodeBexp*>($2);
                 NodeMarkerM *M1 = dynamic_cast<NodeMarkerM*>($4);
-                NodeBexp *stmt1 = dynamic_cast<NodeBexp*>($5);
+                NodeStatement *stmt1 = dynamic_cast<NodeStatement*>($5);
                 NodeMarkerN *N = dynamic_cast<NodeMarkerN*>($7);
                 NodeMarkerM *M2 = dynamic_cast<NodeMarkerM*>($8);
-                NodeBexp *stmt2 = dynamic_cast<NodeBexp*>($9);
+                NodeStatement *stmt2 = dynamic_cast<NodeStatement*>($9);
                 
                 code.backpatch(bexp->truelist, M1->quad);
                 code.backpatch(bexp->falselist, M2->quad);
