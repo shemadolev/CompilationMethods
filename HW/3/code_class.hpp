@@ -75,6 +75,4 @@ public:
 	void print(ofstream& file);
 };
 
-
-
 #endif

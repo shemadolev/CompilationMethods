@@ -36,6 +36,11 @@ using namespace std;
 #define RT_F "F0"
 
 #define FUNC_ARGS_OFFSET 1
+#define SAVED_REGS_INT 4
+#define SAVED_REGS_FLOAT 1
+
+//Size of variable in bytes
+#define VAR_SIZE 4
 
 enum idTypes {eINT, eFLOAT, eVOID};
 
@@ -198,13 +203,7 @@ ParserNode *concatList(ParserNode *listHead,ParserNode *newItem);
  * 
  * @param err Error message
  */
-void operational_error(const char* err){
-
-#define SAVED_REGS_INT 4
-#define SAVED_REGS_FLOAT 1
-
-//Size of variable in bytes
-#define VAR_SIZE 4
+void operational_error(const char* err);
 
 class VarEntry{
 public:
