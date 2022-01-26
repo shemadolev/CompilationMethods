@@ -39,6 +39,8 @@ protected:
 
 public:
 
+	CodeClass();
+
 	/**
 	 * @brief Emit code
 	 * 
