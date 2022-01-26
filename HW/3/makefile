@@ -10,4 +10,4 @@ part3: lex.yy.c parser.tab.cpp code_class.cpp part3_helpers.cpp symbol_table.cpp
 	g++ -std=c++11 -o rx-cc parser.tab.cpp lex.yy.c part3_helpers.cpp code_class.cpp symbol_table.cpp
 
 clean:
-	rm -f *.o parser.tab.cpp lex.yy.c parser.tab.h .*gch rx-cc
+	rm -f *.o parser.tab.cpp lex.yy.c parser.tab.h *.gch rx-cc
