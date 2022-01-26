@@ -85,7 +85,7 @@ public:
     NodeSymbol(string type, ParserNode *child);
     ~NodeSymbol();
 
-    void dumpParseTree(int depth);
+    virtual void dumpParseTree(int depth);
 };
 
 /**
@@ -97,7 +97,7 @@ class NodeToken : public ParserNode{
 public:
     NodeToken(string type);
     NodeToken(string type, string value);
-    void dumpParseTree(int depth);
+    virtual void dumpParseTree(int depth);
 };
 
 class NodeExpression : public NodeSymbol{
