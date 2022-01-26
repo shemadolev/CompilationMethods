@@ -63,9 +63,10 @@ TypedVarScopeTable::emitLoadIds(){
     }
 }
 
-void
-TypedVarScopeTable::freeStack(){
-    code.emit(string("SUBTI ") + SP + " " + SP + " " + to_string(_varEntries.size() * VAR_SIZE));
+
+int
+TypedVarScopeTable::getVarCount(){
+    return _curVarOffset - startingIndex;
 }
 
 /**
@@ -117,8 +118,9 @@ VarScopeTable::loadIds(){
 
 void
 VarScopeTable::freeStack(){
-    floatTable.freeStack();
-    intTable.freeStack();
+    int freeCount = floatTable.getVarCount() + intTable.getVarCount();
+    if(freeCount > 0)
+        code.emit(string("SUBTI ") + SP + " " + SP + " " + to_string(freeCount * VAR_SIZE));
 }
 
 /**

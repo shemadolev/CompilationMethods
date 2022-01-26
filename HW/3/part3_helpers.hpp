@@ -347,23 +347,6 @@ public:
      */
     void resetTmps();
 
-    // /**
-    //  * @brief Get the Last Var Offest pointer.
-    //  */
-    // int getLastVarOffest();
-
-    // /**
-    //  * @brief Get the Last Tmp Offest pointer.
-    //  */
-    // int getLastTmpOffest();
-
-    /**
-     * @brief Get the Size of registers array
-     * 
-     * @return int 
-     */
-    int getSize();
-
     /**
      * @brief Emit the ASM code line for storing the registers in range & 
      *          Update the SP to the next available block in the stack.
@@ -377,10 +360,11 @@ public:
     void emitStoreIds();
 
     /**
-     * @brief De-allocate stack space for vars
+     * @brief Get the number of allocated vars in this scope
      * 
+     * @return int 
      */
-    void freeStack();
+    int getVarCount();
 };
 
 class VarScopeTable{
