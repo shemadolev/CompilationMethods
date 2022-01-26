@@ -2,6 +2,7 @@
     #include <iostream>
     #include "part3_helpers.hpp"
     #include <list>
+    #include <algorithm>
     using namespace std;
 
     extern int yylex();
@@ -132,7 +133,7 @@ func_api : type ID '(' func_args ')'    {
 
 func_args : func_arglist                {
                 $$=new NodeFuncArgs();
-                NodeFuncArgs *func_args = dynamic_cast<NodeFuncApi*>($$);
+                NodeFuncArgs *func_args = dynamic_cast<NodeFuncArgs*>($$);
                 NodeFuncArgs *func_arglist = dynamic_cast<NodeFuncArgs*>($1);
 
                 func_args->argList = func_arglist->argList;
@@ -235,7 +236,7 @@ type :  INT                             {
 
 stlist : stlist M stmt                    {
                 $$=new NodeStatement();
-                NodeStatement *stlist=$$;
+                NodeStatement *stlist=dynamic_cast<NodeStatement*>($$);
                 NodeStatement *stlist1=dynamic_cast<NodeStatement*>($1);
                 NodeMarkerM *M=dynamic_cast<NodeMarkerM*>($2);
                 NodeStatement *stmt=dynamic_cast<NodeStatement*>($3);
@@ -755,7 +756,7 @@ call : ID '(' call_args ')'             {
         FunctionEntry* funcEntry = funcTable.find(id->value);
         if(funcEntry == nullptr)
             semantic_error("called an undeclared function");
-        if(call_args->exprList.size() != funcEntry->props.args.size())
+        if(call_args->expList.size() != funcEntry->props.args.size())
             semantic_error("wrong number of arguments passed to function");
 
         varTable.storeIds(); //for each var: Mem[SP++] = var
@@ -811,7 +812,7 @@ call_args : call_arglist                {
                 NodeCallArgs *call_args = dynamic_cast<NodeCallArgs*>($$);
                 NodeCallArgs *call_arglist = dynamic_cast<NodeCallArgs*>($1);
 
-                call_args->exprList = call_arglist->exprList;
+                call_args->expList = call_arglist->expList;
             }
             |/* epsilon */              {$$=new NodeSymbol();} 
 ;
@@ -824,8 +825,8 @@ call_arglist :  call_arglist ',' exp    {
                 
                 if(exp->expType == eVOID)
                     semantic_error("can't pass argument of type 'void' to a function");
-                call_arglist->exprList = call_arglist1->exprList;
-                call_arglist->exprList.push_back(*exp);
+                call_arglist->expList = call_arglist1->expList;
+                call_arglist->expList.push_back(*exp);
         }
         | exp                           {
                 $$=new NodeCallArgs();
@@ -834,7 +835,7 @@ call_arglist :  call_arglist ',' exp    {
 
                 if(exp->expType == eVOID)
                     semantic_error("can't pass argument of type 'void' to a function");
-                call_arglist->exprList.push_back(*exp);
+                call_arglist->expList.push_back(*exp);
         }
 ;
 

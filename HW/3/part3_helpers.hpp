@@ -205,7 +205,7 @@ public:
 
 class NodeCallArgs : public NodeSymbol{
 public:
-    list<NodeExpression> exprList;
+    list<NodeExpression> expList;
 };
 
 class NodeFuncArgs : public NodeSymbol{
