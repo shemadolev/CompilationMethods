@@ -172,56 +172,86 @@ public:
 
 class NodeExpression : public NodeSymbol{
 public:
+    NodeExpression(){
+        cout << "NodeExpression" << endl;
+    }
     idTypes expType;
     string place;
 };
 
 class NodeType : public NodeSymbol{
 public:
+    NodeType(){
+        cout << "NodeType" << endl;
+    }
     idTypes typeValue;
 };
 
 class NodeStatement : public NodeSymbol{
 public:
+    NodeStatement(){
+        cout << "NodeStatement" << endl;
+    }
     CodeLineList nextlist;
     CodeLineList breaklist;
 };
 
 class NodeBexp : public NodeSymbol{
 public:
+    NodeBexp(){
+        cout << "NodeBexp" << endl;
+    }
     CodeLineList truelist;
     CodeLineList falselist;
 };
 
 class NodeDeclaration : public NodeSymbol{
 public:
+    NodeDeclaration(){
+        cout << "NodeDeclaration" << endl;
+    }
     list<string> idList;
     idTypes idType;
 };
 
 class NodeFuncApi : public NodeSymbol{
 public:
+    NodeFuncApi(){
+        cout << "NodeFuncApi" << endl;
+    }
     FunctionProps funcProps;
 };
 
 class NodeCallArgs : public NodeSymbol{
 public:
+    NodeCallArgs(){
+        cout << "NodeCallArgs" << endl;
+    }
     list<NodeExpression> expList;
 };
 
 class NodeFuncArgs : public NodeSymbol{
 public:
+    NodeFuncArgs(){
+        cout << "NodeFuncArgs" << endl;
+    }
     list<ArgDeclaration> argList;
 };
 
 
 class NodeMarkerM : public NodeSymbol{
 public:
+    NodeMarkerM(){
+        cout << "NodeMarkerM" << endl;
+    }
     int quad;
 };
 
 class NodeMarkerN : public NodeSymbol{
 public:
+    NodeMarkerN(){
+        cout << "NodeMarkerN" << endl;
+    }
     CodeLineList nextlist;
 };
 

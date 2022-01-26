@@ -40,8 +40,12 @@ NodeSymbol::~NodeSymbol(){
   delete child;
 }
 
-NodeToken::NodeToken(string type) : ParserNode(type) {}
-NodeToken::NodeToken(string type, string value) : ParserNode(type), value(value){}
+NodeToken::NodeToken(string type) : ParserNode(type) {
+  cout << "token: " << type << endl;
+}
+NodeToken::NodeToken(string type, string value) : ParserNode(type), value(value){
+  cout << "token: " << type << ":" << value << endl;
+}
 
 
 void NodeToken::dumpParseTree(int depth){
