@@ -209,7 +209,7 @@ dcl :   ID ':' type                     {
                 NodeDeclaration *dcl1 = dynamic_cast<NodeDeclaration*>($3);
 
                 //Check if previously decalred same name
-                if (std::find(std::begin(dcl1->idList), std::end(dcl1->idList), id->value) != std::end(mylist))
+                if (std::find(std::begin(dcl1->idList), std::end(dcl1->idList), id->value) != std::end(dcl1->idList))
                     semantic_error("Can't redecalre same variable name");
 
                 dcl->idType = dcl1->idType;
