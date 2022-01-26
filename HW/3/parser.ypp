@@ -460,7 +460,7 @@ cntrl : IF bexp THEN M stmt ELSE N M stmt     {
                 NodeStatement *cntrl = dynamic_cast<NodeStatement*>($$);
                 NodeBexp *bexp = dynamic_cast<NodeBexp*>($2);
                 NodeMarkerM *M = dynamic_cast<NodeMarkerM*>($4);
-                NodeBexp *stmt = dynamic_cast<NodeBexp*>($5);
+                NodeStatement *stmt = dynamic_cast<NodeStatement*>($5);
                 
                 code.backpatch(bexp->truelist, M->quad);
                 cntrl->nextlist.merge(bexp->falselist);
