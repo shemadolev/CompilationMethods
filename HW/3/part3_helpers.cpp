@@ -8,6 +8,24 @@ extern CodeClass code; //defined in parser
 
 extern int yyparse (void);
 
+string_code RelopHit (std::string const& inString) {
+    if (inString == "==") return eEq;
+    if (inString == "<>") return eNeq;
+    if (inString == "<") return eLt;
+    if (inString == "<=") return eLtEq;
+    if (inString == ">") return eGt;
+    if (inString == ">=") return eGtEq;
+    return eDefault;
+}
+
+string_code ArithHit (std::string const& inString) {
+    if (inString == "+") return eAdd;
+    if (inString == "-") return eSub;
+    if (inString == "*") return eMul;
+    if (inString == "/") return eDiv;
+    return eDefault;
+}
+
 ParserNode::ParserNode(string type) : type(type) {}
 ParserNode::ParserNode(string type, ParserNode *sibling) : type(type), sibling(sibling) {}
 ParserNode::~ParserNode(){

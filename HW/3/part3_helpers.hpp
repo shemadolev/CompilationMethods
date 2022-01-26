@@ -217,13 +217,11 @@ public:
 class NodeMarkerM : public NodeSymbol{
 public:
     int quad;
-    NodeMarkerM(); //todo use global code pointer: store quad
 };
 
 class NodeMarkerN : public NodeSymbol{
 public:
     CodeLineList nextlist;
-    NodeMarkerN(); //todo use global code pointer: emit goto
 };
 
 /**
@@ -243,23 +241,9 @@ enum string_code {
     eDefault
 };
 
-string_code RelopHit (std::string const& inString) {
-    if (inString == "==") return eEq;
-    if (inString == "<>") return eNeq;
-    if (inString == "<") return eLt;
-    if (inString == "<=") return eLtEq;
-    if (inString == ">") return eGt;
-    if (inString == ">=") return eGtEq;
-    return eDefault;
-}
+string_code RelopHit (std::string const& inString);
 
-string_code ArithHit (std::string const& inString) {
-    if (inString == "+") return eAdd;
-    if (inString == "-") return eSub;
-    if (inString == "*") return eMul;
-    if (inString == "/") return eDiv;
-    return eDefault;
-}
+string_code ArithHit (std::string const& inString);
 
 //Macro for a special "epsilon" symbol node
 #define EPSILON new NodeToken("EPSILON")
