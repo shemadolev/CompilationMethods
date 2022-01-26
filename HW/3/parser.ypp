@@ -19,17 +19,17 @@
     FunctionTable funcTable;
     
     //return address pointer
-    #define $RA "I0"
+    #define RA "I0"
     //frame start pointer
-    #define $FP "I1"
+    #define FP "I1"
     //stack pointer (next write pointer in stack)
-    #define $SP "I2"
+    #define SP "I2"
     //return int type
-    #define $RT_I "I3"
+    #define RT_I "I3"
     //declaration pointer
-    #define $DP "I4"
+    #define DP "I4"
     //return float type
-    #define $RT_F "F0"
+    #define RT_F "F0"
 
 %}
 
@@ -175,7 +175,7 @@ blk : '{'                             {
                     for(ArgDeclaration arg : varTable.functionArgs){ //Place function args are in the first scope
                         newTable.newVar(arg.id, arg.type);
                     }
-                    code.emit("ADD2I",$SP,$SP,varTable.functionArgs.size() * VAR_SIZE);
+                    code.emit("ADD2I",SP,SP,varTable.functionArgs.size() * VAR_SIZE);
                     varTable.functionArgs.clear();
                 }
         } 
@@ -259,7 +259,7 @@ stmt :  dcl ';'                         {
                         semantic_error("declaration of an already declared variable within the block");                     
                     varTable.front().newVar(id, dcl->idType);
                 }
-                code.emit("ADD2I",$SP,$SP,dcl->idList.size() * VAR_SIZE);
+                code.emit("ADD2I",SP,SP,dcl->idList.size() * VAR_SIZE);
         }
         | assn                          {$$=new NodeStatement("STMT",$1);}
         | exp ';'                       {$$=new NodeStatement("STMT",concatList($1,$2));}
@@ -305,9 +305,9 @@ return : RETURN exp ';'                 {
 
             //Store return value in "return register"
             if(exp->expType == eINT)
-                code.emit("COPYI", $RT_I, exp->place);
+                code.emit("COPYI", RT_I, exp->place);
             else if(exp->expType == eFLOAT)
-                code.emit("COPYF", $RT_F, exp->place);
+                code.emit("COPYF", RT_F, exp->place);
 
             code.emit("RETRN");
         }
@@ -403,7 +403,7 @@ lval : ID                               {
                     semantic_error("accessed undeclared variable");
                 
                 string addressReg = varTable.newTemp(eINT);
-                code->emit("ADD2I",addressReg, $DP, idEntry->offset);
+                code->emit("ADD2I",addressReg, DP, idEntry->offset);
 
                 lval->expType = idEntry->type;
                 lval->place = addressReg;
@@ -703,7 +703,7 @@ exp :   exp ADDOP exp 	                {
 
                 string type = (idEntry->type == eINT) ? "I" : "F";
                 string temp = varTable.newTemp(idEntry->type);
-                code.emit(string("LOAD")+type, temp, $DP, idEntry->offset);
+                code.emit(string("LOAD")+type, temp, DP, idEntry->offset);
 
                 exp->expType = idEntry.type;
                 exp->place = temp.place;
@@ -758,12 +758,12 @@ call : ID '(' call_args ')'             {
         if(call_args->exprList.size() != funcEntry->props.args.size())
             semantic_error("wrong number of arguments passed to function");
 
-        varTable.storeIds(); //for each var: Mem[$SP++] = var
-        code.emit("STORI", $RA, $SP, 0); //Mem[$SP] = $RA
-        code.emit("STORI", $DP, $SP, 1); //Mem[$SP+1] = $DP
-        code.emit("STORI", $FP, $SP, 2); //Mem[$SP+2] = $FP
+        varTable.storeIds(); //for each var: Mem[SP++] = var
+        code.emit("STORI", RA, SP, 0); //Mem[SP] = RA
+        code.emit("STORI", DP, SP, 1); //Mem[SP+1] = DP
+        code.emit("STORI", FP, SP, 2); //Mem[SP+2] = FP
 
-        code.emit("ADD2I", $FP, $SP, 2);
+        code.emit("ADD2I", FP, SP, 2);
         //store arguments
         
         for(int i = FUNC_ARGS_OFFSET, auto argIt = funcEntry->props.args.begin(), auto expArg = call_args->expList.begin();
@@ -773,12 +773,12 @@ call : ID '(' call_args ')'             {
                 semantic_error("wrong type of argument passed to function");
 
             string type = (argIt->type == eINT) ? "I" : "F";
-            code.emit(string("STOR")+type, expArg->place, $FP, i);
+            code.emit(string("STOR")+type, expArg->place, FP, i);
             i++;
         }
-        //set $SP below arguments
-        code.emit("ADD2I", $SP, $FP, funcEntry->props.size()+FUNC_ARGS_OFFSET);
-        code.emit("COPYI", $DP, $SP);
+        //set SP below arguments
+        code.emit("ADD2I", SP, FP, funcEntry->props.size()+FUNC_ARGS_OFFSET);
+        code.emit("COPYI", DP, SP);
 
         //jump
         string L = funcEntry->getPlace(code.nextQuad());
@@ -786,23 +786,23 @@ call : ID '(' call_args ')'             {
         
         //return from callee
         
-        //restore $SP, $FP
-        code.emit("COPYI", $SP, $FP); //$SP = $FP
-        code.emit("LOADI", $FP, $FP); //Mem[$SP+1] = $FP
-        code.emit("SUBTI", $SP, 2); //$SP-=2 
-        code.emit("LOADI", $RA, $SP, 0); //$RA = Mem[$SP]
-        code.emit("LOADI", $RA, $SP, 1); //$DP = Mem[$SP+1]
-        varTable.loadIds();  //for each var: var = Mem[--$SP]
+        //restore SP, FP
+        code.emit("COPYI", SP, FP); //SP = FP
+        code.emit("LOADI", FP, FP); //Mem[SP+1] = FP
+        code.emit("SUBTI", SP, 2); //SP-=2 
+        code.emit("LOADI", RA, SP, 0); //RA = Mem[SP]
+        code.emit("LOADI", RA, SP, 1); //DP = Mem[SP+1]
+        varTable.loadIds();  //for each var: var = Mem[--SP]
         
 
         call->expType = funcEntry->props.type;
         //store the return value, non-void return value
         if(funcEntry->props.type == eINT){
                 call->place = VariableTable.newTemp(eINT);
-                code.emit("COPYI", call->place, $RT_I);
+                code.emit("COPYI", call->place, RT_I);
         } else if(funcEntry->props.type == eFLOAT){
                 call->place = VariableTable.newTemp(eFLOAT);
-                code.emit("COPYF", call->place, $RT_F);
+                code.emit("COPYF", call->place, RT_F);
         }
 }
 ;

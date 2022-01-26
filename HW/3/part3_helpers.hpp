@@ -17,17 +17,17 @@ using namespace std;
 
 
 //return address pointer
-#define $RA "I0"
+#define RA "I0"
 //frame start pointer
-#define $FP "I1"
+#define FP "I1"
 //stack pointer (next write pointer in stack)
-#define $SP "I2"
+#define SP "I2"
 //return int type
-#define $RT_I "I3"
+#define RT_I "I3"
 //declaration pointer
-#define $DP "I4"
+#define DP "I4"
 //return float type
-#define $RT_F "F0"
+#define RT_F "F0"
 
 #define FUNC_ARGS_OFFSET 1
 

@@ -54,7 +54,7 @@ public:
     /**
      * @brief Allocate a new var for specific id
      * 
-     * @param int The offset from $SP for the new variable
+     * @param int The offset from SP for the new variable
      * @return VarEntry& Allocated new var.
      */
     int newVar(string id);
@@ -91,13 +91,13 @@ public:
 
     /**
      * @brief Emit the ASM code line for storing the registers in range & 
-     *          Update the $SP to the next available block in the stack.
+     *          Update the SP to the next available block in the stack.
      */
     void emitLoadIds();
 
     /**
      * @brief Emit the ASM code line for storing the registers in range & 
-     *          Update the $SP to the next available block in the stack.
+     *          Update the SP to the next available block in the stack.
      */
     void emitStoreIds();
 
