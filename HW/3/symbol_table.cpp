@@ -93,7 +93,7 @@ bool
 VarScopeTable::lookup(VarEntry& var, string id){
     bool inIntTable = intTable.lookup(var, id);
     bool inFloatTable = floatTable.lookup(var, id);
-    assert(inIntTable && inFloatTable);
+    assert(!(inIntTable && inFloatTable));
     return inIntTable || inFloatTable;
 }
 
