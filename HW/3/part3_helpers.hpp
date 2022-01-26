@@ -76,10 +76,15 @@ class CodeClass {
 protected:
 	vector<string> codeVec;
 
-	string spreadString(string str) {
+    template<typename T>
+	string spreadString(T str) {
 		return str;
 	}
-
+    
+    template<typename T, typename... Args>
+    string spreadString(T t, Args... args) {
+        return spreadString(t) + string(" ") + spreadString(args...) ;
+    }
 public:
 
 	CodeClass();
