@@ -81,7 +81,7 @@ fdefs : /* epsilon */                   {$$=new NodeSymbol("FDEFS", EPSILON);}
                 if(funcEntry != nullptr){
                     funcEntry = funcTable.insert(func_api->funcProps);
                 } else { //found
-                    if(!funcEntry.matchExisting(func_api->funcProps))
+                    if(!funcEntry->matchExisting(func_api->funcProps))
                         semantic_error("duplicate declaration of function with different API");
                     //override args to ensure correct arg naming
                     funcEntry->props.args = func_api->funcProps.args;
@@ -107,7 +107,7 @@ fdefs : /* epsilon */                   {$$=new NodeSymbol("FDEFS", EPSILON);}
                 if(funcEntry != nullptr){
                     funcTable.insert(func_api->funcProps);
                 } else { //found
-                    if(!funcEntry.matchExisting(func_api->funcProps)){
+                    if(!funcEntry->matchExisting(func_api->funcProps)){
                         semantic_error("duplicate declaration of function with different API");
                     } 
                 }
