@@ -121,13 +121,13 @@ VarScopeTable::freeStack(){
     intTable.freeStack();
 }
 
-
 /**
  * VariableTable implementations
  */
 void 
 VariableTable::push(){
-    _tables.push_front(VarScopeTable());
+    VarScopeTable newTable;
+    _tables.push_front(newTable);
 }
 
 void 
