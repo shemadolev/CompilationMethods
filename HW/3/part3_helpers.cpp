@@ -88,10 +88,16 @@ int main (int argc, char **argv) {
     yydebug=1;
 #endif
     try{
+      extern FILE *yyin;
+      // Open the input file, pass to bison 
+      yyin = fopen(argv[1], "r");
+      if (yyin == NULL) {
+        operational_error("can't open input file");
+      }
       rc = yyparse();
       if (rc == 0) { // Parsed successfully
-          if(PRINT_PARSE_TREE)
-            parseTree->dumpParseTree();
+          // if(PRINT_PARSE_TREE)
+            // parseTree->dumpParseTree();
           //Create output file
           ofstream outFile;
           string outputName = argv[1];
