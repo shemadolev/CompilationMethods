@@ -97,7 +97,7 @@ cout <<"1" <<endl;
 cout <<"end mid-rule fdefs" <<endl;
         } blk            {
                 $$=new NodeSymbol();
-                NodeStatement *blk = dynamic_cast<NodeStatement*>($3);
+                NodeStatement *blk = dynamic_cast<NodeStatement*>($4);
 
                 if(!blk->breaklist.empty())
                     semantic_error("break statement not within loop");
@@ -175,9 +175,9 @@ func_arglist :  func_arglist ',' dcl    {
 ;
 
 blk : '{'                             { 
-cout << "0varTable.push()" <<endl;                
-varTable.push();
-cout << "1varTable.push()" <<endl;
+                cout << "0varTable.push()" <<endl;//debug       
+                varTable.push();
+                cout << "1varTable.push()" <<endl;//debug
                 if(varTable.functionArgs.size() > 0){
                     for(ArgDeclaration arg : varTable.functionArgs){ //Place function args are in the first scope
                         varTable.front().newVar(arg.id, arg.type);
@@ -189,14 +189,14 @@ cout << "1varTable.push()" <<endl;
                 $$=new NodeStatement();
                 NodeStatement *blk = dynamic_cast<NodeStatement*>($$);
                 NodeStatement *stlist = dynamic_cast<NodeStatement*>($3);
-cout <<"list passing"<<endl;
-		if(stlist == nullptr)
-			cout << "oh no" <<endl;
+                cout <<"list passing"<<endl; //debug
+		if(stlist == nullptr)//debug
+			cout << "oh no" <<endl;//debug
                 blk->nextlist = stlist->nextlist;
                 blk->breaklist = stlist->breaklist;
-cout <<"about to pop"<<endl;
+                cout <<"about to pop"<<endl;//debug
                 varTable.pop();
-cout <<"popped"<<endl;
+                cout <<"popped"<<endl;//debug
         } 
 ;
 
