@@ -848,9 +848,9 @@ M : /*epsilon*/                         {
 ;
 
 N : /*epsilon*/                         {
-        NodeMarkerM *N = new NodeMarkerN();
+        NodeMarkerN *N = new NodeMarkerN();
         N->nextlist.push_back(code.nextQuad());
-        code->emit("UJUMP -1");
+        code.emit("UJUMP -1");
         $$=N;
 }
 ;
