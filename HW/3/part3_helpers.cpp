@@ -18,7 +18,6 @@ void ParserNode::dumpParseTree(){
   dumpParseTree(0);
 }
 
-NodeSymbol::NodeSymbol(string type, ParserNode *child) : ParserNode(type), child(child) {}
 NodeSymbol::~NodeSymbol(){
   delete child;
 }
