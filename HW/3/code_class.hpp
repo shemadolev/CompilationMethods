@@ -37,18 +37,6 @@ protected:
 		return to_string(num);
 	}
 
-	template<typename T, typename... Args>
-	string spreadString(T t, Args... args) {
-		return spreadString(t) + string(" ") + spreadString(args...) ;
-	}
-
-	template<typename... Args>
-	int emit(Args... args){
-		string code = spreadString(args...);
-		codeVec.push_back(code);
-		return codeVec.size();
-	}
-
 public:
 
 	/**
@@ -59,7 +47,11 @@ public:
 	 * @return int Line number of emitted code
 	 */
 	template<typename... Args>
-	int emit(Args... args);
+	int emit(Args... args){
+		string code = spreadString(args...);
+		codeVec.push_back(code);
+		return codeVec.size();
+	}
 
 	/**
 	 * @brief Get next line number of code
