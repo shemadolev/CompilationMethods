@@ -114,7 +114,8 @@ fdefs : /* epsilon */                   {$$=new NodeSymbol("FDEFS", EPSILON);}
 ;
 
 func_api : type ID '(' func_args ')'    {
-                $$=new NodeFuncApi("FUNC_API",(ParserNode*)concatList(concatList(concatList(concatList($1,$2),$3),$4),$5));
+                // $$=new NodeFuncApi("FUNC_API",(ParserNode*)concatList(concatList(concatList(concatList($1,$2),$3),$4),$5));
+                $$ = new NodeFuncApi();
                 NodeFuncApi* func_api = $$;
                 NodeType *type = dynamic_cast<NodeType*>($1);
                 NodeToken *id = dynamic_cast<NodeToken*>($2);
@@ -123,7 +124,7 @@ func_api : type ID '(' func_args ')'    {
                 FunctionProps funcProps = {
                     type->typeValue,
                     id->value,
-                    func_args->argsList
+                    func_args->exprList
                 };
                 func_api->funcProps = funcProps;
             } 
@@ -134,7 +135,7 @@ func_args : func_arglist                {
                 NodeArgsList *func_args = $$;
                 NodeArgsList *func_arglist = dynamic_cast<NodeArgsList*>($1);
 
-                func_args->argsList = func_arglist->argsList;
+                func_args->exprList = func_arglist->exprList;
             }       
             | /* epsilon */             {$$=new NodeArgsList("FUNC_ARGS", EPSILON);}
 ;
@@ -145,15 +146,15 @@ func_arglist :  func_arglist ',' dcl    {
                 NodeArgsList *func_arglist1 = dynamic_cast<NodeArgsList*>($1);
                 NodeDeclaration *dcl = dynamic_cast<NodeDeclaration*>($3);
 
-                func_arglist->argsList = func_arglist1->argsList;
+                func_arglist->exprList = func_arglist1->exprList;
                 for(string id : dcl->idList) {
                     //check duplicate arg names
-                    for(ArgDeclaration argIt : func_arglist->argsList){
+                    for(ArgDeclaration argIt : func_arglist->exprList){
                         if(argIt.id == id)
                             semantic_error("Can't redecalre same variable name");
                     }
                     ArgDeclaration arg = {id, dcl->idType};
-                    func_arglist->argsList.push_back(arg);
+                    func_arglist->exprList.push_back(arg);
                 }
         } 
         | dcl                   {
@@ -163,7 +164,7 @@ func_arglist :  func_arglist ',' dcl    {
 
                 for(string id : dcl->idList){
                     ArgDeclaration arg= {id, dcl->idType};
-                    func_arglist->argsList.push_back(arg);
+                    func_arglist->exprList.push_back(arg);
                 }
         }
 ;

@@ -133,6 +133,7 @@ public:
     string type;
     ParserNode *sibling;
 
+    ParserNode(){}
     ParserNode(string type);
     ParserNode(string type, ParserNode *sibling);
 
@@ -149,7 +150,7 @@ public:
 class NodeSymbol : public ParserNode{
     ParserNode *child;
 public:
-    NodeSymbol(string type, ParserNode *child);
+    // NodeSymbol(string type, ParserNode *child);
     ~NodeSymbol();
 
     virtual void dumpParseTree(int depth);
