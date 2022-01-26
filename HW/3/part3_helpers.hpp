@@ -130,13 +130,10 @@ public:
     NodeMarkerN(); //todo use global code pointer: emit goto
 };
 
-class ArgDeclaration{
-public:
+typedef struct _ArgDeclaration {
     string id;
     idTypes type;
-
-    ArgDeclaration(string id, idTypes type) : id(id), type(type){}
-};
+} ArgDeclaration;
 
 /**
  * @brief code to use when there is a string compare hit

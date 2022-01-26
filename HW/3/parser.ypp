@@ -153,7 +153,7 @@ func_arglist :  func_arglist ',' dcl    {
                         if(argIt.id == id)
                             semantic_error("Can't redecalre same variable name");
                     }
-                    ArgDeclaration arg(id, dcl->idType);
+                    ArgDeclaration arg = {id, dcl->idType};
                     func_arglist->argsList.push_back(arg);
                 }
         } 
@@ -163,7 +163,7 @@ func_arglist :  func_arglist ',' dcl    {
                 NodeDeclaration *dcl = $1;
 
                 for(string id : dcl->idList){
-                    ArgDeclaration arg(id, dcl->idType);
+                    ArgDeclaration arg= {id, dcl->idType};
                     func_arglist->argsList.push_back(arg);
                 }
         }
