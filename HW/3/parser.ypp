@@ -840,10 +840,19 @@ call_arglist :  call_arglist ',' exp    {
         }
 ;
 
-M : /*epsilon*/                         {$$=new NodeMarkerM();}
+M : /*epsilon*/                         {
+        NodeMarkerM *M = new NodeMarkerM();
+        M->quad = code.nextQuad();
+        $$=M;
+}
 ;
 
-N : /*epsilon*/                         {$$=new NodeMarkerN();}
+N : /*epsilon*/                         {
+        NodeMarkerM *N = new NodeMarkerN();
+        N->nextlist.push_back(code.nextQuad());
+        code->emit("UJUMP -1");
+        $$=N;
+}
 ;
 
 %%
