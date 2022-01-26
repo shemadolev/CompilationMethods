@@ -249,11 +249,13 @@ string FunctionTable::getUnimplementedCalls(){
     string str;
     for (auto const& funcIt : _functionTable){
         FunctionEntry func = funcIt.second;
-        str += " ";
-        str += func.props.id;
-        for(int line : func.callList){
-            str += ",";
-            str += to_string(line);
+        if(func.callList.size() != 0){
+            str += " ";
+            str += func.props.id;
+            for(int line : func.callList){
+                str += ",";
+                str += to_string(line);
+            }
         }
     }
     return str;
