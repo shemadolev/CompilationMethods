@@ -209,11 +209,10 @@ dcl :   ID ':' type                     {
                 NodeDeclaration *dcl1 = dynamic_cast<NodeDeclaration*>($3);
 
                 //Check if previously decalred same name
-                if(dcl1->idList.find(id->value) != dcl1->idList.end()){
+                if (std::find(std::begin(dcl1->idList), std::end(dcl1->idList), id->value) != std::end(mylist))
                     semantic_error("Can't redecalre same variable name");
-                }
 
-                dcl->idType = dcl1->typeValue;
+                dcl->idType = dcl1->idType;
                 dcl->idList = dcl1->idList;
                 dcl->idList.push_front(id->value);
         }
@@ -853,7 +852,7 @@ void unexpected_error(const char* err){
 }
 
 void semantic_error(const char* err){
-    cerr << "Semantic error: " << err << "in line number " yylineno <<endl;
+    cerr << "Semantic error: " << err << "in line number " << yylineno <<endl;
     exit(3);
 }
 
