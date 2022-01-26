@@ -68,12 +68,12 @@
 %%
 
 program : fdefs                         {
-    parseTree=new NodeSymbol("PROGRAM",$1);
+    parseTree=new NodeSymbol();
     code.emit("HALT");
     }
 ;
 
-fdefs : /* epsilon */                   {$$=new NodeSymbol("FDEFS", EPSILON);}
+fdefs : /* epsilon */                   {$$=new NodeSymbol();}
 	| fdefs func_api {
                 NodeFuncApi *func_api = dynamic_cast<NodeFuncApi*>($2);
                 FunctionEntry* funcEntry = funcTable.find(func_api->funcProps.id);
@@ -90,7 +90,7 @@ fdefs : /* epsilon */                   {$$=new NodeSymbol("FDEFS", EPSILON);}
                 funcTable.setCurrent(funcEntry);
                 funcEntry->define(code.nextQuad());
         } blk            {
-                $$=new NodeSymbol("FDEFS",concatList(concatList($1,$2),$3));
+                $$=new NodeSymbol();
                 NodeStatement *blk = dynamic_cast<NodeStatement*>($3);
 
                 if(!blk->breaklist.empty())
@@ -99,7 +99,7 @@ fdefs : /* epsilon */                   {$$=new NodeSymbol("FDEFS", EPSILON);}
                 code.emit("RETRN"); //fallback, for when not defined
         }
         | fdefs func_api ';'            {
-                $$=new NodeSymbol("FDEFS",concatList(concatList($1,$2),$3));
+                $$=new NodeSymbol();
                 NodeFuncApi *func_api = dynamic_cast<NodeFuncApi*>($2);
 
                 FunctionEntry* funcEntry = funcTable.find(func_api->funcProps.id);
@@ -114,7 +114,7 @@ fdefs : /* epsilon */                   {$$=new NodeSymbol("FDEFS", EPSILON);}
 ;
 
 func_api : type ID '(' func_args ')'    {
-                // $$=new NodeFuncApi("FUNC_API",(ParserNode*)concatList(concatList(concatList(concatList($1,$2),$3),$4),$5));
+                // $$=new NodeFuncApi();
                 $$ = new NodeFuncApi();
                 NodeFuncApi* func_api = $$;
                 NodeType *type = dynamic_cast<NodeType*>($1);
@@ -131,17 +131,17 @@ func_api : type ID '(' func_args ')'    {
 ;
 
 func_args : func_arglist                {
-                $$=new NodeArgsList("FUNC_ARGS",$1);
+                $$=new NodeArgsList();
                 NodeArgsList *func_args = $$;
                 NodeArgsList *func_arglist = dynamic_cast<NodeArgsList*>($1);
 
                 func_args->exprList = func_arglist->exprList;
             }       
-            | /* epsilon */             {$$=new NodeArgsList("FUNC_ARGS", EPSILON);}
+            | /* epsilon */             {$$=new NodeArgsList();}
 ;
 
 func_arglist :  func_arglist ',' dcl    {
-                $$=new NodeArgsList("FUNC_ARGLIST",concatList(concatList($1,$2),$3));
+                $$=new NodeArgsList();
                 NodeArgsList *func_arglist = dynamic_cast<NodeArgsList*>($$);
                 NodeArgsList *func_arglist1 = dynamic_cast<NodeArgsList*>($1);
                 NodeDeclaration *dcl = dynamic_cast<NodeDeclaration*>($3);
@@ -158,7 +158,7 @@ func_arglist :  func_arglist ',' dcl    {
                 }
         } 
         | dcl                   {
-                $$=new NodeArgsList("FUNC_ARGLIST",$1);
+                $$=new NodeArgsList();
                 NodeArgsList *func_arglist = dynamic_cast<NodeArgsList*>($$);
                 NodeDeclaration *dcl = dynamic_cast<NodeDeclaration*>($1);
 
@@ -180,7 +180,7 @@ blk : '{'                             {
                 }
         } 
         stlist '}'                    {
-                $$=new NodeStatement("BLK",concatList(concatList($1,$2),$3));
+                $$=new NodeStatement();
                 NodeStatement *blk = dynamic_cast<NodeStatement*>($$);
                 NodeStatement *stlist = dynamic_cast<NodeStatement*>($1);
 
@@ -192,7 +192,7 @@ blk : '{'                             {
 ;
 
 dcl :   ID ':' type                     {
-                $$=new NodeDeclaration("DCL",concatList(concatList($1,$2),$3));
+                $$=new NodeDeclaration();
                 NodeDeclaration *dcl = dynamic_cast<NodeDeclaration*>($$);
                 NodeToken *id = dynamic_cast<NodeToken*>($1);
                 NodeType *type = dynamic_cast<NodeType*>($3);
@@ -204,7 +204,7 @@ dcl :   ID ':' type                     {
                 dcl->idList.push_front(id->value);
                 }
         | ID ',' dcl                    {
-                &&=new NodeType("DCL",concatList(concatList($1,$2),$3));
+                &&=new NodeType();
                 NodeType *dcl = dynamic_cast<NodeType*>($$);
                 NodeToken *id = dynamic_cast<NodeToken*>($1);
                 NodeType *dcl1 = dynamic_cast<NodeType*>($3);
@@ -221,21 +221,21 @@ dcl :   ID ':' type                     {
 ;
 
 type :  INT                             {
-                $$=new NodeType("TYPE",$1);
+                $$=new NodeType();
                 $$->typeValue = eINT;
         }
         | FLOAT                         {
-                $$=new NodeType("TYPE",$1);
+                $$=new NodeType();
                 $$->typeValue = eFLOAT;
         }
         | VOID                          {
-                $$=new NodeType("TYPE",$1);
+                $$=new NodeType();
                 $$->typeValue = eVOID;
         }
 ;
 
 stlist : stlist M stmt                    {
-                $$=new NodeStatement("STLIST",concatList(concatList($1,$2),$3));
+                $$=new NodeStatement();
                 NodeStatement *stlist=$$;
                 NodeStatement *stlist1=dynamic_cast<NodeStatement*>($1);
                 NodeMarkerM *M=dynamic_cast<NodeMarkerM*>($2);
@@ -246,11 +246,11 @@ stlist : stlist M stmt                    {
                 stlist->breaklist.merge(stmt->breaklist);
                 stlist->breaklist.merge(stlist1->breaklist);
         }
-         |/* epsilon */                 {$$=new NodeSymbol("STLIST", EPSILON);}
+         |/* epsilon */                 {$$=new NodeSymbol();}
 ;
 
 stmt :  dcl ';'                         {
-                $$=new NodeStatement("STMT",concatList($1,$2));
+                $$=new NodeStatement();
                 NodeDeclaration *dcl = dynamic_cast<NodeDeclaration*>($1);
 
                 for(string id : dcl->idList){
@@ -261,21 +261,21 @@ stmt :  dcl ';'                         {
                 }
                 code.emit("ADD2I",SP,SP,dcl->idList.size() * VAR_SIZE);
         }
-        | assn                          {$$=new NodeStatement("STMT",$1);}
-        | exp ';'                       {$$=new NodeStatement("STMT",concatList($1,$2));}
+        | assn                          {$$=new NodeStatement();}
+        | exp ';'                       {$$=new NodeStatement();}
         | cntrl                         {
-                $$=new NodeStatement("STMT",$1);
+                $$=new NodeStatement();
                 NodeStatement *stmt = dynamic_cast<NodeStatement*>($$);
                 NodeStatement *cntrl = dynamic_cast<NodeStatement*>($1); 
 
                 stmt->nextlist = cntrl->nextlist;
                 stmt->breaklist = cntrl->breaklist;
         }
-        | read                          {$$=new NodeStatement("STMT",$1);}
-        | write                         {$$=new NodeStatement("STMT",$1);}
-        | return                        {$$=new NodeStatement("STMT",$1);}
+        | read                          {$$=new NodeStatement();}
+        | write                         {$$=new NodeStatement();}
+        | return                        {$$=new NodeStatement();}
         | blk                           {
-                $$=new NodeStatement("STMT",$1);
+                $$=new NodeStatement();
                 NodeStatement *stmt = dynamic_cast<NodeStatement*>($$);
                 NodeStatement *blk = dynamic_cast<NodeStatement*>($1);
 
@@ -284,7 +284,7 @@ stmt :  dcl ';'                         {
                 
         }
         | BREAK ';'                     {
-                $$=new NodeStatement("STMT",concatList($1,$2));
+                $$=new NodeStatement();
                 NodeStatement *stmt = dynamic_cast<NodeStatement*>($$);
 
                 stmt->breaklist.push_back(code.nextQuad());
@@ -293,7 +293,7 @@ stmt :  dcl ';'                         {
 ;
 
 return : RETURN exp ';'                 {
-            $$=new NodeSymbol("RETURN",concatList(concatList($1,$2),$3));
+            $$=new NodeSymbol();
             NodeExpression *exp = dynamic_cast<NodeExpression*>($2);
             
             //check return type matches function's return type
@@ -312,7 +312,7 @@ return : RETURN exp ';'                 {
             code.emit("RETRN");
         }
         | RETURN ';'                    {
-            $$=new NodeSymbol("RETURN",concatList($1,$2));
+            $$=new NodeSymbol();
 
             if(funcTable.getCurrent()->props.type != eVOID)
                 semantic_error("expected a return argument");
@@ -322,7 +322,7 @@ return : RETURN exp ';'                 {
 ;
 
 write : WRITE '(' exp ')' ';'           {
-                $$=new NodeSymbol("WRITE",concatList(concatList(concatList(concatList($1,$2),$3),$4),$5));
+                $$=new NodeSymbol();
 
                 NodeExpression *exp = dynamic_cast<NodeExpression*>($3);
                 
@@ -335,7 +335,7 @@ write : WRITE '(' exp ')' ';'           {
                 
                 } 
         | WRITE '(' STR ')' ';'         {
-                $$=new NodeSymbol("WRITE",concatList(concatList(concatList(concatList($1,$2),$3),$4),$5));
+                $$=new NodeSymbol();
 
                 NodeToken *strToken = dynamic_cast<NodeToken*>($3);
 
@@ -364,7 +364,7 @@ write : WRITE '(' exp ')' ';'           {
 ;
 
 read : READ '(' lval ')' ';'            {
-                $$=new NodeSymbol("READ",concatList(concatList(concatList(concatList($1,$2),$3),$4),$5));
+                $$=new NodeSymbol();
                 NodeSymbol *read = dynamic_cast<NodeSymbol*>($$);
                 NodeExpression *lval = dynamic_cast<NodeExpression*>($3);
                 
@@ -377,7 +377,7 @@ read : READ '(' lval ')' ';'            {
 ;
 
 assn : lval ASSIGN exp ';'              {
-                $$=new NodeStatement("ASSN",concatList(concatList(concatList($1,$2),$3),$4));
+                $$=new NodeStatement();
                 NodeStatement *assn = dynamic_cast<NodeStatement*>($$);
                 NodeExpression *lval = dynamic_cast<NodeExpression*>($1);
                 NodeExpression *exp1 = dynamic_cast<NodeExpression*>($3);
@@ -392,7 +392,7 @@ assn : lval ASSIGN exp ';'              {
 ;
 
 lval : ID                               {
-                $$ = new NodeExpression("LVAL",id);
+                $$ = new NodeExpression();
                 NodeExpression *lval = dynamic_cast<NodeExpression*>($$);
                 NodeToken *id = dynamic_cast<NodeToken*>($1);
                 
@@ -411,7 +411,7 @@ lval : ID                               {
 ;       
 
 fullwhile : FULL_WHILE N M bexp DO M stmt {
-                $$ = new NodeBexp("FULLWHILE",concatList(concatList(concatList(concatList(concatList(concatList($1,$2),$3),$4)$5)$6)$7));
+                $$ = new NodeBexp();
                 NodeBexp *fullwhile = dynamic_cast<NodeBexp*>($$);
                 NodeMarkerN *N = dynamic_cast<NodeMarkerN*>($2);
                 NodeMarkerM *M1 = dynamic_cast<NodeMarkerM*>($3);
@@ -438,7 +438,7 @@ fullwhile : FULL_WHILE N M bexp DO M stmt {
 ;
 
 cntrl : IF bexp THEN M stmt ELSE N M stmt     {
-                $$ = new NodeStatement("CNTRL",concatList(concatList(concatList(concatList(concatList(concatList(concatList(concatList($1,$2),$3),$4),$5),$6)$7)$8)$9));
+                $$ = new NodeStatement();
                 NodeStatement *cntrl = dynamic_cast<NodeStatement*>($$);
                 NodeBexp *bexp = dynamic_cast<NodeBexp*>($2);
                 NodeMarkerM *M1 = dynamic_cast<NodeMarkerM*>($4);
@@ -457,7 +457,7 @@ cntrl : IF bexp THEN M stmt ELSE N M stmt     {
                 
         } 
         | IF bexp THEN M stmt             {
-                $$ = new NodeStatement("CNTRL",concatList(concatList(concatList(concatList($1,$2),$3),$4)$5));
+                $$ = new NodeStatement();
                 NodeStatement *cntrl = dynamic_cast<NodeStatement*>($$);
                 NodeBexp *bexp = dynamic_cast<NodeBexp*>($2);
                 NodeMarkerM *M = dynamic_cast<NodeMarkerM*>($4);
@@ -470,7 +470,7 @@ cntrl : IF bexp THEN M stmt ELSE N M stmt     {
         
         } 
         | WHILE M bexp DO M stmt            {
-                $$ = new NodeStatement("CNTRL",concatList(concatList(concatList(concatList(concatList($1,$2),$3),$4)$5)$6));
+                $$ = new NodeStatement();
                 NodeStatement *cntrl = dynamic_cast<NodeStatement*>($$);
                 NodeMarkerM *M1 = dynamic_cast<NodeMarkerM*>($2);
                 NodeBexp *bexp = dynamic_cast<NodeBexp*>($3);
@@ -484,7 +484,7 @@ cntrl : IF bexp THEN M stmt ELSE N M stmt     {
                 code.emit("UJUMP", M1->quad); //support "fall through" from stmt
         } 
         | fullwhile                     {
-                $$ = new NodeStatement("CNTRL",$1);
+                $$ = new NodeStatement();
                 NodeStatement *cntrl = dynamic_cast<NodeStatement*>($$);
                 NodeBexp *fullwhile = dynamic_cast<NodeBexp*>($1);
                 
@@ -495,7 +495,7 @@ cntrl : IF bexp THEN M stmt ELSE N M stmt     {
 ;
 
 bexp :  bexp OR M bexp                  {
-                $$ = new NodeBexp("BEXP",concatList(concatList(concatList($1,$2),$3)$4));
+                $$ = new NodeBexp();
                 NodeBexp *bexp = dynamic_cast<NodeBexp*>($$);
                 NodeBexp *bexp1 = dynamic_cast<NodeBexp*>($1);
                 NodeMarkerM *M = dynamic_cast<NodeMarkerM*>($3);
@@ -507,7 +507,7 @@ bexp :  bexp OR M bexp                  {
                 bexp->falselist.merge(bexp2->falselist);
         }
         | bexp AND M bexp               {
-                $$ = new NodeBexp("BEXP",concatList(concatList(concatList($1,$2),$3)$4));
+                $$ = new NodeBexp();
                 NodeBexp *bexp = dynamic_cast<NodeBexp*>($$);
                 NodeBexp *bexp1 = dynamic_cast<NodeBexp*>($1);
                 NodeMarkerM *M = dynamic_cast<NodeMarkerM*>($3);
@@ -519,7 +519,7 @@ bexp :  bexp OR M bexp                  {
                 bexp->falselist.merge(bexp2->falselist);
         }
         | NOT bexp                      {
-                $$ = new NodeBexp("BEXP",concatList($1,$2));
+                $$ = new NodeBexp();
                 NodeBexp *bexp = dynamic_cast<NodeBexp*>($$);        
                 NodeBexp *bexp1 = dynamic_cast<NodeBexp*>($2);        
 
@@ -527,7 +527,7 @@ bexp :  bexp OR M bexp                  {
                 bexp->truelist.merge(bexp1->falselist);
         }
         | exp RELOP exp                 {
-                $$ = new NodeBexp("BEXP",concatList(concatList($1,$2),$3));
+                $$ = new NodeBexp();
                 NodeBexp *bexp = dynamic_cast<NodeBexp*>($$);        
                 NodeExpression *exp1 = dynamic_cast<NodeExpression*>($1);
                 NodeExpression *exp1 = dynamic_cast<NodeExpression*>($3);
@@ -581,7 +581,7 @@ bexp :  bexp OR M bexp                  {
                 
         }
         | '(' bexp ')'                  {
-                $$ = new NodeBexp("BEXP",concatList(concatList($1,$2),$3));
+                $$ = new NodeBexp();
                 NodeBexp *bexp = dynamic_cast<NodeBexp*>($$);        
                 NodeBexp *bexp1 = dynamic_cast<NodeBexp*>($2);
 
@@ -589,7 +589,7 @@ bexp :  bexp OR M bexp                  {
                 bexp->falselist = bexp1->falselist;        
         }
         | fullwhile                     {
-                $$ = new NodeBexp("BEXP",$1);
+                $$ = new NodeBexp();
                 NodeBexp *fullwhile = dynamic_cast<NodeBexp*>($1);
                 NodeBexp *bexp = dynamic_cast<NodeBexp*>($$);        
 
@@ -599,7 +599,7 @@ bexp :  bexp OR M bexp                  {
 ;
 
 exp :   exp ADDOP exp 	                {
-                $$=new NodeExpression("EXP",concatList(concatList($1,$2),$3));
+                $$=new NodeExpression();
                 NodeExpression *exp = dynamic_cast<NodeExpression*>($$);
                 NodeExpression *exp1 = dynamic_cast<NodeExpression*>($1);
                 NodeToken *addop = dynamic_cast<NodeToken*>($2);
@@ -629,7 +629,7 @@ exp :   exp ADDOP exp 	                {
                 exp->place = res;
         }
         | exp MULOP exp                 {
-                $$=new NodeExpression("EXP",concatList(concatList($1,$2),$3));
+                $$=new NodeExpression();
                 NodeExpression *exp = dynamic_cast<NodeExpression*>($$);
                 NodeExpression *exp1 = dynamic_cast<NodeExpression*>($1);
                 NodeToken *mulop = dynamic_cast<NodeToken*>($2);
@@ -659,7 +659,7 @@ exp :   exp ADDOP exp 	                {
                 exp->place = res;
         }
         | '(' exp ')'                   {
-            $$=new NodeExpression("EXP",concatList(concatList($1,$2),$3));
+            $$=new NodeExpression();
             NodeExpression *exp = dynamic_cast<NodeExpression*>($$);
             NodeExpression *exp1 = dynamic_cast<NodeExpression*>($2);
 
@@ -667,7 +667,7 @@ exp :   exp ADDOP exp 	                {
             exp->expType = exp1->expType;
         }
         | '(' type ')' exp              {
-            $$=new NodeExpression("EXP",concatList(concatList(concatList($1,$2),$3),$4));
+            $$=new NodeExpression();
             NodeExpression *exp = dynamic_cast<NodeExpression*>($$);
             NodeType *type = dynamic_cast<NodeType*>($2);
             NodeExpression *exp1 = dynamic_cast<NodeExpression*>($4);
@@ -692,7 +692,7 @@ exp :   exp ADDOP exp 	                {
 
         }
         | ID                            {
-                $$=new NodeExpression("EXP",$1);
+                $$=new NodeExpression();
                 NodeExpression *exp = dynamic_cast<NodeExpression*>($$);
                 NodeToken *id = dynamic_cast<NodeToken*>($1); 
                 
@@ -709,7 +709,7 @@ exp :   exp ADDOP exp 	                {
                 exp->place = temp.place;
         }
         | num                           {
-                $$=new NodeExpression("EXP",$1);
+                $$=new NodeExpression();
                 NodeExpression *exp = dynamic_cast<NodeExpression*>($$);
                 NodeExpression *num = dynamic_cast<NodeExpression*>($1);
 
@@ -717,7 +717,7 @@ exp :   exp ADDOP exp 	                {
                 exp->expType = num->expType;
         }
         | call                          {
-                $$=new NodeExpression("EXP",$1);
+                $$=new NodeExpression();
                 NodeExpression *exp = dynamic_cast<NodeExpression*>($$);
                 NodeExpression *call = dynamic_cast<NodeExpression*>($1);
 
@@ -727,7 +727,7 @@ exp :   exp ADDOP exp 	                {
 ;
 
 num :   INTEGERNUM                      {
-                $$=new NodeExpression("NUM",$1);
+                $$=new NodeExpression();
                 NodeExpression *num = dynamic_cast<NodeExpression*>($$);
                 NodeToken *integer = dynamic_cast<NodeToken*>($1);
 
@@ -736,7 +736,7 @@ num :   INTEGERNUM                      {
                 code.emit("COPYI", num->place , integer->value); 
         }
         | REALNUM                       {
-                $$=new NodeExpression("NUM",$1);
+                $$=new NodeExpression();
                 NodeExpression *num = dynamic_cast<NodeExpression*>($$);
                 NodeToken *real = dynamic_cast<NodeToken*>($1);
 
@@ -747,7 +747,7 @@ num :   INTEGERNUM                      {
 ;
 
 call : ID '(' call_args ')'             {
-        $$=new NodeExpression("CALL",concatList(concatList(concatList($1,$2),$3),$4));
+        $$=new NodeExpression();
         NodeExpression *call = dynamic_cast<NodeExpression*>($$);
         NodeToken *id = dynamic_cast<NodeToken*>($1);
         NodeArgsList *call_args = dynamic_cast<NodeArgsList*>($3);
@@ -808,17 +808,17 @@ call : ID '(' call_args ')'             {
 ;
 
 call_args : call_arglist                {
-                $$=new NodeArgsList("CALL_ARGS",$1);
+                $$=new NodeArgsList();
                 NodeArgsList *call_args = dynamic_cast<NodeArgsList*>($$);
                 NodeArgsList *call_arglist = dynamic_cast<NodeArgsList*>($1);
 
                 call_args->exprList = call_arglist->exprList;
             }
-            |/* epsilon */              {$$=new NodeSymbol("CALL_ARGS", EPSILON);} 
+            |/* epsilon */              {$$=new NodeSymbol();} 
 ;
 
 call_arglist :  call_arglist ',' exp    {
-                $$=new NodeArgsList("CALL_ARGLIST",concatList(concatList($1,$2),$3));
+                $$=new NodeArgsList();
                 NodeArgsList *call_arglist = dynamic_cast<NodeArgsList*>($$);
                 NodeArgsList *call_arglist1 = dynamic_cast<NodeArgsList*>($1);
                 NodeExpression *exp = dynamic_cast<NodeExpression*>($3);
@@ -829,7 +829,7 @@ call_arglist :  call_arglist ',' exp    {
                 call_arglist->exprList.push_back(*exp);
         }
         | exp                           {
-                $$=new NodeArgsList("CALL_ARGLIST",$1);
+                $$=new NodeArgsList();
                 NodeArgsList *call_arglist = dynamic_cast<NodeArgsList*>($$);
                 NodeExpression *exp = dynamic_cast<NodeExpression*>($1);
 
