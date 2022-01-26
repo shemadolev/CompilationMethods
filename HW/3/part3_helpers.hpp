@@ -161,8 +161,8 @@ public:
  * 
  */
 class NodeToken : public ParserNode{
-    string value;
 public:
+    string value;
     NodeToken(string type);
     NodeToken(string type, string value);
     virtual void dumpParseTree(int depth);
