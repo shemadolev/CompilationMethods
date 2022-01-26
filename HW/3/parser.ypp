@@ -115,7 +115,7 @@ fdefs : /* epsilon */                   {$$=new NodeSymbol();}
 
 func_api : type ID '(' func_args ')'    {
                 $$ = new NodeFuncApi();
-                NodeFuncApi* func_api = $$;
+                NodeFuncApi* func_api = dynamic_cast<NodeFuncApi*>($$);
                 NodeType *type = dynamic_cast<NodeType*>($1);
                 NodeToken *id = dynamic_cast<NodeToken*>($2);
                 NodeArgsList *func_args = dynamic_cast<NodeArgsList*>($4);
@@ -131,7 +131,7 @@ func_api : type ID '(' func_args ')'    {
 
 func_args : func_arglist                {
                 $$=new NodeArgsList();
-                NodeArgsList *func_args = $$;
+                NodeArgsList *func_args = dynamic_cast<NodeFuncApi*>($$);
                 NodeArgsList *func_arglist = dynamic_cast<NodeArgsList*>($1);
 
                 func_args->exprList = func_arglist->exprList;
