@@ -6,8 +6,8 @@ extern CodeClass code; //defined in parser
  * TypedVarScopeTable implementations
  */
 
-TypedVarScopeTable::TypedVarScopeTable(int startingIndex, idTypes type):
-        _curVarOffset(0), _curTempOffset(startingIndex),
+TypedVarScopeTable::TypedVarScopeTable(idTypes type):
+        _curVarOffset(0), _curTempOffset((type == eINT) ? SAVED_REGS_INT : SAVED_REGS_FLOAT),
         startingIndex((type == eINT) ? SAVED_REGS_INT : SAVED_REGS_FLOAT), _type(type){
     _typeLetter = (type == eINT) ? "I" : "F";            
 }
@@ -73,7 +73,7 @@ TypedVarScopeTable::freeStack(){
  */
 
 VarScopeTable::VarScopeTable() : 
-    intTable(SAVED_REGS_INT, eINT), floatTable(SAVED_REGS_FLOAT, eFLOAT) {}
+    intTable(eINT), floatTable(eFLOAT) {}
 
 string
 VarScopeTable::newTemp(idTypes type){

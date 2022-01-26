@@ -315,10 +315,9 @@ public:
     /**
      * @brief Construct a new Register Allocator object
      * 
-     * @param startingIndex - the index after the last var in the parent block
      * @param type - the type of the register in this file
      */
-    TypedVarScopeTable(int startingIndex, idTypes type);
+    TypedVarScopeTable(idTypes type);
 
     /**
      * @brief Allocate a new temp var
