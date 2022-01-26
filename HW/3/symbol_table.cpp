@@ -134,6 +134,8 @@ void
 VariableTable::pop(){
     _tables.front().freeStack();
     _tables.pop_front();
+    if(_tables.size())
+        _tables.front().resetTmps();
 }
 
 VarScopeTable& 

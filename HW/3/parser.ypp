@@ -77,10 +77,13 @@ program : fdefs                         {
 
 fdefs : /* epsilon */                   {$$=new NodeSymbol();}
 	| fdefs func_api {
+cout <<"mid-rule fdefs" <<endl;
                 NodeFuncApi *func_api = dynamic_cast<NodeFuncApi*>($2);
                 FunctionEntry* funcEntry = funcTable.find(func_api->funcProps.id);
-                if(funcEntry != nullptr){
-                    funcEntry = funcTable.insert(func_api->funcProps);
+cout <<"1" <<endl;                
+                if(funcEntry == nullptr){
+                cout <<"funcEntry != nullptr\n";
+                funcEntry = funcTable.insert(func_api->funcProps);
                 } else { //found
                     if(!funcEntry->matchExisting(func_api->funcProps))
                         semantic_error("duplicate declaration of function with different API");
@@ -91,6 +94,7 @@ fdefs : /* epsilon */                   {$$=new NodeSymbol();}
                     semantic_error("duplicate definition of a function");
                 funcTable.setCurrent(funcEntry);
                 funcEntry->define(code.nextQuad());
+cout <<"end mid-rule fdefs" <<endl;
         } blk            {
                 $$=new NodeSymbol();
                 NodeStatement *blk = dynamic_cast<NodeStatement*>($3);
@@ -171,7 +175,9 @@ func_arglist :  func_arglist ',' dcl    {
 ;
 
 blk : '{'                             { 
-                varTable.push();
+cout << "0varTable.push()" <<endl;                
+varTable.push();
+cout << "1varTable.push()" <<endl;
                 if(varTable.functionArgs.size() > 0){
                     for(ArgDeclaration arg : varTable.functionArgs){ //Place function args are in the first scope
                         varTable.front().newVar(arg.id, arg.type);
@@ -179,16 +185,18 @@ blk : '{'                             {
                     code.emit("ADD2I",SP,SP,to_string(varTable.functionArgs.size() * VAR_SIZE));
                     varTable.functionArgs.clear();
                 }
-        } 
-        stlist '}'                    {
+        } stlist '}'                    {
                 $$=new NodeStatement();
                 NodeStatement *blk = dynamic_cast<NodeStatement*>($$);
-                NodeStatement *stlist = dynamic_cast<NodeStatement*>($1);
-
+                NodeStatement *stlist = dynamic_cast<NodeStatement*>($3);
+cout <<"list passing"<<endl;
+		if(stlist == nullptr)
+			cout << "oh no" <<endl;
                 blk->nextlist = stlist->nextlist;
                 blk->breaklist = stlist->breaklist;
+cout <<"about to pop"<<endl;
                 varTable.pop();
-                varTable.front().resetTmps();
+cout <<"popped"<<endl;
         } 
 ;
 
@@ -246,7 +254,10 @@ stlist : stlist M stmt                    {
                 stlist->breaklist.merge(stmt->breaklist);
                 stlist->breaklist.merge(stlist1->breaklist);
         }
-         |/* epsilon */                 {$$=new NodeSymbol();}
+         |/* epsilon */                 {
+		$$=new NodeStatement();
+		cout << "epsilon stlist\n";
+}
 ;
 
 stmt :  dcl ';'                         {
