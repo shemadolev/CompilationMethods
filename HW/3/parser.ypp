@@ -14,7 +14,7 @@
     extern const char* yytext;
 
     ParserNode *parseTree; 
-    codeClass code;
+    CodeClass code;
     VariableTable varTable;
     FunctionTable funcTable;
     
