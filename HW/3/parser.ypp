@@ -10,7 +10,6 @@
     void unexpected_error(const char*);
     void semantic_error(const char* err);
 
-
     extern int yylineno;
     extern const char* yytext;
 
@@ -19,19 +18,6 @@
     VariableTable varTable;
     FunctionTable funcTable;
     
-    //return address pointer
-    #define RA "I0"
-    //frame start pointer
-    #define FP "I1"
-    //stack pointer (next write pointer in stack)
-    #define SP "I2"
-    //return int type
-    #define RT_I "I3"
-    //declaration pointer
-    #define DP "I4"
-    //return float type
-    #define RT_F "F0"
-
 %}
 
 // Reserved words 
