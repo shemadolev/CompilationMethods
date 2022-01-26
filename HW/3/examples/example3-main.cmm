@@ -1,0 +1,21 @@
+int foo2();
+int foo(c: int);
+
+void main() {
+a:int;
+b: int;
+c: int;
+
+   a =2;
+   if(foo(a) > a) then {
+     b = 20;
+     c = 10;
+   } else
+   {
+     b = 10;
+     c = 20;
+   }
+
+   write(b);
+   write(c);
+}

@@ -1,0 +1,11 @@
+int gcd  (a,b:int)
+{
+	while (a <> b) do
+    {
+		if(a > b) then
+			return (gcd(a - b,b));
+		else
+			return (gcd(a,b - a));
+    }
+	return(a);
+}

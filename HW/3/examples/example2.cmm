@@ -1,0 +1,22 @@
+int power (c: int, m:int)
+{
+    d:int;
+    if m==0 then return 1;
+    if m==1 then return c;
+    d=power(c,m-1);
+    return d*c;
+}
+
+int power (c: int, m:int);
+
+void main()
+{
+    a:int;
+    b:int;
+    n:int;
+
+    read(a);
+    read(n);
+    b = power (a,n);
+    write(b);
+}
