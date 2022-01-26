@@ -11,14 +11,6 @@ extern ParserNode *parseTree; /* Root of parse tree. Defined in the parser. */
 extern FunctionTable funcTable; //defined in parser
 extern CodeClass code; //defined in parser
 
-bool replace(std::string& str, const std::string& from, const std::string& to) {
-    size_t start_pos = str.find(from);
-    if(start_pos == std::string::npos)
-        return false;
-    str.replace(start_pos, from.length(), to);
-    return true;
-}
-
 extern int yyparse (void);
 
 ParserNode::ParserNode(string type) : type(type) {}

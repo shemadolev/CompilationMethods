@@ -9,6 +9,8 @@
 
 using namespace std;
 
+bool replace(std::string& str, const std::string& from, const std::string& to);
+
 class CodeLineList : public list<int> {
 public:
 	/**

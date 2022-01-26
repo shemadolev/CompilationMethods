@@ -44,8 +44,6 @@ using namespace std;
 
 enum idTypes {eINT, eFLOAT, eVOID};
 
-bool replace(std::string& str, const std::string& from, const std::string& to);
-
 typedef struct _ArgDeclaration {
     string id;
     idTypes type;
