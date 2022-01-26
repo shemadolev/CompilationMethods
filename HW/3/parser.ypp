@@ -437,13 +437,13 @@ fullwhile : FULL_WHILE N M bexp DO M stmt {
         } 
 ;
 
-cntrl : IF bexp THEN M stmt N ELSE M stmt     {
+cntrl : IF bexp THEN M stmt ELSE N M stmt     {
                 $$ = new NodeStatement("CNTRL",concatList(concatList(concatList(concatList(concatList(concatList(concatList(concatList($1,$2),$3),$4),$5),$6)$7)$8)$9));
                 NodeStatement *cntrl = $$;
                 NodeBexp *bexp = $2;
                 NodeMarkerM *M1 = $4;
                 NodeBexp *stmt1 = $5;
-                NodeMarkerN *N = $6;
+                NodeMarkerN *N = $7;
                 NodeMarkerM *M2 = $8;
                 NodeBexp *stmt2 = $9;
                 
