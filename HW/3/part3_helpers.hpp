@@ -69,7 +69,7 @@ public:
     ParserNode(string type);
     ParserNode(string type, ParserNode *sibling);
 
-    ~ParserNode();
+    virtual ~ParserNode(); //enable polymorphism
 
     void dumpParseTree();
     virtual void dumpParseTree(int depth) = 0;
