@@ -1,6 +1,8 @@
 #include "code_class.hpp"
 #include "part3_helpers.hpp"
 
+CodeClass::CodeClass(){}
+
 int CodeClass::nextQuad(){
     return codeVec.size() + 1;
 }
