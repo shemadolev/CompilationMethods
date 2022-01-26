@@ -767,7 +767,8 @@ call : ID '(' call_args ')'             {
         code.emit("ADD2I", FP, SP, "2");
         //store arguments
         int i = FUNC_ARGS_OFFSET;
-        auto argIt = funcEntry->props.args.begin(), expArg = call_args->expList.begin();
+        auto argIt = funcEntry->props.args.begin();
+        auto expArg = call_args->expList.begin();
         for(;argIt != funcEntry->props.args.end();i++, argIt++, expArg++){
             if(expArg->expType != argIt->type)
                 semantic_error("wrong type of argument passed to function");
