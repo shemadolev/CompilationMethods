@@ -1,6 +1,6 @@
 %{
     #include <iostream>
-    #include "part2_helpers.hpp"
+    #include "part3_helpers.hpp"
     #include "code_class.hpp"
     #include "symbol_table.hpp"
     #include <list>
@@ -17,6 +17,19 @@
     codeClass code;
     VariableTable varTable;
     FunctionTable funcTable;
+    
+    //return address pointer
+    #define $RA "I0"
+    //frame start pointer
+    #define $FP "I1"
+    //stack pointer (next write pointer in stack)
+    #define $SP "I2"
+    //return int type
+    #define $RT_I "I3"
+    //declaration pointer
+    #define $DP "I4"
+    //return float type
+    #define $RT_F "F0"
 
 %}
 
@@ -791,6 +804,7 @@ call : ID '(' call_args ')'             {
                 call->place = VariableTable.newTemp(eFLOAT);
                 code.emit("COPYF", call->place, $RT_F);
         }
+}
 ;
 
 call_args : call_arglist                {
@@ -817,7 +831,7 @@ call_arglist :  call_arglist ',' exp    {
         | exp                           {
                 $$=new NodeArgsList("CALL_ARGLIST",$1);
                 NodeArgsList *call_arglist = $$;
-                NodeExpression *exp = $3;
+                NodeExpression *exp = $1;
 
                 if(exp->expType == eVOID)
                     semantic_error("can't pass argument of type 'void' to a function")
