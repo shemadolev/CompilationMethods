@@ -9,6 +9,8 @@
     extern int yylex();
     void yyerror(const char*);
     void unexpected_error(const char*);
+    void semantic_error(const char* err);
+
 
     extern int yylineno;
     extern const char* yytext;
@@ -69,7 +71,7 @@
 
 program : fdefs                         {
     parseTree=new NodeSymbol("PROGRAM",$1);
-    code->emit("HALT");
+    code.emit("HALT");
     }
 ;
 
@@ -114,8 +116,8 @@ fdefs : /* epsilon */                   {$$=new NodeSymbol("FDEFS", EPSILON);}
 ;
 
 func_api : type ID '(' func_args ')'    {
-                $$=new NodeFuncApi("FUNC_API",concatList(concatList(concatList(concatList($1,$2),$3),$4),$5));
-                NodeFuncApi* func_api;
+                $$=new NodeFuncApi("FUNC_API",(ParserNode*)concatList(concatList(concatList(concatList($1,$2),$3),$4),$5));
+                NodeFuncApi* func_api = $$;
                 NodeType *type = dynamic_cast<NodeType*>($1);
                 NodeToken *id = dynamic_cast<NodeToken*>($2);
                 NodeArgsList *func_args = dynamic_cast<NodeArgsList*>($4);
@@ -131,8 +133,8 @@ func_api : type ID '(' func_args ')'    {
 
 func_args : func_arglist                {
                 $$=new NodeArgsList("FUNC_ARGS",$1);
-                NodeArgsList* func_args = $$;
-                NodeArgsList* func_arglist = $1;
+                NodeArgsList *func_args = $$;
+                NodeArgsList *func_arglist = dynamic_cast<NodeArgsList*>($1);
 
                 func_args->argsList = func_arglist->argsList;
             }       
@@ -236,9 +238,9 @@ type :  INT                             {
 stlist : stlist M stmt                    {
                 $$=new NodeStatement("STLIST",concatList(concatList($1,$2),$3));
                 NodeStatement *stlist=$$;
-                NodeStatement *stlist1=$1;
-                NodeMarkerM *M=$2;
-                NodeStatement *stmt=$3;
+                NodeStatement *stlist1=dynamic_cast<NodeStatement*>($1);
+                NodeMarkerM *M=dynamic_cast<NodeMarkerM*>($2);
+                NodeStatement *stmt=dynamic_cast<NodeStatement*>($3);
 
                 code.backpatch(stlist1.nextlist, M->quad);
                 stlist->nextlist.merge(stmt->nextlist);
@@ -402,7 +404,7 @@ lval : ID                               {
                     semantic_error("accessed undeclared variable");
                 
                 string addressReg = varTable.newTemp(eINT);
-                code->emit("ADD2I",addressReg, DP, idEntry->offset);
+                code.emit("ADD2I",addressReg, DP, idEntry->offset);
 
                 lval->expType = idEntry->type;
                 lval->place = addressReg;

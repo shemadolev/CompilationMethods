@@ -27,7 +27,7 @@ void CodeClass::backpatch(CodeLineList lineList, int lineNo){
     string replaceTo = " " + to_string(lineNo);
     for(int codeLine : lineList){
         if(!replace(codeVec[codeLine - 1], replaceFrom, replaceTo)){
-            cerr << "codeClass::backpatch Error parsing line to backpatch:" << endl
+            cerr << "CodeClass::backpatch Error parsing line to backpatch:" << endl
                 << "Line " << codeLine << ": " << codeVec[codeLine - 1] << endl;
             exit(1);
         }
