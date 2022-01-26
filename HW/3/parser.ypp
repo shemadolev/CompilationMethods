@@ -204,9 +204,9 @@ dcl :   ID ':' type                     {
                 }
         | ID ',' dcl                    {
                 &&=new NodeType();
-                NodeType *dcl = dynamic_cast<NodeType*>($$);
+                NodeDeclaration *dcl = dynamic_cast<NodeDeclaration*>($$);
                 NodeToken *id = dynamic_cast<NodeToken*>($1);
-                NodeType *dcl1 = dynamic_cast<NodeType*>($3);
+                NodeDeclaration *dcl1 = dynamic_cast<NodeDeclaration*>($3);
 
                 //Check if previously decalred same name
                 if(dcl1->idList.find(id->value) != dcl1->idList.end()){
@@ -221,15 +221,15 @@ dcl :   ID ':' type                     {
 
 type :  INT                             {
                 $$=new NodeType();
-                $$->typeValue = eINT;
+                ((NodeType*)$$)->typeValue = eINT;
         }
         | FLOAT                         {
                 $$=new NodeType();
-                $$->typeValue = eFLOAT;
+                ((NodeType*)$$)->typeValue = eFLOAT;
         }
         | VOID                          {
                 $$=new NodeType();
-                $$->typeValue = eVOID;
+                ((NodeType*)$$)->typeValue = eVOID;
         }
 ;
 
