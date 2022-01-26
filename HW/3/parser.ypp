@@ -369,7 +369,7 @@ read : READ '(' lval ')' ';'            {
                 
                 // lval can't be void - it's guarrnteed at this point
                 string type = (lval->expType == eINT) ? "I" : "F";
-                string temp = varTable.newTemp(lval->expType);
+                string temp = varTable.front().newTemp(lval->expType);
                 code.emit(string("READ")+type, temp);
                 code.emit(string("STOR")+type, temp, lval->place, 0);
         } 
@@ -401,7 +401,7 @@ lval : ID                               {
                 if(!found)
                     semantic_error("accessed undeclared variable");
                 
-                string addressReg = varTable.newTemp(eINT);
+                string addressReg = varTable.front().newTemp(eINT);
                 code.emit("ADD2I",addressReg, DP, idEntry->offset);
 
                 lval->expType = idEntry->type;
@@ -701,7 +701,7 @@ exp :   exp ADDOP exp 	                {
                     semantic_error("tried evaluating undeclared variable");
 
                 string type = (idEntry->type == eINT) ? "I" : "F";
-                string temp = varTable.newTemp(idEntry->type);
+                string temp = varTable.front().newTemp(idEntry->type);
                 code.emit(string("LOAD")+type, temp, DP, idEntry->offset);
 
                 exp->expType = idEntry.type;
@@ -797,10 +797,10 @@ call : ID '(' call_args ')'             {
         call->expType = funcEntry->props.type;
         //store the return value, non-void return value
         if(funcEntry->props.type == eINT){
-                call->place = VariableTable.newTemp(eINT);
+                call->place = varTable.front().newTemp(eINT);
                 code.emit("COPYI", call->place, RT_I);
         } else if(funcEntry->props.type == eFLOAT){
-                call->place = VariableTable.newTemp(eFLOAT);
+                call->place = varTable.front().newTemp(eFLOAT);
                 code.emit("COPYF", call->place, RT_F);
         }
 }
