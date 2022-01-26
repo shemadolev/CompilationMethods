@@ -4,14 +4,76 @@
 extern CodeClass code; //defined in parser
 
 /**
+ * TypedVarScopeTable implementations
+ */
+
+TypedVarScopeTable::TypedVarScopeTable(int startingIndex, idTypes type):
+        _curVarOffset(0), _curTempOffset(startingIndex),
+        startingIndex((type == eINT) ? SAVED_REGS_INT : SAVED_REGS_FLOAT), _type(type){
+    _typeLetter = (type == eINT) ? "I" : "F";            
+}
+
+string
+TypedVarScopeTable::newTemp(){
+    return _typeLetter + to_string(_curTempOffset++);
+}
+
+int
+TypedVarScopeTable::newVar(string id){
+    int stack_offset = _curVarOffset * VAR_SIZE;
+    _curVarOffset++;
+    _varEntries.insert(pair<string,int>(id,stack_offset));
+    return stack_offset;
+}
+
+bool 
+TypedVarScopeTable::lookup(VarEntry& var, string id){
+    auto it = _varEntries.find(id);
+    if(it != _varEntries.end()){ // id is within the symbol table
+        var.type = _type;
+        var.offset = it->second;
+        return true;
+    }
+    return false;
+}
+
+void
+TypedVarScopeTable::resetTmps(){
+    _curTempOffset = startingIndex;
+}
+
+void
+TypedVarScopeTable::emitStoreIds(){
+    int regs_num = _curTempOffset - startingIndex;
+    //Store registers
+    for (int i=0; i<_curTempOffset; i++){
+        code.emit(string("STOR")+_typeLetter, _typeLetter+to_string(startingIndex + i), $SP, i * VAR_SIZE);
+    }
+    //Update $SP
+    code.emit("ADD2I", $SP, $SP, regs_num * VAR_SIZE);
+}
+void
+TypedVarScopeTable::emitLoadIds(){
+    int regs_num = _curTempOffset - startingIndex;
+    //Update $SP
+    code.emit("SUBTI", $SP, $SP, regs_num * VAR_SIZE);
+    //Store registers
+    for (int i=0; i<_curTempOffset; i++){
+        code.emit(string("LOAD")+_typeLetter, _typeLetter+to_string(startingIndex + i), $SP, i * VAR_SIZE);
+    }
+}
+
+void
+TypedVarScopeTable::freeStack(){
+    code.emit("SUBTI", $SP, $SP, _varEntries.size() * VAR_SIZE);
+}
+
+/**
  * VarScopeTable implementations
  */
 
 VarScopeTable::VarScopeTable() : 
     intTable(SAVED_REGS_INT, eINT), floatTable(SAVED_REGS_FLOAT, eFLOAT) {}
-
-VarScopeTable::VarScopeTable(VarScopeTable& prevTable) : 
-    intTable(prevTable.intTable.getLastVarOffest(), eINT), floatTable(prevTable.floatTable.getLastVarOffest(), eFLOAT) {}
 
 string
 VarScopeTable::newTemp(idTypes type){
@@ -20,10 +82,10 @@ VarScopeTable::newTemp(idTypes type){
     return (type == eINT) ? intTable.newTemp() : floatTable.newTemp();
 }
 
-string
+int
 VarScopeTable::newVar(string id, idTypes type){
     if(type == eVOID)
-        return "-1";
+        return -1;
     return (type == eINT) ? intTable.newVar(id) : floatTable.newVar(id);
 }
 
@@ -41,134 +103,36 @@ VarScopeTable::resetTmps(){
     floatTable.resetTmps();
 }
 
-
-/**
- * @brief Emit the ASM code line for storing the registers in range & 
- *          Update the $SP to the next available block in the stack.
- * 
- * @param firstReg 
- * @param lastReg 
- * @param table_type 
- */
-void emitStoreIds(int firstReg, int lastReg, idTypes table_type){
-    string type = (table_type == eINT) ? "I" : "F";
-    int regs_num = lastReg - firstReg + 1;
-    //Store registers
-    for (int i=0; i<regs_num; i++){
-        code.emit(string("STOR")+type, type+to_string(i), $SP, to_string(i));
-    }
-    //Update $SP
-    code.emit("ADD2I", $SP, $SP, regs_num);
-}
-
 void 
 VarScopeTable::storeIds(){
-    // int vars
-    emitStoreIds(SAVED_REGS_INT, intTable.getLastVarOffest(), eINT);
-    // float vars
-    emitStoreIds(SAVED_REGS_FLOAT, floatTable.getLastVarOffest(), eFLOAT);
-    // int tmps
-    emitStoreIds(intTable.getLastTmpOffest(), intTable.getSize()-1, eINT);
-    // float tmps
-    emitStoreIds(floatTable.getLastTmpOffest(), floatTable.getSize()-1, eFLOAT);
+    intTable.emitStoreIds();
+    floatTable.emitStoreIds();
 }
-
-
-/**
- * @brief Emit the ASM code line for storing the registers in range & 
- *          Update the $SP to the next available block in the stack.
- * 
- * @param firstReg 
- * @param lastReg 
- * @param table_type 
- */
-void emitLoadIds(int firstReg, int lastReg, idTypes table_type){
-    string type = (table_type == eINT) ? "I" : "F";
-    int regs_num = lastReg - firstReg + 1;
-    //Update $SP
-    code.emit("SUBTI", $SP, $SP, regs_num);
-    //Store registers
-    for (int i=0; i<regs_num; i++){
-        code.emit(string("LOAD")+type, type+to_string(i), $SP, to_string(i));
-    }
-}
-
 
 void 
 VarScopeTable::loadIds(){
-    // float tmps
-    emitLoadIds(floatTable.getLastTmpOffest(), floatTable.getSize()-1, eFLOAT);
-    // int tmps
-    emitLoadIds(intTable.getLastTmpOffest(), intTable.getSize()-1, eINT);
-    // float vars
-    emitLoadIds(SAVED_REGS_FLOAT, floatTable.getLastVarOffest(), eFLOAT);
-    // int vars
-    emitLoadIds(SAVED_REGS_INT, intTable.getLastVarOffest(), eINT);
-}
-
-/**
- * TypedVarScopeTable implementations
- */
-
-TypedVarScopeTable::TypedVarScopeTable(int startingIndex, idTypes type):
-        _curVarOffset(startingIndex), _curTempOffset(size-1), _type(type){
-    _typeLetter = (type == eINT) ? "I" : "F";            
-}
-
-string
-TypedVarScopeTable::newTemp(){
-    return _typeLetter + to_string(_curTempOffset--);
-}
-
-string
-TypedVarScopeTable::newVar(string id){
-    _varEntries.insert(pair<string,int>(id,_curVarOffset));
-    return _typeLetter + to_string(_curVarOffset++);
-}
-
-bool 
-TypedVarScopeTable::lookup(VarEntry& var, string id){
-    auto it = _varEntries.find(id);
-    if(it != _varEntries.end()){ // id is within the symbol table
-        var.type = _type;
-        string reg = _typeLetter + to_string(it->second);
-        var.place = reg;
-        return true;
-    }
-    return false;
+    floatTable.emitLoadIds();
+    intTable.emitLoadIds();
 }
 
 void
-TypedVarScopeTable::resetTmps(){
-    _curTempOffset = size-1;
+VarScopeTable::freeStack(){
+    floatTable.freeStack();
+    intTable.freeStack();
 }
 
-int 
-TypedVarScopeTable::getLastVarOffest(){
-    return _curVarOffset-1; //last reg that stores variable
-}
-
-int 
-TypedVarScopeTable::getLastTmpOffest(){
-    return _curTempOffset+1; //last reg that stores tmp
-}
 
 /**
  * VariableTable implementations
  */
 void 
 VariableTable::push(){
-    if(_tables.size() == 0){ 
-        VarScopeTable newTable;
-        _tables.push_front(newTable);
-    } else {
-        VarScopeTable newTable(_tables.front());
-        _tables.push_front(newTable);
-    }
+    _tables.push_front(VarScopeTable());
 }
 
 void 
 VariableTable::pop(){
+    _tables.front().freeStack();
     _tables.pop_front();
 }
 
@@ -207,7 +171,8 @@ VariableTable::loadIds(){
 
 bool
 VariableTable::isInScope(string id){
-    return front().lookup(VarEntry(),id);
+    VarEntry tmp;
+    return front().lookup(tmp,id);
 }
 
 /**

@@ -16,9 +16,12 @@ using namespace std;
 #define SAVED_REGS_INT 4
 #define SAVED_REGS_FLOAT 1
 
+//Size of variable in bytes
+#define VAR_SIZE 4
+
 class VarEntry{
 public:
-    string place;
+    int offset;
     idTypes type;
 };
 
@@ -26,10 +29,10 @@ class TypedVarScopeTable{
 protected:
     int _curVarOffset;
     int _curTempOffset;
+    int startingIndex;
     idTypes _type;
     string _typeLetter;
     map<string,int> _varEntries;
-    const int size = 1024;
 
 public:
 
@@ -50,12 +53,11 @@ public:
 
     /**
      * @brief Allocate a new var for specific id
-     * @exception Will be thrown for taken id. NOTE: happens in ypp file?
      * 
-     * @param id The id of the var
-     * @return VarEntry& Allocated new var. NOTE: seems that it can be void
+     * @param int The offset from $SP for the new variable
+     * @return VarEntry& Allocated new var.
      */
-    string newVar(string id);
+    int newVar(string id);
 
     /**
      * @brief Search id and get the Var object
@@ -70,15 +72,15 @@ public:
      */
     void resetTmps();
 
-    /**
-     * @brief Get the Last Var Offest pointer.
-     */
-    int getLastVarOffest();
+    // /**
+    //  * @brief Get the Last Var Offest pointer.
+    //  */
+    // int getLastVarOffest();
 
-    /**
-     * @brief Get the Last Tmp Offest pointer.
-     */
-    int getLastTmpOffest();
+    // /**
+    //  * @brief Get the Last Tmp Offest pointer.
+    //  */
+    // int getLastTmpOffest();
 
     /**
      * @brief Get the Size of registers array
@@ -86,6 +88,24 @@ public:
      * @return int 
      */
     int getSize();
+
+    /**
+     * @brief Emit the ASM code line for storing the registers in range & 
+     *          Update the $SP to the next available block in the stack.
+     */
+    void emitLoadIds();
+
+    /**
+     * @brief Emit the ASM code line for storing the registers in range & 
+     *          Update the $SP to the next available block in the stack.
+     */
+    void emitStoreIds();
+
+    /**
+     * @brief De-allocate stack space for vars
+     * 
+     */
+    void freeStack();
 };
 
 class VarScopeTable{
@@ -98,13 +118,6 @@ public:
      * @brief Construct a new Var Scope Table object 
      */
     VarScopeTable();
-
-    /**
-     * @brief Construct a new Var Scope Table object, that is an inner scope of a given table
-     * 
-     * @param prevTable Previous table (containing scope)
-     */
-    VarScopeTable(VarScopeTable& prevTable);
 
     /**
      * @brief Allocate a new temporary register to be used until next entrance/exit of a block.
@@ -121,7 +134,7 @@ public:
      * @param type - Type of the variable (can be eFLOAT/eINT)
      * @return string - Register ("-1" indicates an error)
      */
-    string newVar(string id, idTypes type);
+    int newVar(string id, idTypes type);
 
     /**
      * @brief Search id and get the Var object
@@ -145,6 +158,8 @@ public:
      * @brief load the variables & temporaries. emits LOAD ASM functions
      */
     void loadIds();
+
+    void freeStack();
 
 };
 
