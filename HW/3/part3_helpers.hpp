@@ -41,7 +41,16 @@ enum idTypes {eINT, eFLOAT, eVOID};
 
 bool replace(std::string& str, const std::string& from, const std::string& to);
 
+typedef struct _ArgDeclaration {
+    string id;
+    idTypes type;
+} ArgDeclaration;
 
+typedef struct _functionProps {
+    idTypes type;
+    string id;
+    list<ArgDeclaration> args;
+} FunctionProps;
 
 /**
  * @brief Virtual class for parse tree nodes
@@ -136,11 +145,6 @@ public:
     CodeLineList nextlist;
     NodeMarkerN(); //todo use global code pointer: emit goto
 };
-
-typedef struct _ArgDeclaration {
-    string id;
-    idTypes type;
-} ArgDeclaration;
 
 /**
  * @brief code to use when there is a string compare hit
@@ -402,12 +406,6 @@ public:
      */
     bool isInScope(string id);
 };
-
-typedef struct _functionProps {
-    idTypes type;
-    string id;
-    list<ArgDeclaration> args;
-} FunctionProps;
 
 class FunctionEntry{
 protected:
