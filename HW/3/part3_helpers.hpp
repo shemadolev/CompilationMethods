@@ -209,7 +209,7 @@ public:
 
 class NodeMarkerM : public NodeSymbol{
 public:
-    string quad;
+    int quad;
     NodeMarkerM(); //todo use global code pointer: store quad
 };
 

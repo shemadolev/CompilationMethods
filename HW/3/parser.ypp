@@ -381,12 +381,12 @@ assn : lval ASSIGN exp ';'              {
                 NodeExpression *lval = dynamic_cast<NodeExpression*>($1);
                 NodeExpression *exp1 = dynamic_cast<NodeExpression*>($3);
 
-                if(lval->expType != exp->expType)
+                if(lval->expType != exp1->expType)
                         semantic_error("assignment of different types");
                 // lval can't be void - it's guarrnteed at this point
                 string type = (lval->expType == eINT) ? "I" : "F";
 
-                code.emit(string("STOR")+type, exp->place, lval->place, 0);
+                code.emit(string("STOR")+type, exp1->place, lval->place, 0);
         } 
 ;
 
@@ -402,9 +402,9 @@ lval : ID                               {
                     semantic_error("accessed undeclared variable");
                 
                 string addressReg = varTable.front().newTemp(eINT);
-                code.emit("ADD2I",addressReg, DP, idEntry->offset);
+                code.emit("ADD2I",addressReg, DP, idEntry.offset);
 
-                lval->expType = idEntry->type;
+                lval->expType = idEntry.type;
                 lval->place = addressReg;
         }
 ;       
@@ -650,7 +650,7 @@ exp :   exp ADDOP exp 	                {
                         code.emit(string("DIVD")+type, res, exp1->place, exp2->place);
                         break;
                 default:
-                        unexpected_error("can't find ADDOP match")
+                        unexpected_error("can't find ADDOP match");
                         break;
                 }
 
@@ -685,7 +685,7 @@ exp :   exp ADDOP exp 	                {
                     code.emit("CFTOI", exp->place, exp1->place);
                 } else { //eFLOAT
                     exp->place = varTable.front().newTemp(eFLOAT);
-                    code.emit("CITOF", exp->place, exp1->place)
+                    code.emit("CITOF", exp->place, exp1->place);
                 }
             }
 
@@ -700,12 +700,12 @@ exp :   exp ADDOP exp 	                {
                 if(!found)
                     semantic_error("tried evaluating undeclared variable");
 
-                string type = (idEntry->type == eINT) ? "I" : "F";
-                string temp = varTable.front().newTemp(idEntry->type);
-                code.emit(string("LOAD")+type, temp, DP, idEntry->offset);
+                string type = (idEntry.type == eINT) ? "I" : "F";
+                string temp = varTable.front().newTemp(idEntry.type);
+                code.emit(string("LOAD")+type, temp, DP, idEntry.offset);
 
                 exp->expType = idEntry.type;
-                exp->place = temp.place;
+                exp->place = temp;
         }
         | num                           {
                 $$=new NodeExpression();
