@@ -202,10 +202,16 @@ public:
     FunctionProps funcProps;
 };
 
-class NodeArgsList : public NodeSymbol{
+class NodeCallArgs : public NodeSymbol{
 public:
     list<NodeExpression> exprList;
 };
+
+class NodeFuncArgs : public NodeSymbol{
+public:
+    list<ArgDeclaration> argList;
+};
+
 
 class NodeMarkerM : public NodeSymbol{
 public:

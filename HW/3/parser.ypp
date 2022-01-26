@@ -119,52 +119,52 @@ func_api : type ID '(' func_args ')'    {
                 NodeFuncApi* func_api = dynamic_cast<NodeFuncApi*>($$);
                 NodeType *type = dynamic_cast<NodeType*>($1);
                 NodeToken *id = dynamic_cast<NodeToken*>($2);
-                NodeArgsList *func_args = dynamic_cast<NodeArgsList*>($4);
+                NodeFuncArgs *func_args = dynamic_cast<NodeFuncArgs*>($4);
 
                 FunctionProps funcProps = {
                     type->typeValue,
                     id->value,
-                    func_args->exprList
+                    func_args->argList
                 };
                 func_api->funcProps = funcProps;
             } 
 ;
 
 func_args : func_arglist                {
-                $$=new NodeArgsList();
-                NodeArgsList *func_args = dynamic_cast<NodeFuncApi*>($$);
-                NodeArgsList *func_arglist = dynamic_cast<NodeArgsList*>($1);
+                $$=new NodeFuncArgs();
+                NodeFuncArgs *func_args = dynamic_cast<NodeFuncApi*>($$);
+                NodeFuncArgs *func_arglist = dynamic_cast<NodeFuncArgs*>($1);
 
-                func_args->exprList = func_arglist->exprList;
+                func_args->argList = func_arglist->argList;
             }       
-            | /* epsilon */             {$$=new NodeArgsList();}
+            | /* epsilon */             {$$=new NodeFuncArgs();}
 ;
 
 func_arglist :  func_arglist ',' dcl    {
-                $$=new NodeArgsList();
-                NodeArgsList *func_arglist = dynamic_cast<NodeArgsList*>($$);
-                NodeArgsList *func_arglist1 = dynamic_cast<NodeArgsList*>($1);
+                $$=new NodeFuncArgs();
+                NodeFuncArgs *func_arglist = dynamic_cast<NodeFuncArgs*>($$);
+                NodeFuncArgs *func_arglist1 = dynamic_cast<NodeFuncArgs*>($1);
                 NodeDeclaration *dcl = dynamic_cast<NodeDeclaration*>($3);
 
-                func_arglist->exprList = func_arglist1->exprList;
+                func_arglist->argList = func_arglist1->argList;
                 for(string id : dcl->idList) {
                     //check duplicate arg names
-                    for(ArgDeclaration argIt : func_arglist->exprList){
+                    for(ArgDeclaration argIt : func_arglist->argList){
                         if(argIt.id == id)
                             semantic_error("Can't redecalre same variable name");
                     }
                     ArgDeclaration arg = {id, dcl->idType};
-                    func_arglist->exprList.push_back(arg);
+                    func_arglist->argList.push_back(arg);
                 }
         } 
         | dcl                   {
-                $$=new NodeArgsList();
-                NodeArgsList *func_arglist = dynamic_cast<NodeArgsList*>($$);
+                $$=new NodeFuncArgs();
+                NodeFuncArgs *func_arglist = dynamic_cast<NodeFuncArgs*>($$);
                 NodeDeclaration *dcl = dynamic_cast<NodeDeclaration*>($1);
 
                 for(string id : dcl->idList){
                     ArgDeclaration arg= {id, dcl->idType};
-                    func_arglist->exprList.push_back(arg);
+                    func_arglist->argList.push_back(arg);
                 }
         }
 ;
@@ -750,7 +750,7 @@ call : ID '(' call_args ')'             {
         $$=new NodeExpression();
         NodeExpression *call = dynamic_cast<NodeExpression*>($$);
         NodeToken *id = dynamic_cast<NodeToken*>($1);
-        NodeArgsList *call_args = dynamic_cast<NodeArgsList*>($3);
+        NodeCallArgs *call_args = dynamic_cast<NodeCallArgs*>($3);
 
         FunctionEntry* funcEntry = funcTable.find(id->value);
         if(funcEntry == nullptr)
@@ -807,9 +807,9 @@ call : ID '(' call_args ')'             {
 ;
 
 call_args : call_arglist                {
-                $$=new NodeArgsList();
-                NodeArgsList *call_args = dynamic_cast<NodeArgsList*>($$);
-                NodeArgsList *call_arglist = dynamic_cast<NodeArgsList*>($1);
+                $$=new NodeCallArgs();
+                NodeCallArgs *call_args = dynamic_cast<NodeCallArgs*>($$);
+                NodeCallArgs *call_arglist = dynamic_cast<NodeCallArgs*>($1);
 
                 call_args->exprList = call_arglist->exprList;
             }
@@ -817,9 +817,9 @@ call_args : call_arglist                {
 ;
 
 call_arglist :  call_arglist ',' exp    {
-                $$=new NodeArgsList();
-                NodeArgsList *call_arglist = dynamic_cast<NodeArgsList*>($$);
-                NodeArgsList *call_arglist1 = dynamic_cast<NodeArgsList*>($1);
+                $$=new NodeCallArgs();
+                NodeCallArgs *call_arglist = dynamic_cast<NodeCallArgs*>($$);
+                NodeCallArgs *call_arglist1 = dynamic_cast<NodeCallArgs*>($1);
                 NodeExpression *exp = dynamic_cast<NodeExpression*>($3);
                 
                 if(exp->expType == eVOID)
@@ -828,8 +828,8 @@ call_arglist :  call_arglist ',' exp    {
                 call_arglist->exprList.push_back(*exp);
         }
         | exp                           {
-                $$=new NodeArgsList();
-                NodeArgsList *call_arglist = dynamic_cast<NodeArgsList*>($$);
+                $$=new NodeCallArgs();
+                NodeCallArgs *call_arglist = dynamic_cast<NodeCallArgs*>($$);
                 NodeExpression *exp = dynamic_cast<NodeExpression*>($1);
 
                 if(exp->expType == eVOID)
