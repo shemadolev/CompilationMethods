@@ -80,10 +80,6 @@ protected:
 		return str;
 	}
 
-	string spreadString(int num) {
-		return to_string(num);
-	}
-
 public:
 
 	CodeClass();

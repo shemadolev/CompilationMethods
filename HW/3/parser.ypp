@@ -175,7 +175,7 @@ blk : '{'                             {
                     for(ArgDeclaration arg : varTable.functionArgs){ //Place function args are in the first scope
                         varTable.front().newVar(arg.id, arg.type);
                     }
-                    code.emit("ADD2I",SP,SP,varTable.functionArgs.size() * VAR_SIZE);
+                    code.emit("ADD2I",SP,SP,to_string(varTable.functionArgs.size() * VAR_SIZE));
                     varTable.functionArgs.clear();
                 }
         } 
@@ -258,7 +258,7 @@ stmt :  dcl ';'                         {
                         semantic_error("declaration of an already declared variable within the block");                     
                     varTable.front().newVar(id, dcl->idType);
                 }
-                code.emit("ADD2I",SP,SP,dcl->idList.size() * VAR_SIZE);
+                code.emit("ADD2I",SP,SP,to_string(dcl->idList.size() * VAR_SIZE));
         }
         | assn                          {$$=new NodeStatement();}
         | exp ';'                       {$$=new NodeStatement();}
@@ -371,7 +371,7 @@ read : READ '(' lval ')' ';'            {
                 string type = (lval->expType == eINT) ? "I" : "F";
                 string temp = varTable.front().newTemp(lval->expType);
                 code.emit(string("READ")+type, temp);
-                code.emit(string("STOR")+type, temp, lval->place, 0);
+                code.emit(string("STOR")+type, temp, lval->place, "0");
         } 
 ;
 
@@ -386,7 +386,7 @@ assn : lval ASSIGN exp ';'              {
                 // lval can't be void - it's guarrnteed at this point
                 string type = (lval->expType == eINT) ? "I" : "F";
 
-                code.emit(string("STOR")+type, exp1->place, lval->place, 0);
+                code.emit(string("STOR")+type, exp1->place, lval->place, "0");
         } 
 ;
 
@@ -402,7 +402,7 @@ lval : ID                               {
                     semantic_error("accessed undeclared variable");
                 
                 string addressReg = varTable.front().newTemp(eINT);
-                code.emit("ADD2I",addressReg, DP, idEntry.offset);
+                code.emit("ADD2I",addressReg, DP, to_string(idEntry.offset));
 
                 lval->expType = idEntry.type;
                 lval->place = addressReg;
@@ -418,14 +418,14 @@ fullwhile : FULL_WHILE N M bexp DO M stmt {
                 NodeMarkerM *M2 = dynamic_cast<NodeMarkerM*>($6);
                 NodeStatement *stmt = dynamic_cast<NodeStatement*>($7);
 
-                code.emit("UJUMP", M1->quad);
+                code.emit("UJUMP", to_string(M1->quad));
                 code.backpatch(N->nextlist,code.nextQuad());
                 string res = varTable.front().newTemp(eINT);
                 code.emit("COPYI", res , "0"); 
-                code.emit("UJUMP", M1->quad);
+                code.emit("UJUMP", to_string(M1->quad));
                 code.backpatch(bexp->truelist,code.nextQuad());
                 code.emit("COPYI", res , "1"); 
-                code.emit("UJUMP", M2->quad);
+                code.emit("UJUMP", to_string(M2->quad));
                 code.backpatch(bexp->falselist,code.nextQuad());
                 fullwhile->falselist = CodeLineList(code.nextQuad());
                 fullwhile->falselist.merge(stmt->breaklist);
@@ -480,7 +480,7 @@ cntrl : IF bexp THEN M stmt ELSE N M stmt     {
                 code.backpatch(stmt->nextlist,M1->quad);
                 cntrl->nextlist.merge(bexp->falselist);
                 cntrl->nextlist.merge(stmt->breaklist);
-                code.emit("UJUMP", M1->quad); //support "fall through" from stmt
+                code.emit("UJUMP", to_string(M1->quad)); //support "fall through" from stmt
         } 
         | fullwhile                     {
                 $$ = new NodeStatement();
@@ -703,7 +703,7 @@ exp :   exp ADDOP exp 	                {
 
                 string type = (idEntry.type == eINT) ? "I" : "F";
                 string temp = varTable.front().newTemp(idEntry.type);
-                code.emit(string("LOAD")+type, temp, DP, idEntry.offset);
+                code.emit(string("LOAD")+type, temp, DP, to_string(idEntry.offset));
 
                 exp->expType = idEntry.type;
                 exp->place = temp;
@@ -759,11 +759,11 @@ call : ID '(' call_args ')'             {
             semantic_error("wrong number of arguments passed to function");
 
         varTable.storeIds(); //for each var: Mem[SP++] = var
-        code.emit("STORI", RA, SP, 0); //Mem[SP] = RA
-        code.emit("STORI", DP, SP, 1); //Mem[SP+1] = DP
-        code.emit("STORI", FP, SP, 2); //Mem[SP+2] = FP
+        code.emit("STORI", RA, SP, "0"); //Mem[SP] = RA
+        code.emit("STORI", DP, SP, "1"); //Mem[SP+1] = DP
+        code.emit("STORI", FP, SP, "2"); //Mem[SP+2] = FP
 
-        code.emit("ADD2I", FP, SP, 2);
+        code.emit("ADD2I", FP, SP, "2");
         //store arguments
         int i = FUNC_ARGS_OFFSET;
         auto argIt = funcEntry->props.args.begin(), expArg = call_args->expList.begin();
@@ -772,11 +772,11 @@ call : ID '(' call_args ')'             {
                 semantic_error("wrong type of argument passed to function");
 
             string type = (argIt->type == eINT) ? "I" : "F";
-            code.emit(string("STOR")+type, expArg->place, FP, i);
+            code.emit(string("STOR")+type, expArg->place, FP, to_string(i));
             i++;
         }
         //set SP below arguments
-        code.emit("ADD2I", SP, FP, funcEntry->props.args.size()+FUNC_ARGS_OFFSET);
+        code.emit("ADD2I", SP, FP, to_string(funcEntry->props.args.size()+FUNC_ARGS_OFFSET));
         code.emit("COPYI", DP, SP);
 
         //jump
@@ -788,9 +788,9 @@ call : ID '(' call_args ')'             {
         //restore SP, FP
         code.emit("COPYI", SP, FP); //SP = FP
         code.emit("LOADI", FP, FP); //Mem[SP+1] = FP
-        code.emit("SUBTI", SP, 2); //SP-=2 
-        code.emit("LOADI", RA, SP, 0); //RA = Mem[SP]
-        code.emit("LOADI", RA, SP, 1); //DP = Mem[SP+1]
+        code.emit("SUBTI", SP, "2"); //SP-=2 
+        code.emit("LOADI", RA, SP, "0"); //RA = Mem[SP]
+        code.emit("LOADI", RA, SP, "1"); //DP = Mem[SP+1]
         varTable.loadIds();  //for each var: var = Mem[--SP]
         
 
