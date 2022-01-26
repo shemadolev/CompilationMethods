@@ -172,7 +172,7 @@ blk : '{'                             {
                 varTable.push();
                 if(varTable.functionArgs.size() > 0){
                     for(ArgDeclaration arg : varTable.functionArgs){ //Place function args are in the first scope
-                        newTable.newVar(arg.id, arg.type);
+                        varTable.front().newVar(arg.id, arg.type);
                     }
                     code.emit("ADD2I",SP,SP,varTable.functionArgs.size() * VAR_SIZE);
                     varTable.functionArgs.clear();
@@ -203,7 +203,7 @@ dcl :   ID ':' type                     {
                 dcl->idList.push_front(id->value);
                 }
         | ID ',' dcl                    {
-                &&=new NodeType();
+                $$=new NodeType();
                 NodeDeclaration *dcl = dynamic_cast<NodeDeclaration*>($$);
                 NodeToken *id = dynamic_cast<NodeToken*>($1);
                 NodeDeclaration *dcl1 = dynamic_cast<NodeDeclaration*>($3);
@@ -381,12 +381,12 @@ assn : lval ASSIGN exp ';'              {
                 NodeExpression *lval = dynamic_cast<NodeExpression*>($1);
                 NodeExpression *exp1 = dynamic_cast<NodeExpression*>($3);
 
-                if(lval->expType != exp->expType)
+                if(lval->expType != exp1->expType)
                         semantic_error("assignment of different types");
                 // lval can't be void - it's guarrnteed at this point
                 string type = (lval->expType == eINT) ? "I" : "F";
 
-                code.emit(string("STOR")+type, exp->place, lval->place, 0);
+                code.emit(string("STOR")+type, exp1->place, lval->place, 0);
         } 
 ;
 
@@ -402,9 +402,9 @@ lval : ID                               {
                     semantic_error("accessed undeclared variable");
                 
                 string addressReg = varTable.front().newTemp(eINT);
-                code.emit("ADD2I",addressReg, DP, idEntry->offset);
+                code.emit("ADD2I",addressReg, DP, idEntry.offset);
 
-                lval->expType = idEntry->type;
+                lval->expType = idEntry.type;
                 lval->place = addressReg;
         }
 ;       
@@ -529,6 +529,7 @@ bexp :  bexp OR M bexp                  {
                 $$ = new NodeBexp();
                 NodeBexp *bexp = dynamic_cast<NodeBexp*>($$);        
                 NodeExpression *exp1 = dynamic_cast<NodeExpression*>($1);
+                NodeToken *relop = dynamic_cast<NodeToken*>($2);
                 NodeExpression *exp2 = dynamic_cast<NodeExpression*>($3);
 
                 if(exp1->expType != exp2->expType)
@@ -539,7 +540,7 @@ bexp :  bexp OR M bexp                  {
                 
                 // calculate RELOP
                 string res = varTable.front().newTemp(eINT);
-                switch (RelopHit($1->value)){
+                switch (RelopHit(relop->value)){
                 case eEq:
                         code.emit(string("SEQU")+type, res, exp1->place, exp2->place);
                         bexp->truelist.push_back(code.nextQuad());
@@ -642,7 +643,7 @@ exp :   exp ADDOP exp 	                {
                 string type = (exp1->expType == eINT) ? "I" : "F";
                 // calculate MULOP
                 string res = varTable.front().newTemp(exp1->expType);
-                switch (ArithHit(addop->value)){
+                switch (ArithHit(mulop->value)){
                 case eMul:
                         code.emit(string("MULT")+type, res, exp1->place, exp2->place);
                         break;
@@ -650,7 +651,7 @@ exp :   exp ADDOP exp 	                {
                         code.emit(string("DIVD")+type, res, exp1->place, exp2->place);
                         break;
                 default:
-                        unexpected_error("can't find ADDOP match")
+                        unexpected_error("can't find ADDOP match");
                         break;
                 }
 
@@ -685,7 +686,7 @@ exp :   exp ADDOP exp 	                {
                     code.emit("CFTOI", exp->place, exp1->place);
                 } else { //eFLOAT
                     exp->place = varTable.front().newTemp(eFLOAT);
-                    code.emit("CITOF", exp->place, exp1->place)
+                    code.emit("CITOF", exp->place, exp1->place);
                 }
             }
 
@@ -700,12 +701,12 @@ exp :   exp ADDOP exp 	                {
                 if(!found)
                     semantic_error("tried evaluating undeclared variable");
 
-                string type = (idEntry->type == eINT) ? "I" : "F";
-                string temp = varTable.front().newTemp(idEntry->type);
-                code.emit(string("LOAD")+type, temp, DP, idEntry->offset);
+                string type = (idEntry.type == eINT) ? "I" : "F";
+                string temp = varTable.front().newTemp(idEntry.type);
+                code.emit(string("LOAD")+type, temp, DP, idEntry.offset);
 
                 exp->expType = idEntry.type;
-                exp->place = temp.place;
+                exp->place = temp;
         }
         | num                           {
                 $$=new NodeExpression();
@@ -776,7 +777,7 @@ call : ID '(' call_args ')'             {
             i++;
         }
         //set SP below arguments
-        code.emit("ADD2I", SP, FP, funcEntry->props.size()+FUNC_ARGS_OFFSET);
+        code.emit("ADD2I", SP, FP, funcEntry->props.args.size()+FUNC_ARGS_OFFSET);
         code.emit("COPYI", DP, SP);
 
         //jump
@@ -823,7 +824,7 @@ call_arglist :  call_arglist ',' exp    {
                 NodeExpression *exp = dynamic_cast<NodeExpression*>($3);
                 
                 if(exp->expType == eVOID)
-                    semantic_error("can't pass argument of type 'void' to a function")
+                    semantic_error("can't pass argument of type 'void' to a function");
                 call_arglist->exprList = call_arglist1->exprList;
                 call_arglist->exprList.push_back(*exp);
         }
@@ -833,7 +834,7 @@ call_arglist :  call_arglist ',' exp    {
                 NodeExpression *exp = dynamic_cast<NodeExpression*>($1);
 
                 if(exp->expType == eVOID)
-                    semantic_error("can't pass argument of type 'void' to a function")
+                    semantic_error("can't pass argument of type 'void' to a function");
                 call_arglist->exprList.push_back(*exp);
         }
 ;
@@ -852,8 +853,8 @@ void unexpected_error(const char* err){
 }
 
 void semantic_error(const char* err){
-    cerr << "Semantic error: " err << "in line number " yylineno <<endl;
-    exit(3)
+    cerr << "Semantic error: " << err << "in line number " yylineno <<endl;
+    exit(3);
 }
 
 void yyerror(const char*) {
