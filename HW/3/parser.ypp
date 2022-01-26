@@ -114,7 +114,6 @@ fdefs : /* epsilon */                   {$$=new NodeSymbol();}
 ;
 
 func_api : type ID '(' func_args ')'    {
-                // $$=new NodeFuncApi();
                 $$ = new NodeFuncApi();
                 NodeFuncApi* func_api = $$;
                 NodeType *type = dynamic_cast<NodeType*>($1);
@@ -530,7 +529,7 @@ bexp :  bexp OR M bexp                  {
                 $$ = new NodeBexp();
                 NodeBexp *bexp = dynamic_cast<NodeBexp*>($$);        
                 NodeExpression *exp1 = dynamic_cast<NodeExpression*>($1);
-                NodeExpression *exp1 = dynamic_cast<NodeExpression*>($3);
+                NodeExpression *exp2 = dynamic_cast<NodeExpression*>($3);
 
                 if(exp1->expType != exp2->expType)
                         semantic_error("RELOP between incompatible types");
