@@ -68,17 +68,18 @@ cout <<"mid-rule fdefs" <<endl;
                 FunctionEntry* funcEntry = funcTable.find(func_api->funcProps.id);
 cout <<"1" <<endl;                
                 if(funcEntry == nullptr){
-                cout <<"funcEntry != nullptr\n";
-                funcEntry = funcTable.insert(func_api->funcProps);
+                    cout <<"funcEntry != nullptr\n";
+                    funcEntry = funcTable.insert(func_api->funcProps);
                 } else { //found
                     if(!funcEntry->matchExisting(func_api->funcProps))
                         semantic_error("duplicate declaration of function with different API");
-                    //override args to ensure correct arg naming
-                    funcEntry->props.args = func_api->funcProps.args;
                 }
+                //override args to ensure correct arg naming
+                funcEntry->props.args = func_api->funcProps.args;
                 if(funcEntry->isDefined())
                     semantic_error("duplicate definition of a function");
                 funcTable.setCurrent(funcEntry);
+                varTable.setFunctionApi(funcEntry->props.args);
                 funcEntry->define(code.nextQuad());
 cout <<"end mid-rule fdefs" <<endl;
         } blk            {
@@ -165,6 +166,7 @@ blk : '{'                             {
                 varTable.push();
                 cout << "1varTable.push()" <<endl;//debug
                 if(varTable.functionArgs.size() > 0){
+cout << "adding func args to scope\n";
                     for(ArgDeclaration arg : varTable.functionArgs){ //Place function args are in the first scope
                         varTable.front().newVar(arg.id, arg.type);
                     }
@@ -615,7 +617,7 @@ exp :   exp ADDOP exp 	                {
                 case eAdd:
                         code.emit(string("ADD2")+type, res, exp1->place, exp2->place);
                         break;
-                case eNeq:
+                case eSub:
                         code.emit(string("SUBT")+type, res, exp1->place, exp2->place);
                         break;
                 default:
