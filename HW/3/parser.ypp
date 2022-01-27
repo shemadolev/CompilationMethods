@@ -776,7 +776,6 @@ call : ID '(' call_args ')'             {
             string type = (argIt->type == eINT) ? "I" : "F";
             code.emit(string("STOR")+type, expArg->place, FP, to_string(i * VAR_SIZE));
             cout<< "passing arg: " <<i << " FP + " <<i * VAR_SIZE <<endl;;
-            i++;
         }
         //set DP on the first arg
         code.emit("ADD2I", DP, FP, to_string(FUNC_ARGS_OFFSET*VAR_SIZE));
