@@ -44,22 +44,26 @@ TypedVarScopeTable::resetTmps(){
 void
 TypedVarScopeTable::emitStoreIds(){
     int regs_num = _curTempOffset - startingIndex;
-    //Store registers
-    for (int i=0; i<_curTempOffset; i++){
-        code.emit(string("STOR")+_typeLetter + " " +  _typeLetter + to_string(startingIndex + i) + " " + SP + " " + to_string(i * VAR_SIZE));
+    if(regs_num > 0){
+        //Store registers
+        for (int i=0; i<regs_num; i++){
+            code.emit(string("STOR")+_typeLetter + " " +  _typeLetter + to_string(startingIndex + i) + " " + SP + " " + to_string(i * VAR_SIZE));
+        }
+        //Update SP
+        code.emit(string("ADD2I ") + SP + " " + SP + " " + to_string(regs_num * VAR_SIZE));
     }
-    //Update SP
-    code.emit(string("ADD2I ") + SP + " " + SP + " " + to_string(regs_num * VAR_SIZE));
 }
 
 void
 TypedVarScopeTable::emitLoadIds(){
     int regs_num = _curTempOffset - startingIndex;
-    //Update SP
-    code.emit(string("SUBTI ") + SP + " " + SP + " " + to_string(regs_num * VAR_SIZE));
-    //Store registers
-    for (int i=0; i<_curTempOffset; i++){
-        code.emit(string("LOAD")+_typeLetter + " " +  _typeLetter + to_string(startingIndex + i) + " " + SP + " " + to_string(i * VAR_SIZE));
+    if(regs_num > 0){
+        //Update SP
+        code.emit(string("SUBTI ") + SP + " " + SP + " " + to_string(regs_num * VAR_SIZE));
+        //Store registers
+        for (int i=0; i<regs_num; i++){
+            code.emit(string("LOAD")+_typeLetter + " " +  _typeLetter + to_string(startingIndex + i) + " " + SP + " " + to_string(i * VAR_SIZE));
+        }
     }
 }
 
