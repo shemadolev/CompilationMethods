@@ -86,6 +86,7 @@ fdefs : /* epsilon */                   {$$=new NodeSymbol();}
                 if(!blk->breaklist.empty())
                     semantic_error("break statement not within loop");
 
+                code.backpatch(blk->nextlist, code.nextQuad());
                 code.emit("RETRN"); //fallback, for when not defined
         }
         | fdefs func_api ';'            {
