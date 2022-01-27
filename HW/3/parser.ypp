@@ -778,10 +778,11 @@ call : ID '(' call_args ')'             {
             cout<< "passing arg: " <<i << " FP + " <<i * VAR_SIZE <<endl;;
             i++;
         }
+        //set DP on the first arg
+        code.emit("ADD2I", DP, FP, to_string(FUNC_ARGS_OFFSET*VAR_SIZE));
         //set SP above arguments
         code.emit("ADD2I", SP, FP, 
                 to_string(((funcEntry->props.args.size()+FUNC_ARGS_OFFSET)* VAR_SIZE)));
-        code.emit("COPYI", DP, SP);
         //jump
         string L = funcEntry->getPlace(code.nextQuad());
         code.emit("JLINK", L);

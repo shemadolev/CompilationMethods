@@ -36,7 +36,7 @@ using namespace std;
 #define RT_F "F0"
 
 #define FUNC_ARGS_OFFSET 1
-#define SAVED_REGS_INT 4
+#define SAVED_REGS_INT 5
 #define SAVED_REGS_FLOAT 1
 
 //Size of variable in bytes

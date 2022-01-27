@@ -65,12 +65,6 @@ TypedVarScopeTable::emitLoadIds(){
     }
 }
 
-
-// int
-// TypedVarScopeTable::getVarCount(){
-//     return _curVarOffset - startingIndex;
-// }
-
 /**
  * VarScopeTable implementations
  */
