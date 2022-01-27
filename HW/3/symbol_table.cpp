@@ -116,7 +116,7 @@ VarScopeTable::loadIds(){
 
 void
 VarScopeTable::freeStack(){
-    if(_curVarOffset > 0)
+    if(_curVarOffset > _varStartingIndex)
         code.emit(string("SUBTI ") + SP + " " + SP + " " + to_string(_curVarOffset));
 }
 
