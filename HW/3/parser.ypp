@@ -635,8 +635,9 @@ exp :   exp ADDOP exp 	                {
                 NodeToken *addop = dynamic_cast<NodeToken*>($2);
                 NodeExpression *exp2 = dynamic_cast<NodeExpression*>($3);
 
+		string types[3] = {"int", "float", "void"};
                 if(exp1->expType != exp2->expType)
-                        semantic_error("assignment of different types");
+                        semantic_error(string("addition of type ") + types[exp1->expType] + " to " + types[exp2->expType]);
                 if(exp1->expType == eVOID)
                         semantic_error("ADDOP can't be done with 'void'");
                 
@@ -711,6 +712,7 @@ exp :   exp ADDOP exp 	                {
                     semantic_error("can't cast to void");
                 if(exp1->expType == eVOID)
                     semantic_error("can't cast from void");
+                exp->expType = type->typeValue;
                 if(type->typeValue == eINT){
                     exp->place = varTable.front().newTemp(eINT);
                     code.emit("CFTOI", exp->place, exp1->place);
