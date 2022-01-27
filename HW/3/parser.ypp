@@ -190,7 +190,7 @@ dcl :   ID ':' type                     {
                 dcl->idList.push_front(id->value);
                 }
         | ID ',' dcl                    {
-                $$=new NodeType();
+                $$=new NodeDeclaration();
                 NodeDeclaration *dcl = dynamic_cast<NodeDeclaration*>($$);
                 NodeToken *id = dynamic_cast<NodeToken*>($1);
                 NodeDeclaration *dcl1 = dynamic_cast<NodeDeclaration*>($3);
