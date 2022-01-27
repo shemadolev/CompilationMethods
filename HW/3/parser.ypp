@@ -55,10 +55,12 @@
 
 %%
 
-program : fdefs                         {
-    parseTree=new NodeSymbol();
-    code.emit("HALT");
-    }
+program :   {
+                code.emit("ADD2I" , SP, SP, VAR_SIZE);
+            }fdefs                         {
+                parseTree=new NodeSymbol();
+                code.emit("HALT");
+            }
 ;
 
 fdefs : /* epsilon */                   {$$=new NodeSymbol();}
