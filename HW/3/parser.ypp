@@ -776,9 +776,11 @@ call : ID '(' call_args ')'             {
             code.emit(string("STOR")+type, expArg->place, FP, to_string(i * VAR_SIZE));
             i++;
         }
-        //set SP below arguments
-        code.emit("ADD2I", SP, FP, to_string(funcEntry->props.args.size()+FUNC_ARGS_OFFSET));
-        code.emit("COPYI", DP, SP);
+        //set SP above arguments
+        code.emit("ADD2I", SP, FP, 
+                to_string((funcEntry->props.args.size()+FUNC_ARGS_OFFSET* VAR_SIZE)));
+        //set DP above FP on the first argument
+        code.emit("ADD2I", DP, FP, to_string(FUNC_ARGS_OFFSET * VAR_SIZE));
 
         //jump
         string L = funcEntry->getPlace(code.nextQuad());
