@@ -789,7 +789,7 @@ call : ID '(' call_args ')'             {
         //restore SP, FP
         code.emit("COPYI", SP, FP); //SP = FP
         code.emit("LOADI", FP, FP, "0"); //FP = Mem[FP+0]
-        code.emit("SUBTI", SP, "8"); //SP-=2*4
+        code.emit("SUBTI", SP, SP, "8"); //SP-=2*4
         code.emit("LOADI", RA, SP, "0"); //RA = Mem[SP]
         code.emit("LOADI", DP, SP, "4"); //DP = Mem[SP+1*4]
         varTable.loadIds();  //for each var: var = Mem[--SP]
