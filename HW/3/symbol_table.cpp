@@ -7,8 +7,9 @@ extern CodeClass code; //defined in parser
  */
 
 TypedVarScopeTable::TypedVarScopeTable(idTypes type):
-        _curVarOffset(0), _curTempOffset((type == eINT) ? SAVED_REGS_INT : SAVED_REGS_FLOAT),
-        startingIndex((type == eINT) ? SAVED_REGS_INT : SAVED_REGS_FLOAT), _type(type){
+        _curTempOffset((type == eINT) ? SAVED_REGS_INT : SAVED_REGS_FLOAT),
+        _tempStartingIndex((type == eINT) ? SAVED_REGS_INT : SAVED_REGS_FLOAT), 
+        _type(type){
     _typeLetter = (type == eINT) ? "I" : "F";            
 }
 
@@ -17,12 +18,9 @@ TypedVarScopeTable::newTemp(){
     return _typeLetter + to_string(_curTempOffset++);
 }
 
-int
-TypedVarScopeTable::newVar(string id){
-    int stack_offset = _curVarOffset * VAR_SIZE;
-    _curVarOffset++;
-    _varEntries.insert(pair<string,int>(id,stack_offset));
-    return stack_offset;
+void
+TypedVarScopeTable::newVar(string id, int offset){
+    _varEntries.insert(pair<string,int>(id,offset));
 }
 
 bool 
@@ -38,16 +36,16 @@ TypedVarScopeTable::lookup(VarEntry& var, string id){
 
 void
 TypedVarScopeTable::resetTmps(){
-    _curTempOffset = startingIndex;
+    _curTempOffset = _tempStartingIndex;
 }
 
 void
 TypedVarScopeTable::emitStoreIds(){
-    int regs_num = _curTempOffset - startingIndex;
+    int regs_num = _curTempOffset - _tempStartingIndex;
     if(regs_num > 0){
         //Store registers
         for (int i=0; i<regs_num; i++){
-            code.emit(string("STOR")+_typeLetter + " " +  _typeLetter + to_string(startingIndex + i) + " " + SP + " " + to_string(i * VAR_SIZE));
+            code.emit(string("STOR")+_typeLetter + " " +  _typeLetter + to_string(_tempStartingIndex + i) + " " + SP + " " + to_string(i * VAR_SIZE));
         }
         //Update SP
         code.emit(string("ADD2I ") + SP + " " + SP + " " + to_string(regs_num * VAR_SIZE));
@@ -56,7 +54,7 @@ TypedVarScopeTable::emitStoreIds(){
 
 void
 TypedVarScopeTable::emitLoadIds(){
-    int regs_num = _curTempOffset - startingIndex;
+    int regs_num = _curTempOffset - _tempStartingIndex;
     if(regs_num > 0){
         //Update SP
         code.emit(string("SUBTI ") + SP + " " + SP + " " + to_string(regs_num * VAR_SIZE));
@@ -68,17 +66,17 @@ TypedVarScopeTable::emitLoadIds(){
 }
 
 
-int
-TypedVarScopeTable::getVarCount(){
-    return _curVarOffset - startingIndex;
-}
+// int
+// TypedVarScopeTable::getVarCount(){
+//     return _curVarOffset - startingIndex;
+// }
 
 /**
  * VarScopeTable implementations
  */
 
-VarScopeTable::VarScopeTable() : 
-    intTable(eINT), floatTable(eFLOAT) {}
+VarScopeTable::VarScopeTable(int startingOffset) : 
+    _curVarOffset(startingOffset), _varStartingIndex(startingOffset), intTable(eINT), floatTable(eFLOAT) {}
 
 string
 VarScopeTable::newTemp(idTypes type){
@@ -91,7 +89,9 @@ int
 VarScopeTable::newVar(string id, idTypes type){
     if(type == eVOID)
         return -1;
-    return (type == eINT) ? intTable.newVar(id) : floatTable.newVar(id);
+    (type == eINT) ? intTable.newVar(id, _curVarOffset) : floatTable.newVar(id, _curVarOffset);
+    _curVarOffset+=VAR_SIZE;
+    return _curVarOffset;
 }
 
 bool
@@ -122,9 +122,12 @@ VarScopeTable::loadIds(){
 
 void
 VarScopeTable::freeStack(){
-    int freeCount = floatTable.getVarCount() + intTable.getVarCount();
-    if(freeCount > 0)
-        code.emit(string("SUBTI ") + SP + " " + SP + " " + to_string(freeCount * VAR_SIZE));
+    if(_curVarOffset > 0)
+        code.emit(string("SUBTI ") + SP + " " + SP + " " + to_string(_curVarOffset));
+}
+
+int VarScopeTable::getCurOffset(){
+    return _curVarOffset;
 }
 
 /**
@@ -132,7 +135,8 @@ VarScopeTable::freeStack(){
  */
 void 
 VariableTable::push(){
-    VarScopeTable newTable;
+    int stackOffset = (_tables.size() > 0) ? _tables.front().getCurOffset() : FUNC_ARGS_OFFSET*VAR_SIZE; 
+    VarScopeTable newTable(stackOffset);
     _tables.push_front(newTable);
 }
 
