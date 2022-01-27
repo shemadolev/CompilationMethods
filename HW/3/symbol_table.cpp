@@ -135,7 +135,7 @@ int VarScopeTable::getCurOffset(){
  */
 void 
 VariableTable::push(){
-    int stackOffset = (_tables.size() > 0) ? _tables.front().getCurOffset() : FUNC_ARGS_OFFSET*VAR_SIZE; 
+    int stackOffset = (_tables.size() > 0) ? _tables.front().getCurOffset() : 0; 
     VarScopeTable newTable(stackOffset);
     _tables.push_front(newTable);
 }
