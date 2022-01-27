@@ -41,10 +41,14 @@ NodeSymbol::~NodeSymbol(){
 }
 
 NodeToken::NodeToken(string type) : ParserNode(type) {
+#ifdef DEBUG
   cout << "token: " << type << endl;
+#endif
 }
 NodeToken::NodeToken(string type, string value) : ParserNode(type), value(value){
+#ifdef DEBUG
   cout << "token: " << type << ":" << value << endl;
+#endif
 }
 
 

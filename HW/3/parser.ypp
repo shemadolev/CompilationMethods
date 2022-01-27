@@ -63,13 +63,10 @@ program :   fdefs                         {
 
 fdefs : /* epsilon */                   {$$=new NodeSymbol();}
 	| fdefs func_api {
-                cout <<"mid-rule fdefs" <<endl;
                 NodeFuncApi *func_api = dynamic_cast<NodeFuncApi*>($2);
                 FunctionEntry* funcEntry = funcTable.find(func_api->funcProps.id);
-                cout <<"1" <<endl;
                                 
                 if(funcEntry == nullptr){
-                    cout <<"funcEntry != nullptr\n";
                     funcEntry = funcTable.insert(func_api->funcProps);
                 } else { //found
                     if(!funcEntry->matchExisting(func_api->funcProps))
@@ -82,7 +79,6 @@ fdefs : /* epsilon */                   {$$=new NodeSymbol();}
                 funcTable.setCurrent(funcEntry);
                 varTable.setFunctionApi(funcEntry->props.args);
                 funcEntry->define(code.nextQuad());
-                cout <<"end mid-rule fdefs" <<endl;
         } blk            {
                 $$=new NodeSymbol();
                 NodeStatement *blk = dynamic_cast<NodeStatement*>($4);
@@ -163,11 +159,8 @@ func_arglist :  func_arglist ',' dcl    {
 ;
 
 blk : '{'                             { 
-            cout << "0varTable.push()" <<endl;//debug       
             varTable.push();
-            cout << "1varTable.push()" <<endl;//debug
             if(varTable.functionArgs.size() > 0){
-                cout << "adding func args to scope\n";
                 for(ArgDeclaration arg : varTable.functionArgs){ //Place function args are in the first scope
                     varTable.front().newVar(arg.id, arg.type);
                 }
@@ -178,14 +171,9 @@ blk : '{'                             {
             $$=new NodeStatement();
             NodeStatement *blk = dynamic_cast<NodeStatement*>($$);
             NodeStatement *stlist = dynamic_cast<NodeStatement*>($3);
-            cout <<"list passing"<<endl; //debug
-		    if(stlist == nullptr)//debug
-                cout << "oh no" <<endl;//debug
             blk->nextlist = stlist->nextlist;
             blk->breaklist = stlist->breaklist;
-            cout <<"about to pop"<<endl;//debug
             varTable.pop();
-            cout <<"popped"<<endl;//debug
         } 
 ;
 
@@ -245,7 +233,6 @@ stlist : stlist M stmt                    {
         }
          |/* epsilon */                 {
 		$$=new NodeStatement();
-		cout << "epsilon stlist\n";
 }
 ;
 
@@ -797,7 +784,7 @@ call : ID '(' call_args ')'             {
             } else {
                 unexpected_error("Passed function a void arg");
             }
-            cout<< "passing arg: " <<i << " FP + " <<i * VAR_SIZE <<endl;
+
         }
         //set DP on the first arg
         code.emit("ADD2I", DP, FP, to_string(FUNC_ARGS_OFFSET*VAR_SIZE));

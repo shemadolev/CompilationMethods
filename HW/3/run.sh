@@ -19,7 +19,7 @@ do
 	FileRsk="$File".rsk
 	FileMyE="$File"_my.e
 	FileOrE="$File".e
-	FileMyO="$File".out
+	FileMyO="$File"_my.out
 	FileOrO="$File".out
 
 	./rx-cc "$FileCmm" #This creates FileRsk

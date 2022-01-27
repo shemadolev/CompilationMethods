@@ -21,7 +21,6 @@ using namespace std;
 
 #define PRINT_PARSE_TREE 1
 
-
 //return address pointer
 #define RA "I0"
 //frame start pointer
@@ -172,85 +171,105 @@ public:
 
 class NodeExpression : public NodeSymbol{
 public:
+#ifdef DEBUG
     NodeExpression(){
         cout << "NodeExpression" << endl;
     }
+#endif
     idTypes expType;
     string place;
 };
 
 class NodeType : public NodeSymbol{
 public:
+#ifdef DEBUG
     NodeType(){
         cout << "NodeType" << endl;
     }
+#endif
     idTypes typeValue;
 };
 
 class NodeStatement : public NodeSymbol{
 public:
+#ifdef DEBUG
     NodeStatement(){
         cout << "NodeStatement" << endl;
     }
+#endif
     CodeLineList nextlist;
     CodeLineList breaklist;
 };
 
 class NodeBexp : public NodeSymbol{
 public:
+#ifdef DEBUG
     NodeBexp(){
         cout << "NodeBexp" << endl;
     }
+#endif
     CodeLineList truelist;
     CodeLineList falselist;
 };
 
 class NodeDeclaration : public NodeSymbol{
 public:
+#ifdef DEBUG
     NodeDeclaration(){
         cout << "NodeDeclaration" << endl;
     }
+#endif
     list<string> idList;
     idTypes idType;
 };
 
 class NodeFuncApi : public NodeSymbol{
 public:
+#ifdef DEBUG
     NodeFuncApi(){
         cout << "NodeFuncApi" << endl;
     }
+#endif
     FunctionProps funcProps;
 };
 
 class NodeCallArgs : public NodeSymbol{
 public:
+#ifdef DEBUG
     NodeCallArgs(){
         cout << "NodeCallArgs" << endl;
     }
+#endif
     list<NodeExpression> expList;
 };
 
 class NodeFuncArgs : public NodeSymbol{
 public:
+#ifdef DEBUG
     NodeFuncArgs(){
         cout << "NodeFuncArgs" << endl;
     }
+#endif
     list<ArgDeclaration> argList;
 };
 
 class NodeMarkerM : public NodeSymbol{
 public:
+#ifdef DEBUG
     NodeMarkerM(){
         cout << "NodeMarkerM" << endl;
     }
+#endif
     int quad;
 };
 
 class NodeMarkerN : public NodeSymbol{
 public:
+#ifdef DEBUG
     NodeMarkerN(){
         cout << "NodeMarkerN" << endl;
     }
+#endif
     CodeLineList nextlist;
 };
 
