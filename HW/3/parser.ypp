@@ -764,7 +764,7 @@ call : ID '(' call_args ')'             {
         code.emit("STORI", DP, SP, "4"); //Mem[SP+1*4] = DP
         code.emit("STORI", FP, SP, "8"); //Mem[SP+2*4] = FP
 
-        code.emit("ADD2I", FP, SP, "4");
+        code.emit("ADD2I", FP, SP, "8");
         //store arguments
         int i = FUNC_ARGS_OFFSET;
         auto argIt = funcEntry->props.args.begin();
@@ -775,6 +775,7 @@ call : ID '(' call_args ')'             {
 
             string type = (argIt->type == eINT) ? "I" : "F";
             code.emit(string("STOR")+type, expArg->place, FP, to_string(i * VAR_SIZE));
+            cout<< "passing arg: " <<i << " FP + " <<i * VAR_SIZE <<endl;;
             i++;
         }
         //set SP above arguments
