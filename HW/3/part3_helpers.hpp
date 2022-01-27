@@ -436,7 +436,7 @@ class VariableTable{
 protected:
     list<VarScopeTable> _tables;
 public:
-    list<ArgDeclaration> functionArgs; //todo merge this into _tables on first push. Must always be overwritten on function entry!!
+    list<ArgDeclaration> functionArgs;
     
     /**
      * @brief Push a new VarScopeTable into the tables list.
