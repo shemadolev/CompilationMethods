@@ -1,0 +1,14 @@
+int foo (a : int)
+{
+    return a+2;
+}
+
+int power (c: int, m:int);
+
+void main()
+{
+    a:int;
+    read(a);
+    a = foo(foo(a));
+    write(a);
+}
