@@ -30,6 +30,8 @@ using namespace std;
 #define SP "I2"
 //return int type
 #define RT_I "I3"
+//declarations pointer (points on the first variable in the frame)
+#define DP "I4"
 //return float type
 #define RT_F "F0"
 
