@@ -164,7 +164,6 @@ blk : '{'                             {
                 for(ArgDeclaration arg : varTable.functionArgs){ //Place function args are in the first scope
                     varTable.front().newVar(arg.id, arg.type);
                 }
-                code.emit("ADD2I",SP,SP,to_string(varTable.functionArgs.size() * VAR_SIZE));
                 varTable.functionArgs.clear();
             }
         } stlist '}'                    {
