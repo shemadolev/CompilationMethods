@@ -533,7 +533,7 @@ bexp :  bexp OR M bexp                  {
                 string type = (exp1->expType == eINT) ? "I" : "F"; 
                 
                 // calculate RELOP
-                string res = varTable.front().newTemp(eINT);
+                string res = varTable.front().newTemp(exp1->expType);
                 switch (RelopHit(relop->value)){
                 case eEq:
                         code.emit(string("SEQU")+type, res, exp1->place, exp2->place);
