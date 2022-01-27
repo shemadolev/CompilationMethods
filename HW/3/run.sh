@@ -25,9 +25,13 @@ do
 	./rx-cc "$FileCmm" #This creates FileRsk
 	./rx-linker "$FileRsk"
 	mv out.e "$FileMyE"
-	./rx-vm1.1 "$FileMyE" <"$FileInput" >"$FileMyO"
-	./rx-vm1.1 "$FileOrE" <"$FileInput" >"$FileOrO"
-
+	if [ -f "$FileInput" ]; then
+		./rx-vm1.1 "$FileMyE" <"$FileInput" >"$FileMyO"
+		./rx-vm1.1 "$FileOrE" <"$FileInput" >"$FileOrO"
+	else
+		./rx-vm1.1 "$FileMyE" >"$FileMyO"
+		./rx-vm1.1 "$FileOrE" >"$FileOrO"
+	fi
 	diffRes=$(diff "$FileOrO" "$FileMyO")
 	if [[ -z $diffRes ]]; then #diff is empty == files are eqaul
 		echo "Same: $File"
