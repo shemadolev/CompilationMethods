@@ -760,10 +760,10 @@ call : ID '(' call_args ')'             {
 
         varTable.storeIds(); //for each var: Mem[SP++] = var
         code.emit("STORI", RA, SP, "0"); //Mem[SP] = RA
-        code.emit("STORI", DP, SP, "1"); //Mem[SP+1] = DP
-        code.emit("STORI", FP, SP, "2"); //Mem[SP+2] = FP
+        code.emit("STORI", DP, SP, "4"); //Mem[SP+1] = DP
+        code.emit("STORI", FP, SP, "8"); //Mem[SP+2] = FP
 
-        code.emit("ADD2I", FP, SP, "2");
+        code.emit("ADD2I", FP, SP, "8");
         //store arguments
         int i = FUNC_ARGS_OFFSET;
         auto argIt = funcEntry->props.args.begin();
@@ -773,7 +773,7 @@ call : ID '(' call_args ')'             {
                 semantic_error("wrong type of argument passed to function");
 
             string type = (argIt->type == eINT) ? "I" : "F";
-            code.emit(string("STOR")+type, expArg->place, FP, to_string(i));
+            code.emit(string("STOR")+type, expArg->place, FP, to_string(i * VAR_SIZE));
             i++;
         }
         //set SP below arguments
@@ -788,10 +788,10 @@ call : ID '(' call_args ')'             {
         
         //restore SP, FP
         code.emit("COPYI", SP, FP); //SP = FP
-        code.emit("LOADI", FP, FP); //Mem[SP+1] = FP
-        code.emit("SUBTI", SP, "2"); //SP-=2 
+        code.emit("LOADI", FP, FP, "0"); //FP = Mem[FP+0]
+        code.emit("SUBTI", SP, "8"); //SP-=2*4
         code.emit("LOADI", RA, SP, "0"); //RA = Mem[SP]
-        code.emit("LOADI", RA, SP, "1"); //DP = Mem[SP+1]
+        code.emit("LOADI", DP, SP, "4"); //DP = Mem[SP+1*4]
         varTable.loadIds();  //for each var: var = Mem[--SP]
         
 
