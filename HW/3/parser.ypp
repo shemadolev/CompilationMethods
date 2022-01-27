@@ -533,37 +533,73 @@ bexp :  bexp OR M bexp                  {
                 string type = (exp1->expType == eINT) ? "I" : "F"; 
                 
                 // calculate RELOP
-                string res = varTable.front().newTemp(exp1->expType);
+                string resInt = varTable.front().newTemp(eINT);
                 switch (RelopHit(relop->value)){
                 case eEq:
-                        code.emit(string("SEQU")+type, res, exp1->place, exp2->place);
+                        if(exp1->expType == eFLOAT){
+                            string resFloat = varTable.front().newTemp(eFLOAT);
+                            code.emit("SEQUF", resFloat, exp1->place, exp2->place);
+                            code.emit("CFTOI", resInt, resFloat);
+                        } else {
+                            code.emit("SEQUI", resInt, exp1->place, exp2->place);
+                        }
                         bexp->truelist.push_back(code.nextQuad());
-                        code.emit("BNEQZ", res, "-1"); //expressions equal --> res=1 
+                        code.emit("BNEQZ", resInt, "-1"); //expressions equal --> res=1 
                         break;
                 case eNeq:
-                        code.emit(string("SNEQ")+type, res, exp1->place, exp2->place);
+                        if(exp1->expType == eFLOAT){
+                            string resFloat = varTable.front().newTemp(eFLOAT);
+                            code.emit("SNEQF", resFloat, exp1->place, exp2->place);
+                            code.emit("CFTOI", resInt, resFloat);
+                        } else {
+                            code.emit("SNEQI", resInt, exp1->place, exp2->place);
+                        }                       
                         bexp->truelist.push_back(code.nextQuad());
-                        code.emit("BNEQZ", res, "-1");
+                        code.emit("BNEQZ", resInt, "-1");
                         break;
                 case eLt:
-                        code.emit(string("SLET")+type, res, exp1->place, exp2->place);
+                        if(exp1->expType == eFLOAT){
+                            string resFloat = varTable.front().newTemp(eFLOAT);
+                            code.emit("SLETF", resFloat, exp1->place, exp2->place);
+                            code.emit("CFTOI", resInt, resFloat);
+                        } else {
+                            code.emit("SLETI", resInt, exp1->place, exp2->place);
+                        }
                         bexp->truelist.push_back(code.nextQuad());
-                        code.emit("BNEQZ", res, "-1");
+                        code.emit("BNEQZ", resInt, "-1");
                         break;
                 case eLtEq:
-                        code.emit(string("SGRT")+type, res, exp1->place, exp2->place);
+                        if(exp1->expType == eFLOAT){
+                            string resFloat = varTable.front().newTemp(eFLOAT);
+                            code.emit("SGRTF", resFloat, exp1->place, exp2->place);
+                            code.emit("CFTOI", resInt, resFloat);
+                        } else {
+                            code.emit("SGRTI", resInt, exp1->place, exp2->place);
+                        }
                         bexp->truelist.push_back(code.nextQuad());
-                        code.emit("BEQZ", res, "-1"); //exp1 <= exp2 --> res=0
+                        code.emit("BEQZ", resInt, "-1"); //exp1 <= exp2 --> res=0
                         break;
                 case eGt:
-                        code.emit(string("SGRT")+type, res, exp1->place, exp2->place);
+                        if(exp1->expType == eFLOAT){
+                            string resFloat = varTable.front().newTemp(eFLOAT);
+                            code.emit("SGRTF", resFloat, exp1->place, exp2->place);
+                            code.emit("CFTOI", resInt, resFloat);
+                        } else {
+                            code.emit("SGRTI", resInt, exp1->place, exp2->place);
+                        }
                         bexp->truelist.push_back(code.nextQuad());
-                        code.emit("BNEQZ", res, "-1");
+                        code.emit("BNEQZ", resInt, "-1");
                         break;
                 case eGtEq:
-                        code.emit(string("SLET")+type, res, exp1->place, exp2->place);
+                        if(exp1->expType == eFLOAT){
+                            string resFloat = varTable.front().newTemp(eFLOAT);
+                            code.emit("SLETF", resFloat, exp1->place, exp2->place);
+                            code.emit("CFTOI", resInt, resFloat);
+                        } else {
+                            code.emit("SLETI", resInt, exp1->place, exp2->place);
+                        }
                         bexp->truelist.push_back(code.nextQuad());
-                        code.emit("BEQZ", res, "-1"); //exp1 >= exp2 --> res=0
+                        code.emit("BEQZ", resInt, "-1"); //exp1 >= exp2 --> res=0
                         break;
                 default:
                         unexpected_error("can't find RELOP match");
