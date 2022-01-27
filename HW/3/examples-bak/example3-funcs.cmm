@@ -1,0 +1,13 @@
+int foo2()
+{
+  return 1;
+}
+
+int foo(c: int)
+{
+  e:int;
+
+  e = foo2 ();
+  e = e + c;
+  return (e);
+}

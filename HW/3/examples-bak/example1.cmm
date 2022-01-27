@@ -1,0 +1,17 @@
+
+void main()
+{
+    a:int;
+    n:int;
+
+    read(a);
+    n = 0;
+    while(a <> 0) do {
+      a = a/10;
+      n = n+1;
+    }
+
+    write("\"a\" has ");
+    write(n);
+    write(" digits\n");
+}

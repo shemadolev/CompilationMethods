@@ -1,0 +1,8 @@
+<header>
+<unimplemented> main
+<implemented> main,1
+</header>
+SUBTI I2 I2 0
+SUBTI I2 I2 0
+RETRN
+HALT

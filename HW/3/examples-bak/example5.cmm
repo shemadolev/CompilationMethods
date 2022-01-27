@@ -1,0 +1,27 @@
+# This is an example
+
+void main()
+{
+	a : int;
+	B: float;
+	read(a);
+	B =(float)a + 3.0;
+	write("This is \"B\":\n");
+	write(B);
+	write("\n");
+
+	c : int;
+	c = 2;
+	if(full_while (c <= a ) do {
+		if(c < a) then {
+			d : int;
+			d = a / c;
+			if(d * c == a) then
+				break;
+		}
+		c = c + 1;
+	}) then
+		write("I am special\n");
+	else
+       write("I am not special\n");
+}
