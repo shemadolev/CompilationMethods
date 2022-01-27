@@ -402,11 +402,17 @@ lval : ID                               {
                 if(!found)
                     semantic_error("accessed undeclared variable");
                 
-                string addressReg = varTable.front().newTemp(eINT);
-                code.emit("ADD2I",addressReg, DP, to_string(idEntry.offset));
+                string intAddress = varTable.front().newTemp(eINT);
+                code.emit("ADD2I",intAddress, DP, to_string(idEntry.offset));
 
                 lval->expType = idEntry.type;
-                lval->place = addressReg;
+                lval->place = intAddress;
+
+                if(idEntry.type == eFLOAT){
+                    string floatAddress = varTable.front().newTemp(eFLOAT);
+                    code.emit("CITOF",floatAddress,intAddress);
+                    lval->place = floatAddress;
+                }
         }
 ;       
 
@@ -704,8 +710,14 @@ exp :   exp ADDOP exp 	                {
 
                 string type = (idEntry.type == eINT) ? "I" : "F";
                 string temp = varTable.front().newTemp(idEntry.type);
-                code.emit(string("LOAD")+type, temp, DP, to_string(idEntry.offset));
 
+                if(idEntry.type == eFLOAT){
+                    string floatDP = varTable.front().newTemp(eFLOAT);
+                    code.emit("CITOF", floatDP, DP);
+                    code.emit("LOADF", temp, floatDP, to_string(idEntry.offset));
+                } else {
+                    code.emit("LOADI", temp, DP, to_string(idEntry.offset));
+                }
                 exp->expType = idEntry.type;
                 exp->place = temp;
         }
@@ -769,19 +781,29 @@ call : ID '(' call_args ')'             {
         int i = FUNC_ARGS_OFFSET;
         auto argIt = funcEntry->props.args.begin();
         auto expArg = call_args->expList.begin();
+
+        //Cast FP to a float temp reg
+        string floatFP = varTable.front().newTemp(eFLOAT);
+        code.emit("CITOF",floatFP, FP);
+
         for(;argIt != funcEntry->props.args.end();i++, argIt++, expArg++){
             if(expArg->expType != argIt->type)
                 semantic_error("wrong type of argument passed to function");
 
-            string type = (argIt->type == eINT) ? "I" : "F";
-            code.emit(string("STOR")+type, expArg->place, FP, to_string(i * VAR_SIZE));
-            cout<< "passing arg: " <<i << " FP + " <<i * VAR_SIZE <<endl;;
+            if(argIt->type == eINT){
+                code.emit(string("STORI"), expArg->place, FP, to_string(i * VAR_SIZE));
+            } else if (argIt->type == eFLOAT){
+                code.emit(string("STORF"), expArg->place, floatFP, to_string(i * VAR_SIZE));
+            } else {
+                unexpected_error("Passed function a void arg");
+            }
+            cout<< "passing arg: " <<i << " FP + " <<i * VAR_SIZE <<endl;
         }
         //set DP on the first arg
         code.emit("ADD2I", DP, FP, to_string(FUNC_ARGS_OFFSET*VAR_SIZE));
         //set SP above arguments
         code.emit("ADD2I", SP, FP, 
-                to_string(((funcEntry->props.args.size()+FUNC_ARGS_OFFSET)* VAR_SIZE)));
+            to_string(((funcEntry->props.args.size()+FUNC_ARGS_OFFSET)* VAR_SIZE)));
         //jump
         string L = funcEntry->getPlace(code.nextQuad());
         code.emit("JLINK", L);

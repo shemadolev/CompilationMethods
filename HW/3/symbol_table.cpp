@@ -43,9 +43,15 @@ void
 TypedVarScopeTable::emitStoreIds(){
     int regs_num = _curTempOffset - _tempStartingIndex;
     if(regs_num > 0){
+        string regSP = SP;
+        if(_type == eFLOAT){
+            //Cast SP to a float temp reg
+            regSP = newTemp();
+            code.emit("CITOF",regSP, SP);
+        }
         //Store registers
         for (int i=0; i<regs_num; i++){
-            code.emit(string("STOR")+_typeLetter + " " +  _typeLetter + to_string(_tempStartingIndex + i) + " " + SP + " " + to_string(i * VAR_SIZE));
+            code.emit(string("STOR")+_typeLetter + " " +  _typeLetter + to_string(_tempStartingIndex + i) + " " + regSP + " " + to_string(i * VAR_SIZE));
         }
         //Update SP
         code.emit(string("ADD2I ") + SP + " " + SP + " " + to_string(regs_num * VAR_SIZE));
@@ -58,9 +64,16 @@ TypedVarScopeTable::emitLoadIds(){
     if(regs_num > 0){
         //Update SP
         code.emit(string("SUBTI ") + SP + " " + SP + " " + to_string(regs_num * VAR_SIZE));
+        
+        string regSP = SP;
+        if(_type == eFLOAT){
+            //Cast SP to a float temp reg
+            regSP = newTemp();
+            code.emit("CITOF",regSP, SP);
+        }
         //Store registers
         for (int i=0; i<regs_num; i++){
-            code.emit(string("LOAD")+_typeLetter + " " +  _typeLetter + to_string(_tempStartingIndex + i) + " " + SP + " " + to_string(i * VAR_SIZE));
+            code.emit(string("LOAD")+_typeLetter + " " +  _typeLetter + to_string(_tempStartingIndex + i) + " " + regSP + " " + to_string(i * VAR_SIZE));
         }
     }
 }
