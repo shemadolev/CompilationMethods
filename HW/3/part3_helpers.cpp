@@ -36,9 +36,12 @@ void ParserNode::dumpParseTree(){
   dumpParseTree(0);
 }
 
-NodeSymbol::~NodeSymbol(){
-  delete child;
-}
+// NodeSymbol::~NodeSymbol(){
+//   delete child;
+// }
+
+// NodeSymbol::NodeSymbol(string type, list<NodeSymbol*> children) : ParserNode(type), children(children) {
+// }
 
 NodeToken::NodeToken(string type) : ParserNode(type) {
 #ifdef DEBUG

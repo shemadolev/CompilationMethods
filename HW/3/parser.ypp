@@ -577,7 +577,7 @@ bexp :  bexp OR M bexp                  {
                             code.emit("SGRTI", resInt, exp1->place, exp2->place);
                         }
                         bexp->truelist.push_back(code.nextQuad());
-                        code.emit("BEQZ", resInt, "-1"); //exp1 <= exp2 --> res=0
+                        code.emit("BREQZ", resInt, "-1"); //exp1 <= exp2 --> res=0
                         break;
                 case eGt:
                         if(exp1->expType == eFLOAT){
@@ -599,7 +599,7 @@ bexp :  bexp OR M bexp                  {
                             code.emit("SLETI", resInt, exp1->place, exp2->place);
                         }
                         bexp->truelist.push_back(code.nextQuad());
-                        code.emit("BEQZ", resInt, "-1"); //exp1 >= exp2 --> res=0
+                        code.emit("BREQZ", resInt, "-1"); //exp1 >= exp2 --> res=0
                         break;
                 default:
                         unexpected_error("can't find RELOP match");

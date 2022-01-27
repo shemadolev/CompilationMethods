@@ -150,8 +150,9 @@ public:
  */
 class NodeSymbol : public ParserNode{
     ParserNode *child;
+    // list<NodeSymbol*> children;
 public:
-    // NodeSymbol(string type, ParserNode *child);
+    // NodeSymbol(string type, list<NodeSymbol*> children);
     ~NodeSymbol();
 
     virtual void dumpParseTree(int depth);
@@ -171,6 +172,7 @@ public:
 
 class NodeExpression : public NodeSymbol{
 public:
+// NodeExpression(string type, list<NodeSymbol*> children) : NodeSymbol(type, children){}
 #ifdef DEBUG
     NodeExpression(){
         cout << "NodeExpression" << endl;
@@ -182,6 +184,7 @@ public:
 
 class NodeType : public NodeSymbol{
 public:
+// NodeType(string type, list<NodeSymbol*> children) : NodeSymbol(type, children){}
 #ifdef DEBUG
     NodeType(){
         cout << "NodeType" << endl;
@@ -192,6 +195,7 @@ public:
 
 class NodeStatement : public NodeSymbol{
 public:
+// NodeStatement(string type, list<NodeSymbol*> children) : NodeSymbol(type, children){}
 #ifdef DEBUG
     NodeStatement(){
         cout << "NodeStatement" << endl;
@@ -203,6 +207,7 @@ public:
 
 class NodeBexp : public NodeSymbol{
 public:
+// NodeBexp(string type, list<NodeSymbol*> children) : NodeSymbol(type, children){}
 #ifdef DEBUG
     NodeBexp(){
         cout << "NodeBexp" << endl;
@@ -214,6 +219,7 @@ public:
 
 class NodeDeclaration : public NodeSymbol{
 public:
+// NodeDeclaration(string type, list<NodeSymbol*> children) : NodeSymbol(type, children){}
 #ifdef DEBUG
     NodeDeclaration(){
         cout << "NodeDeclaration" << endl;
@@ -225,6 +231,7 @@ public:
 
 class NodeFuncApi : public NodeSymbol{
 public:
+// NodeFuncApi(string type, list<NodeSymbol*> children) : NodeSymbol(type, children){}
 #ifdef DEBUG
     NodeFuncApi(){
         cout << "NodeFuncApi" << endl;
@@ -235,6 +242,7 @@ public:
 
 class NodeCallArgs : public NodeSymbol{
 public:
+// NodeCallArgs(string type, list<NodeSymbol*> children) : NodeSymbol(type, children){}
 #ifdef DEBUG
     NodeCallArgs(){
         cout << "NodeCallArgs" << endl;
@@ -245,6 +253,7 @@ public:
 
 class NodeFuncArgs : public NodeSymbol{
 public:
+// NodeFuncArgs(string type, list<NodeSymbol*> children) : NodeSymbol(type, children){}
 #ifdef DEBUG
     NodeFuncArgs(){
         cout << "NodeFuncArgs" << endl;
@@ -255,6 +264,7 @@ public:
 
 class NodeMarkerM : public NodeSymbol{
 public:
+// NodeMarkerM(string type, list<NodeSymbol*> children) : NodeSymbol(type, children){}
 #ifdef DEBUG
     NodeMarkerM(){
         cout << "NodeMarkerM" << endl;
@@ -265,6 +275,7 @@ public:
 
 class NodeMarkerN : public NodeSymbol{
 public:
+// NodeMarkerN(string type, list<NodeSymbol*> children) : NodeSymbol(type, children){}
 #ifdef DEBUG
     NodeMarkerN(){
         cout << "NodeMarkerN" << endl;
