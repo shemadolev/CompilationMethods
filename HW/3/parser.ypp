@@ -778,7 +778,7 @@ call : ID '(' call_args ')'             {
         }
         //set SP above arguments
         code.emit("ADD2I", SP, FP, 
-                to_string((funcEntry->props.args.size()+FUNC_ARGS_OFFSET* VAR_SIZE)));
+                to_string(((funcEntry->props.args.size()+FUNC_ARGS_OFFSET)* VAR_SIZE)));
         //set DP above FP on the first argument
         code.emit("ADD2I", DP, FP, to_string(FUNC_ARGS_OFFSET * VAR_SIZE));
 
