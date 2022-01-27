@@ -96,7 +96,7 @@ cout <<"end mid-rule fdefs" <<endl;
                 NodeFuncApi *func_api = dynamic_cast<NodeFuncApi*>($2);
 
                 FunctionEntry* funcEntry = funcTable.find(func_api->funcProps.id);
-                if(funcEntry != nullptr){
+                if(funcEntry == nullptr){
                     funcTable.insert(func_api->funcProps);
                 } else { //found
                     if(!funcEntry->matchExisting(func_api->funcProps)){
