@@ -66,7 +66,7 @@ fdefs : /* epsilon */                   {$$=new NodeSymbol();}
 cout <<"mid-rule fdefs" <<endl;
                 NodeFuncApi *func_api = dynamic_cast<NodeFuncApi*>($2);
                 FunctionEntry* funcEntry = funcTable.find(func_api->funcProps.id);
-cout <<"1" <<endl;                
+                cout <<"1" <<endl;                
                 if(funcEntry == nullptr){
                     cout <<"funcEntry != nullptr\n";
                     funcEntry = funcTable.insert(func_api->funcProps);
@@ -81,7 +81,7 @@ cout <<"1" <<endl;
                 funcTable.setCurrent(funcEntry);
                 varTable.setFunctionApi(funcEntry->props.args);
                 funcEntry->define(code.nextQuad());
-cout <<"end mid-rule fdefs" <<endl;
+                cout <<"end mid-rule fdefs" <<endl;
         } blk            {
                 $$=new NodeSymbol();
                 NodeStatement *blk = dynamic_cast<NodeStatement*>($4);
@@ -780,7 +780,7 @@ call : ID '(' call_args ')'             {
         code.emit("ADD2I", SP, FP, 
                 to_string(((funcEntry->props.args.size()+FUNC_ARGS_OFFSET)* VAR_SIZE)));
         //set DP above FP on the first argument
-        code.emit("ADD2I", DP, FP, to_string(FUNC_ARGS_OFFSET * VAR_SIZE));
+        code.emit("COPYI", DP, SP);
 
         //jump
         string L = funcEntry->getPlace(code.nextQuad());
