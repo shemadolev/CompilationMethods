@@ -30,13 +30,11 @@ using namespace std;
 #define SP "I2"
 //return int type
 #define RT_I "I3"
-//declaration pointer
-#define DP "I4"
 //return float type
 #define RT_F "F0"
 
 #define FUNC_ARGS_OFFSET 1
-#define SAVED_REGS_INT 5
+#define SAVED_REGS_INT 4
 #define SAVED_REGS_FLOAT 1
 
 //Size of variable in bytes
@@ -238,7 +236,6 @@ public:
     list<ArgDeclaration> argList;
 };
 
-
 class NodeMarkerM : public NodeSymbol{
 public:
     NodeMarkerM(){
@@ -303,9 +300,8 @@ public:
 
 class TypedVarScopeTable{
 protected:
-    int _curVarOffset;
     int _curTempOffset;
-    int startingIndex;
+    int _tempStartingIndex;
     idTypes _type;
     string _typeLetter;
     map<string,int> _varEntries;
@@ -329,10 +325,10 @@ public:
     /**
      * @brief Allocate a new var for specific id
      * 
-     * @param int The offset from SP for the new variable
-     * @return VarEntry& Allocated new var.
+     * @param id the name of the variable
+     * @param int Stack offset - the offset from SP for the new variable (according to VAR_SIZE)
      */
-    int newVar(string id);
+    void newVar(string id, int offset);
 
     /**
      * @brief Search id and get the Var object
@@ -369,6 +365,8 @@ public:
 
 class VarScopeTable{
 protected:
+    int _curVarOffset;
+    int _varStartingIndex;
     TypedVarScopeTable intTable;
     TypedVarScopeTable floatTable;
 public:
@@ -376,7 +374,7 @@ public:
     /**
      * @brief Construct a new Var Scope Table object 
      */
-    VarScopeTable();
+    VarScopeTable(int startingOffset);
 
     /**
      * @brief Allocate a new temporary register to be used until next entrance/exit of a block.
@@ -418,7 +416,17 @@ public:
      */
     void loadIds();
 
+    /**
+     * @brief Free the memory that was used by this scope.
+     * 
+     */
     void freeStack();
+
+    /**
+     * @brief Get the offset of the next available cell in the stack
+     * @return int 
+     */
+    int getCurOffset();
 
 };
 
