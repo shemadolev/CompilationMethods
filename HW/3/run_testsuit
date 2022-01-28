@@ -1,6 +1,4 @@
 #!/bin/bash
-rm -r *
-cp -r /media/sf_comp/hw3/* .
 make
 # this script compiles, linkes and runs cmm files
 

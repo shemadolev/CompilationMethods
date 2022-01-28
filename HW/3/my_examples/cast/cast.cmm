@@ -1,6 +1,11 @@
-int sum(a:float,b:int){
-    return (int)a + b;
+#int sum(a:float,b:int){
+#    return (int)a + b;
+#}
+
+int sum(a,b:int){
+    return a + a;
 }
+
 
 void main(){
     a: int;
@@ -17,11 +22,8 @@ void main(){
     a = (int)a;
     b = (float)b;
 
-    intSum = sum((float)a,(int)b);
-    floatSum = (float)sum((float)a,(int)b);
-
-    write(intSum);
-    write(", ");
-    write(floatSum);
+    intSum = sum(a,a);
+    write(",");
+write(sum(a,a));
     write("\n");
 }
