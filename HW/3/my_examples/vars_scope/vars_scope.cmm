@@ -1,0 +1,30 @@
+void main(){
+    a,b,c : int;
+
+    write("read outer a\n");
+    read(a);
+    write("read b\n");
+    read(b);
+
+    {
+        a : int;
+        write("read inner a\n");
+        read(a);
+
+        write("write b from inner scope\n");
+        write(b);
+
+        write("read b from inner scope\n");
+        read(b);
+
+        write("inner a: ");
+        write(a);
+        write("\n");
+    }
+    
+    write("outer a: ");
+    write(a);
+    write("\nb: ");
+    write(b);
+    write("\n");
+}

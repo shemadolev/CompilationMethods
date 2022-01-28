@@ -1,0 +1,27 @@
+int sum(a:float,b:int){
+    return (int)a + b;
+}
+
+void main(){
+    a: int;
+    b : float;
+    read(a);
+    read(b);
+
+    intSum:int;
+    floatSum:float;
+
+    a = (int)((float)a);
+    b = (float)((int)b);
+
+    a = (int)a;
+    b = (float)b;
+
+    intSum = sum((float)a,(int)b);
+    floatSum = (float)sum((float)a,(int)b);
+
+    write(intSum);
+    write(", ");
+    write(floatSum);
+    write("\n");
+}

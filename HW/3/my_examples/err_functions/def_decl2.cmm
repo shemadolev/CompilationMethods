@@ -1,0 +1,10 @@
+int foo(a,b:int){
+    return a + b;
+}
+
+int foo(a:int, b:int);
+
+#different return type
+float foo(a,b:int);
+
+void main(){}

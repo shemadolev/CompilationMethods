@@ -1,0 +1,8 @@
+int foo(a,b:int){
+    return 5.0;
+}
+
+void main(){
+    a , b: int;
+    foo(a,b);
+}
