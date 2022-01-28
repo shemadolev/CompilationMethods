@@ -70,12 +70,12 @@ fdefs : /* epsilon */                   {$$=new NodeSymbol();}
                     funcEntry = funcTable.insert(func_api->funcProps);
                 } else { //found
                     if(!funcEntry->matchExisting(func_api->funcProps))
-                        semantic_error("duplicate declaration of function with different API");
+                        semantic_error(string("the API of the definition of function '") + func_api->funcProps.id + "' doesn't match previous declaration");
+                    if(funcEntry->isDefined())
+                        semantic_error(string("duplicate definition of a function '") + func_api->funcProps.id + "'");
                 }
                 //override args to ensure correct arg naming
                 funcEntry->props.args = func_api->funcProps.args;
-                if(funcEntry->isDefined())
-                    semantic_error("duplicate definition of a function");
                 funcTable.setCurrent(funcEntry);
                 varTable.setFunctionApi(funcEntry->props.args);
                 funcEntry->define(code.nextQuad());
@@ -98,7 +98,7 @@ fdefs : /* epsilon */                   {$$=new NodeSymbol();}
                     funcTable.insert(func_api->funcProps);
                 } else { //found
                     if(!funcEntry->matchExisting(func_api->funcProps)){
-                        semantic_error("duplicate declaration of function with different API");
+                        semantic_error(string("duplicate declaration of function '") + func_api->funcProps.id + "' with different API");
                     } 
                 }
         }
@@ -141,7 +141,7 @@ func_arglist :  func_arglist ',' dcl    {
                     //check duplicate arg names
                     for(ArgDeclaration argIt : func_arglist->argList){
                         if(argIt.id == id)
-                            semantic_error("Can't redecalre same variable name");
+                            semantic_error(string("argument ") + id + " was already declared in the function header");
                     }
                     ArgDeclaration arg = {id, dcl->idType};
                     func_arglist->argList.push_back(arg);
@@ -184,7 +184,7 @@ dcl :   ID ':' type                     {
                 NodeType *type = dynamic_cast<NodeType*>($3);
 
                 if(type->typeValue == eVOID)
-                        semantic_error("variable can't be 'void'");
+                        semantic_error("can't decalre variable of type 'void'");
                 
                 dcl->idType = type->typeValue;
                 dcl->idList.push_front(id->value);
@@ -197,7 +197,7 @@ dcl :   ID ':' type                     {
 
                 //Check if previously decalred same name
                 if (std::find(std::begin(dcl1->idList), std::end(dcl1->idList), id->value) != std::end(dcl1->idList))
-                    semantic_error("Can't redecalre same variable name");
+                    semantic_error(string("already declared variable with name '") + id->value + "'");
 
                 dcl->idType = dcl1->idType;
                 dcl->idList = dcl1->idList;
@@ -243,7 +243,7 @@ stmt :  dcl ';'                         {
                 for(string id : dcl->idList){
                     // variable can't be declared twice in the same block
                     if(varTable.isInScope(id))
-                        semantic_error("declaration of an already declared variable within the block");                     
+                        semantic_error(string("variable '") + id + "' was already declared within the same block");
                     varTable.front().newVar(id, dcl->idType);
                 }
                 code.emit("ADD2I",SP,SP,to_string(dcl->idList.size() * VAR_SIZE));
@@ -284,9 +284,11 @@ return : RETURN exp ';'                 {
             NodeExpression *exp = dynamic_cast<NodeExpression*>($2);
             
             //check return type matches function's return type
-            if(funcTable.getCurrent()->props.type != exp->expType)
-                semantic_error("return value type isn't matching function's declaration");
+            idTypes currentFuncType = funcTable.getCurrent()->props.type;
+            if(currentFuncType != exp->expType)
+                semantic_error(string("return value of type ") + idTypesNames[exp->expType] + ", expected type " + idTypesNames[currentFuncType]);
 
+            //todo maybe we should remove this check, not sure if should be allowed
             if(exp->expType == eVOID)
                 semantic_error("return value type can't be void");
 
@@ -302,7 +304,7 @@ return : RETURN exp ';'                 {
             $$=new NodeSymbol();
 
             if(funcTable.getCurrent()->props.type != eVOID)
-                semantic_error("expected a return argument");
+                semantic_error("expected return with an expression");
 
             code.emit("RETRN");
         }
@@ -370,7 +372,7 @@ assn : lval ASSIGN exp ';'              {
                 NodeExpression *exp1 = dynamic_cast<NodeExpression*>($3);
 
                 if(lval->expType != exp1->expType)
-                        semantic_error("assignment of different types");
+                        semantic_error(string("can't assign type ") + idTypesNames[exp1->expType] + " into type " + idTypesNames[lval->expType]);
                 // lval can't be void - it's guarrnteed at this point
                 string type = (lval->expType == eINT) ? "I" : "F";
 
@@ -387,7 +389,7 @@ lval : ID                               {
                 VarEntry idEntry;
                 bool found = varTable.lookupVarTableList(idEntry, id->value);
                 if(!found)
-                    semantic_error("accessed undeclared variable");
+                    semantic_error(string("name ") + id->value + " is undeclared");
                 
                 string intAddress = varTable.front().newTemp(eINT);
                 code.emit("ADD2I",intAddress, DP, to_string(idEntry.offset));
@@ -513,8 +515,8 @@ bexp :  bexp OR M bexp                  {
         }
         | NOT bexp                      {
                 $$ = new NodeBexp();
-                NodeBexp *bexp = dynamic_cast<NodeBexp*>($$);        
-                NodeBexp *bexp1 = dynamic_cast<NodeBexp*>($2);        
+                NodeBexp *bexp = dynamic_cast<NodeBexp*>($$);
+                NodeBexp *bexp1 = dynamic_cast<NodeBexp*>($2);
 
                 bexp->falselist.merge(bexp1->truelist);
                 bexp->truelist.merge(bexp1->falselist);
@@ -527,9 +529,9 @@ bexp :  bexp OR M bexp                  {
                 NodeExpression *exp2 = dynamic_cast<NodeExpression*>($3);
 
                 if(exp1->expType != exp2->expType)
-                        semantic_error("RELOP between incompatible types");
+                        semantic_error(string("can't compare type ") + idTypesNames[exp1->expType] + " with type " + idTypesNames[exp2->expType]);
                 if(exp1->expType == eVOID)
-                        semantic_error("RELOP can't be done with 'void'");                
+                        semantic_error("can't compare void expressions");
                 string type = (exp1->expType == eINT) ? "I" : "F"; 
                 
                 // calculate RELOP
@@ -635,11 +637,10 @@ exp :   exp ADDOP exp 	                {
                 NodeToken *addop = dynamic_cast<NodeToken*>($2);
                 NodeExpression *exp2 = dynamic_cast<NodeExpression*>($3);
 
-                string types[3] = {"int", "float", "void"};
                 if(exp1->expType != exp2->expType)
-                        semantic_error(string("addition of type ") + types[exp1->expType] + " to " + types[exp2->expType]);
+                        semantic_error(string("can't add type ") + idTypesNames[exp1->expType] + " with type " + idTypesNames[exp2->expType]);
                 if(exp1->expType == eVOID)
-                        semantic_error("ADDOP can't be done with 'void'");
+                        semantic_error("addition operation can't be done with 'void'");
                 
                 string type = (exp1->expType == eINT) ? "I" : "F";
                 // calculate ADDOP
@@ -667,9 +668,9 @@ exp :   exp ADDOP exp 	                {
                 NodeExpression *exp2 = dynamic_cast<NodeExpression*>($3);
 
                 if(exp1->expType != exp2->expType)
-                        semantic_error("assignment of different types");
+                        semantic_error(string("can't multiply type ") + idTypesNames[exp1->expType] + " with type " + idTypesNames[exp2->expType]);
                 if(exp1->expType == eVOID)
-                        semantic_error("ADDOP can't be done with 'void'");
+                        semantic_error("multiply operation can't be done with 'void'");
                 
                 string type = (exp1->expType == eINT) ? "I" : "F";
                 // calculate MULOP
@@ -708,10 +709,8 @@ exp :   exp ADDOP exp 	                {
                 exp->place = exp1->place;
                 exp->expType = exp1->expType;
             } else {
-                if(type->typeValue == eVOID)
-                    semantic_error("can't cast to void");
-                if(exp1->expType == eVOID)
-                    semantic_error("can't cast from void");
+                if(type->typeValue == eVOID || exp1->expType == eVOID)
+                    semantic_error(string("can't cast ") + idTypesNames[exp1->expType] + " to " + idTypesNames[type->typeValue]);
                 exp->expType = type->typeValue;
                 if(type->typeValue == eINT){
                     exp->place = varTable.front().newTemp(eINT);
@@ -795,9 +794,9 @@ call : ID '(' call_args ')'             {
 
         FunctionEntry* funcEntry = funcTable.find(id->value);
         if(funcEntry == nullptr)
-            semantic_error("called an undeclared function");
+            semantic_error(string("called an undeclared function '") + id->value + "'");
         if(call_args->expList.size() != funcEntry->props.args.size())
-            semantic_error("wrong number of arguments passed to function");
+            semantic_error(string("wrong number of arguments passed to function '") + id->value +"'");
 
         varTable.storeIds(); //for each var: Mem[SP++] = var
         code.emit("STORI", RA, SP, "0"); //Mem[SP] = RA
@@ -815,7 +814,7 @@ call : ID '(' call_args ')'             {
 
         for(;argIt != funcEntry->props.args.end();i++, argIt++, expArg++){
             if(expArg->expType != argIt->type)
-                semantic_error("wrong type of argument passed to function");
+                semantic_error(string("wrong type of argument passed to function '") + id->value + "'");
 
             if(argIt->type == eINT){
                 code.emit(string("STORI"), expArg->place, FP, to_string(i * VAR_SIZE));
