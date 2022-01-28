@@ -21,6 +21,7 @@ TypedVarScopeTable::newTemp(){
 void
 TypedVarScopeTable::newVar(string id, int offset){
     _varEntries.insert(pair<string,int>(id,offset));
+    cout << "new var " << id << ", " << offset << endl; //debug
 }
 
 bool 
@@ -29,6 +30,7 @@ TypedVarScopeTable::lookup(VarEntry& var, string id){
     if(it != _varEntries.end()){ // id is within the symbol table
         var.type = _type;
         var.offset = it->second;
+        cout << "found var in offset " << var.offset << ", type=" << _type << endl; //debug
         return true;
     }
     return false;
@@ -145,6 +147,7 @@ VariableTable::push(){
     int stackOffset = (_tables.size() > 0) ? _tables.front().getCurOffset() : 0; 
     VarScopeTable newTable(stackOffset);
     _tables.push_front(newTable);
+    cout << "Block #" << _tables.size() << " w/ stackOffset " << stackOffset << endl;
 }
 
 void 
