@@ -30,7 +30,7 @@ TypedVarScopeTable::lookup(VarEntry& var, string id){
     if(it != _varEntries.end()){ // id is within the symbol table
         var.type = _type;
         var.offset = it->second;
-        cout << "found var in offset " << var.offset << ", type=" << _type << endl; //debug
+        cout << "found var " << id << " in offset " << var.offset << ", type=" << _type << endl; //debug
         return true;
     }
     return false;
