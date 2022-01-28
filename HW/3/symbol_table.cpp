@@ -124,8 +124,8 @@ VarScopeTable::storeIds(){
 
 void 
 VarScopeTable::loadIds(){
-    intTable.emitLoadIds();
     floatTable.emitLoadIds();
+    intTable.emitLoadIds();
 }
 
 void

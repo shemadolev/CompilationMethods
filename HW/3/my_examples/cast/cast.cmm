@@ -3,7 +3,10 @@
 #}
 
 int sum(a,b:int){
-    return a + a;
+	write("sum arg is: ");
+	write(a);
+	write("\n");    
+	return a + a;
 }
 
 
