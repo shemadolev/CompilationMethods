@@ -1,0 +1,46 @@
+int mod (a:int, b:int) {
+	q:int;
+
+	q=(int)(a/b);
+	if(a-b*q==0) then
+		return (0);
+	else return (1);
+}
+
+void main(){
+	num1, num2:int;
+	i,j: int;
+	flag:int;
+
+	read(num1);
+	read(num2);
+
+	if num2 > 2 then 
+	{
+		if (mod(num1,2)==0) then
+			num1 = num1 + 1;
+		i = num1;
+
+		while (i <= num2) do {
+			flag = 0;
+			j = 2;
+			while (j < i/2) do
+			{
+		#		write("before mod(i,j), j=");write(j);write("\n");
+		#		write("before mod(i,j), i=");write(i);write("\n");
+				if (mod(i,j)==0) then
+					flag = 1;
+				j = j + 1;
+		#		write("after mod(i,j), j+1=");write(j);write("\n");
+		#		write("after mod(i,j), i=");write(i);write("\n");
+			}
+		#	write("reached out of the while block, i=");write(i);write("\n");
+			if (flag == 0) then {
+		#		write("found prime: ");
+				write(i);
+		#		write("\n");
+			}
+			i = i+2;
+		}
+	}
+}

@@ -1,0 +1,22 @@
+int foo(a:int){
+	return a;
+}
+
+void main(){
+	a : int;
+	read(a);
+	a = a + 1;
+	write("before foo() a="); write(a); write("\n");	
+	a = foo(a);
+	write("after foo() a="); write(a); write("\n");
+	
+	a = a + 1;
+	write("a+2 = ");write(a);
+
+	write("before foo() a="); write(a); write("\n");	
+	a = foo(a);
+	write("after foo() a="); write(a); write("\n");
+	
+	a = a + 1;
+	write("a+3 = ");write(a);
+}
