@@ -1,5 +1,4 @@
 #!/bin/bash
-make
 
 passCounter=0
 totalCounter=0
@@ -18,12 +17,14 @@ do
 	
 	FileCmm="$File".cmm
 	FileRsk="$File".rsk
+	echo "Compile $FileCmm"
 	./rx-cc "$FileCmm" #This creates FileRsk
 	RskList="$RskList $FileRsk"
 done
-./rx-linker "$RskList"
-Prog="$testFolder.e"
-mv out.e "$Prog"
+echo "Linking $RskList" 
+./rx-linker $RskList
+Prog=$testFolder/exe.e
+mv out.e $Prog
 
 for File in "$testFolder"/*.input
 do
@@ -33,7 +34,7 @@ do
 	FileExp="$File".exp
 	FileMy="$File".my
 	
-	./rx-vm1.1 "$Prog" <"$FileIn" >"$FileMy"
+	./rx-vm1.1 $Prog <$FileIn >$FileMy
 
 	diffRes=$(diff "$FileExp" "$FileMy")
 	if [[ -z $diffRes ]]; then #diff is empty == files are eqaul
@@ -46,3 +47,4 @@ do
 done
 
 #make clean
+

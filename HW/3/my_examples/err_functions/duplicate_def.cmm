@@ -1,0 +1,12 @@
+int foo(a:int, b:int);
+
+int foo(a,b:int){
+    return a + b;
+}
+
+#duplicate
+int foo(a,b:int){
+    return a + b;
+}
+
+void main(){}

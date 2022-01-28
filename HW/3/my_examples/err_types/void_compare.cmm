@@ -1,0 +1,9 @@
+void foo(){}
+
+void main(){
+    a : int;
+
+    if(a > foo()){
+        write("Did I just compare int and void??\n");
+    }
+}

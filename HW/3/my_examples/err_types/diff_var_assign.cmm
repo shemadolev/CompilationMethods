@@ -1,0 +1,6 @@
+void main(){
+    a : int;
+    b:float;
+
+    a = b;
+}

@@ -1,0 +1,12 @@
+void main(){
+    a : int;
+
+    {
+        b : int;
+    }
+    
+    # b shouldn't be available in this scope
+    b = 1;
+
+    write("This shouldn't be compiled!");
+}
