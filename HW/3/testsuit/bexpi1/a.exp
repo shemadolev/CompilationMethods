@@ -1,0 +1,8 @@
+Input integer?:Input integer?:
+Test 1: 3 == 5 is: FALSE
+Test 2: 3 > 5 is: FALSE
+Test 3: 3 >= 5 is: FALSE
+Test 4: 3 < 5 is: TRUE
+Test 5: 3 <= 5 is: TRUE
+Test 6: 3 != 5 is: TRUE
+Reached Halt.

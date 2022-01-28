@@ -1,0 +1,8 @@
+Input integer?:Input integer?:
+Test 1: -356 == 356 is: FALSE
+Test 2: -356 > 356 is: FALSE
+Test 3: -356 >= 356 is: FALSE
+Test 4: -356 < 356 is: TRUE
+Test 5: -356 <= 356 is: TRUE
+Test 6: -356 != 356 is: TRUE
+Reached Halt.

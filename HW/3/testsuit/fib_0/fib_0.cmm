@@ -1,0 +1,14 @@
+void main() {
+  a,b,c: int;
+  a = 0;
+  b = 1;
+  c = a+b;
+
+  while (a < 1000) do {
+  write(c);
+  c=a+b;
+  a=b;
+  b=c;
+  }
+}
+

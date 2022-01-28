@@ -1,0 +1,18 @@
+void main() {
+	a,b:int;
+
+	read(a);
+	#TEST WHILE LOOP
+	write("\n");
+	while (a > 0) do
+	{
+		write(a);
+		write("bottles of beer on the wall, ");
+		write(a);
+		write("bottles of beer... Take one down, pass it around... ");
+		a = a - 1;
+		write(a);
+		write("bottles of beer on the wall.\n");
+	}
+	write("All the beer is gone... =(\n");
+}
