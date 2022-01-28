@@ -732,7 +732,6 @@ exp :   exp ADDOP exp 	                {
                 if(!found)
                     semantic_error(string("tried evaluating undeclared variable '") + id->value + "'");
 
-                string type = (idEntry.type == eINT) ? "I" : "F";
                 string temp = varTable.front().newTemp(idEntry.type);
 
                 if(idEntry.type == eFLOAT){

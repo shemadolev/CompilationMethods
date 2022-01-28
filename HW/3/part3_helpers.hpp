@@ -48,7 +48,7 @@ using namespace std;
 
 #define FUNC_ARGS_OFFSET 1
 #define SAVED_REGS_INT 5
-#define SAVED_REGS_FLOAT 1
+#define SAVED_REGS_FLOAT 4
 
 //Size of variable in bytes
 #define VAR_SIZE 4
