@@ -744,7 +744,7 @@ exp :   exp ADDOP exp 	                {
                     code.emit("LOADI", temp, DP, to_string(idEntry.offset));
                 }
                 
-                cout << "new temp " << type << idEntry.offset << " for id " << id->value << endl;
+                cout << "new temp " << temp << " for id " << id->value << endl;
 
                 exp->expType = idEntry.type;
                 exp->place = temp;
