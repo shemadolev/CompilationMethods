@@ -1,0 +1,67 @@
+void main() {
+ a, b : int;
+
+    read(a);
+    read(b);
+	#TEST FOR INTEGER
+	write("\n");
+	write("Test 1: ");
+	write(a);
+	write("== ");
+	write(b);
+	write("is: ");
+	if (a == b) then
+		write("TRUE\n");
+	else
+		write("FALSE\n");
+	
+	write("Test 2: ");
+	write(a);
+	write("> ");
+	write(b);
+	write("is: ");
+	if (a > b) then
+		write("TRUE\n");
+	else
+		write("FALSE\n");
+	
+	write("Test 3: ");
+	write(a);
+	write(">= ");
+	write(b);
+	write("is: ");
+	if (a >= b) then
+		write("TRUE\n");
+	else
+		write("FALSE\n");
+	
+	write("Test 4: ");
+	write(a);
+	write("< ");
+	write(b);
+	write("is: ");
+	if (a < b) then
+		write("TRUE\n");
+	else
+		write("FALSE\n");
+    
+	write("Test 5: ");
+	write(a);
+	write("<= ");
+	write(b);
+	write("is: ");
+	if (a <= b) then
+		write("TRUE\n");
+	else
+		write("FALSE\n");
+	
+	write("Test 6: ");
+	write(a);
+	write("!= ");
+	write(b);
+	write("is: ");
+	if (a <> b) then
+		write("TRUE\n");
+	else
+		write("FALSE\n");
+}

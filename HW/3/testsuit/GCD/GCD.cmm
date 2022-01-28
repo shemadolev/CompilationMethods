@@ -1,0 +1,14 @@
+int gcd (c: int, m: int);
+
+void main() {
+	a,b:int;
+	result: int;
+
+	read(a);
+	read(b);
+
+	result = gcd(a,b);
+
+	write(result);
+}
+

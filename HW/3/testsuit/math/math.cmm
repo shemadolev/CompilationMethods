@@ -1,0 +1,29 @@
+void main(){
+ a,b,c:int;
+
+	write("Testing INT: ");
+	read(a);
+	read(b);
+	c = a + b;
+	write(c);
+	write(a + b);
+	c = a * b;
+	write(c);
+	write(a * b);
+	c = a - b;
+	write(c);
+	write(a - b);
+	c = a / b;
+	write(c);
+	write(a / b);
+
+	write("These should all be the same: ");
+	c = (a + a) * b;
+	write(c);
+	c = b * (a + a);
+	write(c);
+	c = a * b + a * b;
+	write(c);
+	c = b * a + b * a;
+	write(c);
+}

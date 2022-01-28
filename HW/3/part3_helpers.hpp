@@ -21,7 +21,6 @@ using namespace std;
 
 #define PRINT_PARSE_TREE 1
 
-
 //return address pointer
 #define RA "I0"
 //frame start pointer
@@ -36,7 +35,7 @@ using namespace std;
 #define RT_F "F0"
 
 #define FUNC_ARGS_OFFSET 1
-#define SAVED_REGS_INT 4
+#define SAVED_REGS_INT 5
 #define SAVED_REGS_FLOAT 1
 
 //Size of variable in bytes
@@ -151,8 +150,9 @@ public:
  */
 class NodeSymbol : public ParserNode{
     ParserNode *child;
+    // list<NodeSymbol*> children;
 public:
-    // NodeSymbol(string type, ParserNode *child);
+    // NodeSymbol(string type, list<NodeSymbol*> children);
     ~NodeSymbol();
 
     virtual void dumpParseTree(int depth);
@@ -172,85 +172,115 @@ public:
 
 class NodeExpression : public NodeSymbol{
 public:
+// NodeExpression(string type, list<NodeSymbol*> children) : NodeSymbol(type, children){}
+#ifdef DEBUG
     NodeExpression(){
         cout << "NodeExpression" << endl;
     }
+#endif
     idTypes expType;
     string place;
 };
 
 class NodeType : public NodeSymbol{
 public:
+// NodeType(string type, list<NodeSymbol*> children) : NodeSymbol(type, children){}
+#ifdef DEBUG
     NodeType(){
         cout << "NodeType" << endl;
     }
+#endif
     idTypes typeValue;
 };
 
 class NodeStatement : public NodeSymbol{
 public:
+// NodeStatement(string type, list<NodeSymbol*> children) : NodeSymbol(type, children){}
+#ifdef DEBUG
     NodeStatement(){
         cout << "NodeStatement" << endl;
     }
+#endif
     CodeLineList nextlist;
     CodeLineList breaklist;
 };
 
 class NodeBexp : public NodeSymbol{
 public:
+// NodeBexp(string type, list<NodeSymbol*> children) : NodeSymbol(type, children){}
+#ifdef DEBUG
     NodeBexp(){
         cout << "NodeBexp" << endl;
     }
+#endif
     CodeLineList truelist;
     CodeLineList falselist;
 };
 
 class NodeDeclaration : public NodeSymbol{
 public:
+// NodeDeclaration(string type, list<NodeSymbol*> children) : NodeSymbol(type, children){}
+#ifdef DEBUG
     NodeDeclaration(){
         cout << "NodeDeclaration" << endl;
     }
+#endif
     list<string> idList;
     idTypes idType;
 };
 
 class NodeFuncApi : public NodeSymbol{
 public:
+// NodeFuncApi(string type, list<NodeSymbol*> children) : NodeSymbol(type, children){}
+#ifdef DEBUG
     NodeFuncApi(){
         cout << "NodeFuncApi" << endl;
     }
+#endif
     FunctionProps funcProps;
 };
 
 class NodeCallArgs : public NodeSymbol{
 public:
+// NodeCallArgs(string type, list<NodeSymbol*> children) : NodeSymbol(type, children){}
+#ifdef DEBUG
     NodeCallArgs(){
         cout << "NodeCallArgs" << endl;
     }
+#endif
     list<NodeExpression> expList;
 };
 
 class NodeFuncArgs : public NodeSymbol{
 public:
+// NodeFuncArgs(string type, list<NodeSymbol*> children) : NodeSymbol(type, children){}
+#ifdef DEBUG
     NodeFuncArgs(){
         cout << "NodeFuncArgs" << endl;
     }
+#endif
     list<ArgDeclaration> argList;
 };
 
 class NodeMarkerM : public NodeSymbol{
 public:
+// NodeMarkerM(string type, list<NodeSymbol*> children) : NodeSymbol(type, children){}
+#ifdef DEBUG
     NodeMarkerM(){
         cout << "NodeMarkerM" << endl;
     }
+#endif
     int quad;
 };
 
 class NodeMarkerN : public NodeSymbol{
 public:
+// NodeMarkerN(string type, list<NodeSymbol*> children) : NodeSymbol(type, children){}
+#ifdef DEBUG
     NodeMarkerN(){
         cout << "NodeMarkerN" << endl;
     }
+#endif
     CodeLineList nextlist;
 };
 
@@ -436,7 +466,7 @@ class VariableTable{
 protected:
     list<VarScopeTable> _tables;
 public:
-    list<ArgDeclaration> functionArgs; //todo merge this into _tables on first push. Must always be overwritten on function entry!!
+    list<ArgDeclaration> functionArgs;
     
     /**
      * @brief Push a new VarScopeTable into the tables list.

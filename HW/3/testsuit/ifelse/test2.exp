@@ -1,0 +1,5 @@
+Input integer?:Input integer?:Input integer?:Input integer?:
+a:4 b:3 c:2 d:1 
+a > b > c
+a > b > c > d
+Reached Halt.

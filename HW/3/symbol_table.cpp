@@ -21,6 +21,7 @@ TypedVarScopeTable::newTemp(){
 void
 TypedVarScopeTable::newVar(string id, int offset){
     _varEntries.insert(pair<string,int>(id,offset));
+    cout << "new var " << id << ", " << offset << endl; //debug
 }
 
 bool 
@@ -29,6 +30,7 @@ TypedVarScopeTable::lookup(VarEntry& var, string id){
     if(it != _varEntries.end()){ // id is within the symbol table
         var.type = _type;
         var.offset = it->second;
+        cout << "found var " << id << " in offset " << var.offset << ", type=" << _type << endl; //debug
         return true;
     }
     return false;
@@ -43,9 +45,15 @@ void
 TypedVarScopeTable::emitStoreIds(){
     int regs_num = _curTempOffset - _tempStartingIndex;
     if(regs_num > 0){
+        string regSP = SP;
+        if(_type == eFLOAT){
+            //Cast SP to a float temp reg
+            regSP = newTemp();
+            code.emit("CITOF",regSP, SP);
+        }
         //Store registers
         for (int i=0; i<regs_num; i++){
-            code.emit(string("STOR")+_typeLetter + " " +  _typeLetter + to_string(_tempStartingIndex + i) + " " + SP + " " + to_string(i * VAR_SIZE));
+            code.emit(string("STOR")+_typeLetter + " " +  _typeLetter + to_string(_tempStartingIndex + i) + " " + regSP + " " + to_string(i * VAR_SIZE));
         }
         //Update SP
         code.emit(string("ADD2I ") + SP + " " + SP + " " + to_string(regs_num * VAR_SIZE));
@@ -58,18 +66,19 @@ TypedVarScopeTable::emitLoadIds(){
     if(regs_num > 0){
         //Update SP
         code.emit(string("SUBTI ") + SP + " " + SP + " " + to_string(regs_num * VAR_SIZE));
+        
+        string regSP = SP;
+        if(_type == eFLOAT){
+            //Cast SP to a float temp reg
+            regSP = newTemp();
+            code.emit("CITOF",regSP, SP);
+        }
         //Store registers
         for (int i=0; i<regs_num; i++){
-            code.emit(string("LOAD")+_typeLetter + " " +  _typeLetter + to_string(_tempStartingIndex + i) + " " + SP + " " + to_string(i * VAR_SIZE));
+            code.emit(string("LOAD")+_typeLetter + " " +  _typeLetter + to_string(_tempStartingIndex + i) + " " + regSP + " " + to_string(i * VAR_SIZE));
         }
     }
 }
-
-
-// int
-// TypedVarScopeTable::getVarCount(){
-//     return _curVarOffset - startingIndex;
-// }
 
 /**
  * VarScopeTable implementations
@@ -116,13 +125,13 @@ VarScopeTable::storeIds(){
 
 void 
 VarScopeTable::loadIds(){
-    floatTable.emitLoadIds();
     intTable.emitLoadIds();
+    floatTable.emitLoadIds();
 }
 
 void
 VarScopeTable::freeStack(){
-    if(_curVarOffset > 0)
+    if(_curVarOffset > _varStartingIndex)
         code.emit(string("SUBTI ") + SP + " " + SP + " " + to_string(_curVarOffset));
 }
 
@@ -138,6 +147,7 @@ VariableTable::push(){
     int stackOffset = (_tables.size() > 0) ? _tables.front().getCurOffset() : 0; 
     VarScopeTable newTable(stackOffset);
     _tables.push_front(newTable);
+    cout << "Block #" << _tables.size() << " w/ stackOffset " << stackOffset << endl;
 }
 
 void 

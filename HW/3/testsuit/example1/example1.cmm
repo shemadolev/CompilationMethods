@@ -1,0 +1,16 @@
+void main()
+{
+	a:int;
+        b:int;
+
+	read(a);
+	read(b);
+	if a < (int)b then write(a);
+	else write(b);
+	{ # Start new BLK
+		a: int;
+	        a = (int)b + (int)256;
+        	write("\na="); write(a);
+    }
+    write("\nat main BLK a="); write(a); write("\n");
+}

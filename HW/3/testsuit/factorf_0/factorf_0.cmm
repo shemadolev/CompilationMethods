@@ -1,0 +1,14 @@
+void main() {
+	a:int;
+	 i : int;
+	fact:int;
+	read(a);
+	fact = 1;
+	i = (int)1;
+	while (i <= (int)a) do {
+		fact = fact * (int)i;
+		i = i+ (int)1;
+	}
+	write(fact);
+}
+

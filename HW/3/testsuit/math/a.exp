@@ -1,0 +1,1 @@
+Testing INT: Input integer?:Input integer?:8 8 15 15 -2 -2 0 0 These should all be the same: 30 30 30 30 Reached Halt.

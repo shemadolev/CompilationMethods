@@ -1,0 +1,9 @@
+int mod (a:int, b:int) {
+	q:int;
+
+	q=(int)(a/b);
+	if(a-b*q==0) then
+		return (0);
+	else return (1);
+}
+

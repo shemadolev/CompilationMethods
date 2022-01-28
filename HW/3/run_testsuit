@@ -1,0 +1,45 @@
+#!/bin/bash
+rm -r *
+cp -r /media/sf_comp/hw3/* .
+make
+# this script compiles, linkes and runs cmm files
+
+TEST_ROOT="testsuit"
+testdirs=`ls $TEST_ROOT`
+
+
+! [ -e ./rx-cc ] && echo "Error - ./rx-cc does not exist" && exit 
+! [ -e ./rx-linker ] && echo "Error - ./rx-linker does not exist" && exit
+! [ -e ./rx-vm1.1 ] && echo "Error - ./rx-vm1.1 does not exist" && exit
+ 
+for dir in ${testdirs[@]}
+do
+	sourcefiles=`ls $TEST_ROOT/"$dir"/*.cmm`
+	i=0
+	for filename_cmm in ${sourcefiles[@]}; do
+		if [[ $filename_cmm != *.cmm ]]; then
+			echo Illegal filename $filename_cmm. only "*.cmm" files are allowed
+			exit	
+		fi
+		filename_rsk[$i]=${filename_cmm%.cmm}.rsk
+		echo running test $filename_cmm
+		./rx-cc $filename_cmm || exit
+		tmp=`echo this is filename cmm: $filename_rsk | cut --delimiter="/" -f 3,3`
+		`mv $tmp $TEST_ROOT/"$dir"/`
+		(( i++ ))
+	done
+	
+	
+	./rx-linker ${filename_rsk[@]} || exit
+
+	main=${filename_rsk[0]}
+
+	
+	 ./rx-vm1.1 ${main%.rsk}.e < $TEST_ROOT/"$dir"/a.input > $TEST_ROOT/"$dir"/a.output
+	 if [[ `diff $TEST_ROOT/"$dir"/a.output $TEST_ROOT/"$dir"/a.exp` -eq 0 ]]; then
+	 	echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~passed~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	else
+		echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX failed XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+	 fi
+	
+done

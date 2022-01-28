@@ -21,7 +21,6 @@ CodeLineList::CodeLineList(int line){
 }
 
 void CodeClass::backpatch(CodeLineList lineList, int lineNo){
-    //todo Make sure linker replaces 'goto -1' commands
     const string replaceFrom = " -1";
     string replaceTo = " " + to_string(lineNo);
     for(int codeLine : lineList){
