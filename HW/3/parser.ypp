@@ -635,7 +635,7 @@ exp :   exp ADDOP exp 	                {
                 NodeToken *addop = dynamic_cast<NodeToken*>($2);
                 NodeExpression *exp2 = dynamic_cast<NodeExpression*>($3);
 
-		string types[3] = {"int", "float", "void"};
+                string types[3] = {"int", "float", "void"};
                 if(exp1->expType != exp2->expType)
                         semantic_error(string("addition of type ") + types[exp1->expType] + " to " + types[exp2->expType]);
                 if(exp1->expType == eVOID)
@@ -737,9 +737,8 @@ exp :   exp ADDOP exp 	                {
                 string temp = varTable.front().newTemp(idEntry.type);
 
                 if(idEntry.type == eFLOAT){
-                    string floatDP = varTable.front().newTemp(eFLOAT);
-                    code.emit("CITOF", floatDP, DP);
-                    code.emit("LOADF", temp, floatDP, to_string(idEntry.offset));
+                    code.emit("CITOF", DP_F, DP);
+                    code.emit("LOADF", temp, DP_F, to_string(idEntry.offset));
                 } else {
                     code.emit("LOADI", temp, DP, to_string(idEntry.offset));
                 }
@@ -800,7 +799,7 @@ call : ID '(' call_args ')'             {
         if(call_args->expList.size() != funcEntry->props.args.size())
             semantic_error("wrong number of arguments passed to function");
 
-//        varTable.storeIds(); //for each var: Mem[SP++] = var
+        varTable.storeIds(); //for each var: Mem[SP++] = var
         code.emit("STORI", RA, SP, "0"); //Mem[SP] = RA
         code.emit("STORI", DP, SP, "4"); //Mem[SP+1*4] = DP
         code.emit("STORI", FP, SP, "8"); //Mem[SP+2*4] = FP
@@ -811,9 +810,8 @@ call : ID '(' call_args ')'             {
         auto argIt = funcEntry->props.args.begin();
         auto expArg = call_args->expList.begin();
 
-        //Cast FP to a float temp reg
-        string floatFP = varTable.front().newTemp(eFLOAT);
-        code.emit("CITOF",floatFP, FP);
+        //Cast FP to FP_F
+        code.emit("CITOF",FP_F, FP);
 
         for(;argIt != funcEntry->props.args.end();i++, argIt++, expArg++){
             if(expArg->expType != argIt->type)
@@ -822,7 +820,7 @@ call : ID '(' call_args ')'             {
             if(argIt->type == eINT){
                 code.emit(string("STORI"), expArg->place, FP, to_string(i * VAR_SIZE));
             } else if (argIt->type == eFLOAT){
-                code.emit(string("STORF"), expArg->place, floatFP, to_string(i * VAR_SIZE));
+                code.emit(string("STORF"), expArg->place, FP_F, to_string(i * VAR_SIZE));
             } else {
                 unexpected_error("Passed function a void arg");
             }
@@ -845,7 +843,7 @@ call : ID '(' call_args ')'             {
         code.emit("SUBTI", SP, SP, "8"); //SP-=2*4
         code.emit("LOADI", DP, SP, "4"); //DP = Mem[SP+1*4]
         code.emit("LOADI", RA, SP, "0"); //RA = Mem[SP]
-  //      varTable.loadIds();  //for each var: var = Mem[--SP]
+        varTable.loadIds();  //for each var: var = Mem[--SP]
         
 
         call->expType = funcEntry->props.type;

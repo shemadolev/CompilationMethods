@@ -21,6 +21,9 @@ using namespace std;
 
 #define PRINT_PARSE_TREE 1
 
+/**
+ * SAVED INT REGS
+ */
 //return address pointer
 #define RA "I0"
 //frame start pointer
@@ -31,8 +34,17 @@ using namespace std;
 #define RT_I "I3"
 //declarations pointer (points on the first variable in the frame)
 #define DP "I4"
+/**
+ * SAVED FLOAT REGS
+ */
+//frame address pointer
+#define FP_F "F0"
+//stack pointer (next write pointer in stack)
+#define  "F1"
 //return float type
-#define RT_F "F0"
+#define RT_F "F2"
+//declarations pointer (points on the first variable in the frame)
+#define DP_F "F3"
 
 #define FUNC_ARGS_OFFSET 1
 #define SAVED_REGS_INT 5
