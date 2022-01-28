@@ -40,7 +40,7 @@ using namespace std;
 //frame address pointer
 #define FP_F "F0"
 //stack pointer (next write pointer in stack)
-#define  "F1"
+#define SP_F "F1"
 //return float type
 #define RT_F "F2"
 //declarations pointer (points on the first variable in the frame)
