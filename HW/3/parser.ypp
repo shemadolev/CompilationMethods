@@ -744,8 +744,8 @@ exp :   exp ADDOP exp 	                {
                     code.emit("LOADI", temp, DP, to_string(idEntry.offset));
                 }
                 //debug
-                code.emit("PRNTI", DP);
-                cout << "new temp " << temp << " for id " << id->value << endl;
+                //code.emit("PRNTI", DP);
+                //cout << "new temp " << temp << " for id " << id->value << endl;
 
                 exp->expType = idEntry.type;
                 exp->place = temp;
@@ -800,7 +800,7 @@ call : ID '(' call_args ')'             {
         if(call_args->expList.size() != funcEntry->props.args.size())
             semantic_error("wrong number of arguments passed to function");
 
-        varTable.storeIds(); //for each var: Mem[SP++] = var
+//        varTable.storeIds(); //for each var: Mem[SP++] = var
         code.emit("STORI", RA, SP, "0"); //Mem[SP] = RA
         code.emit("STORI", DP, SP, "4"); //Mem[SP+1*4] = DP
         code.emit("STORI", FP, SP, "8"); //Mem[SP+2*4] = FP
@@ -845,7 +845,7 @@ call : ID '(' call_args ')'             {
         code.emit("SUBTI", SP, SP, "8"); //SP-=2*4
         code.emit("LOADI", DP, SP, "4"); //DP = Mem[SP+1*4]
         code.emit("LOADI", RA, SP, "0"); //RA = Mem[SP]
-        varTable.loadIds();  //for each var: var = Mem[--SP]
+  //      varTable.loadIds();  //for each var: var = Mem[--SP]
         
 
         call->expType = funcEntry->props.type;
